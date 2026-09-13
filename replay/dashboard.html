@@ -189,9 +189,6 @@ let D,F=0,playing=false,sel=null,last=0,codes=[],dpr=Math.min(devicePixelRatio||
 let lastRadio=-1,nowPlaying=null,mapView='circuit';
 let lastDom=0,lastClsHTML='',lastMsgHTML='';
 
-fetch(new URLSearchParams(location.search).get('f') || 'replay-2026-12-R.json')
-  .then(r=>r.json()).then(d=>{D=sanitise(d);init()})
-
 // Drop any car the feed listed but never gave a full record for. Monza 2026 emitted a phantom
 // entrant ("241": no team, all-null coordinates, no laps), and because every consumer here
 // assumes laps[code] exists it took the WHOLE replay down with
@@ -206,6 +203,10 @@ function sanitise(d){
   }
   return d;
 }
+
+fetch(new URLSearchParams(location.search).get('f') || 'replay-2026-12-R.json')
+  .then(r=>r.json())
+  .then(d=>{D=sanitise(d);init()})
   .catch(e=>$('#load').textContent='could not load replay data: '+e);
 
 function init(){
