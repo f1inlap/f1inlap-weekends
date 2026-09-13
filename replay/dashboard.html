@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>INLAP · Race Replay</title>
+<style>
+  /* Old-school FOM timing screen: monospace, black, purple = overall best,
+     green = personal best, yellow = neither. */
+  :root{
+    --bg:#000; --card:#0b0b0e; --line:#1e1e26; --fg:#eaeaf0; --muted:#8b8b96; --dim:#5a5a66;
+    --accent:#ff6c00; --purple:#b14bff; --green:#22e07a; --yellow:#ffd400; --red:#e8002d;
+    --mono:'SF Mono',ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--fg);overflow:hidden;
+       font:13px/1.4 var(--mono);padding-bottom:env(safe-area-inset-bottom)}
+  #load{position:fixed;inset:0;display:grid;place-items:center;background:#000;z-index:99;color:var(--muted)}
+
+  header{border-bottom:1px solid var(--line);background:#050507}
+  .top{display:flex;align-items:center;gap:10px;padding:7px 10px;min-width:0}
+  /* #evt must be allowed to shrink. Without min-width:0 it refuses to compress, forces
+     the header wider than the viewport, and the whole page scrolls horizontally, which
+     pushed the flag badge and every panel's right-hand column (gaps!) off screen. */
+  #evt{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .brand{font-weight:800;letter-spacing:.06em;font-size:13px;white-space:nowrap}
+  .brand em{color:var(--accent);font-style:normal}
+  .flag{margin-left:auto;padding:3px 10px;border-radius:4px;font-weight:800;letter-spacing:.1em;font-size:11px;
+        background:#062b16;color:var(--green);border:1px solid #10502c}
+  .flag.YELLOW,.flag.SC,.flag.VSC{background:#2e2905;color:var(--yellow);border-color:#6b5f16}
+  .flag.RED{background:#2c060f;color:#ff5a6e;border-color:#7a1f2c}
+  .stats{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;background:var(--line);
+         border-top:1px solid var(--line)}
+  .st{background:#08080b;padding:4px 7px;min-width:0}
+  .st s{display:block;font-size:8.5px;letter-spacing:.1em;color:var(--dim);text-decoration:none;white-space:nowrap}
+  .st b{display:block;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .st b i{font-style:normal;color:var(--muted);font-size:11px}
+  .p{color:var(--purple)} .g{color:var(--green)} .y{color:var(--yellow)}
+
+  main{display:grid;grid-template-columns:minmax(0,1fr) 350px;grid-template-rows:minmax(0,1fr) 200px;
+       gap:8px;padding:8px;height:calc(100vh - 136px)}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:6px;
+         display:flex;flex-direction:column;overflow:hidden;min-height:0}
+  .panel>h2{margin:0;padding:6px 9px;font-size:9px;letter-spacing:.14em;color:var(--dim);font-weight:700;
+            display:flex;gap:8px;align-items:center;cursor:pointer;user-select:none;background:#08080b;
+            border-bottom:1px solid var(--line);flex:0 0 auto}
+  .panel>h2 .r{margin-left:auto;color:var(--muted);letter-spacing:0;font-weight:400;font-size:10px}
+  .panel>h2::before{content:'▾';font-size:9px;color:var(--dim)}
+  .panel.collapsed>h2::before{content:'▸'}
+  .panel.collapsed>.body{display:none}
+  .body{flex:1 1 auto;min-height:0;overflow:auto}
+  canvas{display:block}
+  .panel.map>.body{overflow:hidden}
+  .panel.map canvas{width:100%;height:100%}
+
+  table{width:100%;border-collapse:collapse}
+  td{padding:2px 4px;font-size:12px;border-bottom:1px solid #121218;white-space:nowrap}
+  tr.row{cursor:pointer} tr.row.on td{background:#171720}
+  .pos{color:#fff;background:#1a1a22;text-align:center;width:20px;font-weight:700}
+  .cd{font-weight:700;letter-spacing:.05em}
+  .bar{display:inline-block;width:3px;height:12px;vertical-align:-1px;margin-right:5px}
+  .gap{text-align:right;color:var(--muted)}
+  .sec{text-align:right;font-size:10.5px;width:44px}
+  .ty{font-size:9px;font-weight:800}
+  .SOFT{color:var(--red)}.MEDIUM{color:var(--yellow)}.HARD{color:#e9e9ee}
+  .INTERMEDIATE{color:var(--green)}.WET{color:#3671c6}
+  .pitf{color:var(--accent);font-weight:800;font-size:9px}
+
+  #tel{padding:7px 9px}
+  .kv{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+  .kv b{color:var(--fg)}
+  .meter{height:5px;background:#16161c;border-radius:2px;overflow:hidden;margin:2px 0 6px}
+  .meter span{display:block;height:100%}
+  #wx{color:var(--dim);font-size:10.5px;line-height:1.7;margin-top:4px}
+
+  #bottom{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) 300px;gap:8px;min-height:0}
+  .msg{font-size:11px;color:var(--muted);padding:2px 9px;border-bottom:1px solid #121218;display:flex;gap:6px}
+  .msg b{color:var(--fg);flex:0 0 28px}
+  .msg.YELLOW b{color:var(--yellow)} .msg.RED b{color:var(--red)} .msg.GREEN b,.msg.CLEAR b{color:var(--green)}
+  .msg.radio{color:var(--accent);cursor:pointer} .msg.radio.on{background:#241505;color:#fff}
+
+  footer{border-top:1px solid var(--line);background:#050507;padding:5px 8px 7px}
+  #tlc{width:100%;height:34px;display:block;cursor:pointer}
+  .ctl{display:flex;align-items:center;gap:6px;margin-top:5px;flex-wrap:wrap}
+  button{background:#14141a;color:var(--fg);border:1px solid var(--line);border-radius:5px;
+         padding:6px 10px;font:600 12px var(--mono);cursor:pointer;min-height:34px}
+  button:active{background:#20202a} button.pl{min-width:78px;border-color:#3a3a46}
+  select{background:#14141a;color:var(--fg);border:1px solid var(--line);border-radius:5px;
+         padding:5px 6px;font:12px var(--mono);min-height:34px}
+  audio{height:30px;max-width:190px;filter:invert(.9) hue-rotate(180deg)}
+  .hint{margin-left:auto;color:var(--dim);font-size:10px}
+  label.cb{display:flex;align-items:center;gap:4px;color:var(--muted);font-size:11px;cursor:pointer}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-left:6px}
+  .seg button{border:0;border-radius:0;min-height:0;padding:2px 8px;font-size:9px;letter-spacing:.1em;
+              background:#101016;color:var(--dim)}
+  .seg button.on{background:var(--accent);color:#000;font-weight:800}
+
+  @media (max-width:900px){
+    body{overflow:auto}
+    .stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .top{flex-wrap:nowrap}
+    #evt{display:none}
+    main{grid-template-columns:1fr;grid-template-rows:none;grid-auto-rows:min-content;height:auto;padding:6px;gap:6px}
+    .panel.map>.body{height:52vh}
+    #right{display:contents}
+    #bottom{grid-column:auto;grid-template-columns:1fr;gap:6px}
+    #bottom .panel>.body{height:180px}
+    #clswrap{max-height:48vh}
+    .hint{display:none}
+    footer{position:sticky;bottom:0;z-index:20}
+    button{padding:9px 12px;min-height:42px;flex:1 1 auto} select{min-height:42px}
+    audio{display:none}
+    /* Sector columns are omitted from the DOM on mobile rather than hidden with CSS:
+       display:none on a <td> still reserved its width, which pushed the gap column off
+       a 430px screen even though the value was in the DOM. The stats bar carries the
+       fastest sectors instead. */
+  }
+</style>
+
+<div id="load">loading telemetry…</div>
+
+<header>
+  <div class="top">
+    <div class="brand">INLAP <em>RACE REPLAY</em></div>
+    <div id="evt" style="color:var(--dim);font-size:10.5px"></div>
+    <div class="flag" id="flag">GREEN</div>
+  </div>
+  <div class="stats">
+    <div class="st"><s>LAP</s><b id="sLap">–</b></div>
+    <div class="st"><s>TIME</s><b id="sClock">0:00</b></div>
+    <div class="st"><s>LEADER</s><b id="sLead">–</b></div>
+    <div class="st"><s>FASTEST LAP</s><b id="sFast" class="p">–</b></div>
+    <div class="st"><s>BEST S1</s><b id="sS1" class="p">–</b></div>
+    <div class="st"><s>BEST S2</s><b id="sS2" class="p">–</b></div>
+    <div class="st"><s>BEST S3</s><b id="sS3" class="p">–</b></div>
+  </div>
+</header>
+
+<main>
+  <div class="panel map" id="pMap">
+    <h2><span id="mapTitle">CIRCUIT</span>
+      <span class="seg" onclick="event.stopPropagation()">
+        <button id="vCircuit" class="on" onclick="setView('circuit')">CIRCUIT</button><button id="vTracker" onclick="setView('tracker')">TRACKER</button>
+      </span>
+      <span class="r" id="mapr"></span></h2>
+    <div class="body"><canvas id="mapc"></canvas></div></div>
+
+  <div id="right">
+    <div class="panel" id="pCls"><h2>TIMING <span class="r" id="clsr"></span></h2>
+      <div class="body" id="clswrap"><table id="cls"></table></div></div>
+    <div class="panel" id="pTel"><h2>TELEMETRY <span class="r" id="selc"></span></h2>
+      <div class="body" id="tel">
+        <div class="kv"><span>SPEED</span><b><span id="vv">0</span> km/h</b></div>
+        <div class="meter"><span id="vb" style="background:linear-gradient(90deg,#ff6c00,#ffd400)"></span></div>
+        <div class="kv"><span>THROTTLE</span><b id="tt">0%</b></div>
+        <div class="meter"><span id="tb" style="background:var(--green)"></span></div>
+        <div class="kv"><span>BRAKE</span><b id="bt">off</b></div>
+        <div class="meter"><span id="bb" style="background:var(--red)"></span></div>
+        <div id="wx"></div></div></div>
+  </div>
+
+  <div id="bottom">
+    <div class="panel" id="pStint"><h2>TYRE STRATEGY <span class="r">full race</span></h2>
+      <div class="body"><canvas id="stc" style="width:100%;height:100%"></canvas></div></div>
+    <div class="panel" id="pLap"><h2>POSITION BY LAP <span class="r">all cars</span></h2>
+      <div class="body"><canvas id="lcc" style="width:100%;height:100%"></canvas></div></div>
+    <div class="panel" id="pMsg"><h2>RACE CONTROL &amp; RADIO</h2><div class="body" id="rc"></div></div>
+  </div>
+</main>
+
+<footer>
+  <canvas id="tlc"></canvas>
+  <div class="ctl">
+    <button class="pl" id="play">▶ PLAY</button>
+    <button id="plap">⏮ LAP</button>
+    <button id="nlap">LAP ⏭</button>
+    <select id="rate"><option>1</option><option>2</option><option selected>8</option><option>20</option><option>60</option><option>150</option></select>
+    <select id="focus"><option value="">whole track</option></select>
+    <label class="cb"><input type="checkbox" id="autoradio" checked> radio</label>
+    <audio id="au" controls preload="none"></audio>
+    <span class="hint">tap timeline to scrub · orange ticks = radio · tap a panel title to collapse</span>
+  </div>
+</footer>
+
+<script>
+const $=s=>document.querySelector(s),TAU=Math.PI*2;
+let D,F=0,playing=false,sel=null,last=0,codes=[],dpr=Math.min(devicePixelRatio||1,2);
+let lastRadio=-1,nowPlaying=null,mapView='circuit';
+let lastDom=0,lastClsHTML='',lastMsgHTML='';
+
+fetch(new URLSearchParams(location.search).get('f') || 'replay-2026-12-R.json')
+  .then(r=>r.json()).then(d=>{D=sanitise(d);init()})
+
+// Drop any car the feed listed but never gave a full record for. Monza 2026 emitted a phantom
+// entrant ("241": no team, all-null coordinates, no laps), and because every consumer here
+// assumes laps[code] exists it took the WHOLE replay down with
+// "Cannot read properties of undefined". Skipping one car beats showing nothing.
+function sanitise(d){
+  const bad=Object.keys(d.drivers||{}).filter(c =>
+    !(d.laps&&d.laps[c]&&d.laps[c].length) || !(d.pos&&d.pos[c]) || !(d.stints&&d.stints[c]));
+  if(bad.length){
+    console.warn('replay: dropping incomplete car(s)', bad);
+    for(const c of bad){ delete d.drivers[c]; for(const k of ['pos','laps','prog','stints']) if(d[k]) delete d[k][c]; }
+    d.radio=(d.radio||[]).filter(r=>!bad.includes(r.code));
+  }
+  return d;
+}
+  .catch(e=>$('#load').textContent='could not load replay data: '+e);
+
+function init(){
+  codes=Object.keys(D.pos);
+  $('#evt').textContent=`${D.meta.event} · ${D.meta.frames.toLocaleString()} frames @ ${D.meta.hz}Hz`;
+  $('#mapr').textContent=D.track.corners.length+' corners';
+  const o=D.track.outline;
+  D._bb=o.reduce((a,[x,y])=>({x0:Math.min(a.x0,x),x1:Math.max(a.x1,x),y0:Math.min(a.y0,y),y1:Math.max(a.y1,y)}),{x0:1e9,x1:-1e9,y0:1e9,y1:-1e9});
+  D._laps={};for(const c in D.laps)D._laps[c]=D.laps[c].slice().sort((a,b)=>a.t-b.t);
+  D._rc=(D.raceControl||[]).filter(m=>m.msg).sort((a,b)=>a.t-b.t);
+  D._radio=(D.radio||[]).slice().sort((a,b)=>a.t-b.t);
+  D._maxLap=D.meta.totalLaps||Math.max(...Object.values(D._laps).flat().map(l=>l.lap));
+
+  // every sector and every completed lap, in the order they were SET, so the stats bar
+  // can answer "fastest so far at this moment" rather than "fastest of the whole race"
+  D._sectors=[];D._lapsDone=[];
+  for(const c in D._laps) for(const l of D._laps[c]){
+    for(const i of [1,2,3]){const v=l['s'+i],t=l['s'+i+'t'];if(v&&t)D._sectors.push({i,t,v,code:c,lap:l.lap})}
+    if(l.time&&l.s3t)D._lapsDone.push({t:l.s3t,v:l.time,code:c,lap:l.lap});
+  }
+  D._sectors.sort((a,b)=>a.t-b.t);D._lapsDone.sort((a,b)=>a.t-b.t);
+
+  sel=codes.find(c=>(D._laps[c][0]||{}).pos===1)||codes[0];
+  const h=new URLSearchParams(location.hash.slice(1));
+  if(h.has('t'))F=clamp(parseFloat(h.get('t'))*D.meta.hz,0,D.meta.frames-1);
+  if(h.has('d')&&D.pos[h.get('d')])sel=h.get('d');
+  if(h.get('v')==='tracker')mapView='tracker';
+  const fo=$('#focus');codes.slice().sort().forEach(c=>fo.insertAdjacentHTML('beforeend',`<option value="${c}">follow ${c}</option>`));
+  $('#load').remove();
+
+  document.querySelectorAll('.panel>h2').forEach(x=>x.onclick=()=>{
+    x.parentElement.classList.toggle('collapsed');requestAnimationFrame(()=>{size();paint()})});
+  addEventListener('resize',()=>{size();paint()});
+  $('#play').onclick=()=>{playing=!playing;$('#play').textContent=playing?'❚❚ PAUSE':'▶ PLAY';last=performance.now();if(playing)requestAnimationFrame(tick)};
+  $('#plap').onclick=()=>jumpLap(-1);
+  $('#nlap').onclick=()=>jumpLap(1);
+  $('#focus').onchange=paint;
+  $('#tlc').onclick=e=>{const r=e.target.getBoundingClientRect();F=clamp((e.clientX-r.left)/r.width*(D.meta.frames-1),0,D.meta.frames-1);paint(true)};
+  $('#mapc').onclick=e=>{const r=e.target.getBoundingClientRect();
+    if(mapView==='tracker'){const rows=order(now()).filter(z=>z.pr!=null);
+      const c=$('#mapc'),H=c.height-24*dpr,rowH=Math.min(H/Math.max(rows.length,8),34*dpr);
+      const i=Math.floor(((e.clientY-r.top)*dpr-16*dpr)/rowH);
+      if(rows[i]){sel=rows[i].code;paint()} return}
+    const b=pick(e.clientX-r.left,e.clientY-r.top);if(b){sel=b;paint()}};
+  addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'){F=clamp(F+D.meta.hz,0,D.meta.frames-1);paint()}
+    if(e.key==='ArrowLeft'){F=clamp(F-D.meta.hz,0,D.meta.frames-1);paint()}
+    if(e.key==='.')jumpLap(1); if(e.key===',')jumpLap(-1);
+    if(e.key===' '){e.preventDefault();$('#play').click()}});
+  if(mapView==='tracker')setView('tracker');
+  size();paint();
+}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const narrow=()=>matchMedia('(max-width:900px)').matches;
+function setView(v){mapView=v;
+  document.getElementById('vCircuit').classList.toggle('on',v==='circuit');
+  document.getElementById('vTracker').classList.toggle('on',v==='tracker');
+  document.getElementById('mapTitle').textContent=v==='circuit'?'CIRCUIT':'TRACKER';
+  paint()}
+const fmt=s=>s==null?'–':(s>=60?`${Math.floor(s/60)}:${(s%60).toFixed(3).padStart(6,'0')}`:s.toFixed(3));
+function now(){return D.meta.t0+F/D.meta.hz}
+function size(){for(const id of['mapc','stc','lcc','tlc']){const c=document.getElementById(id);
+  if(!c||!c.clientWidth)continue;c.width=c.clientWidth*dpr;c.height=c.clientHeight*dpr}}
+
+function jumpLap(dir){
+  // "skip a lap" means the LEADER's lap boundaries, which is what a viewer means by it
+  const t=now(),lead=$('#sLead').textContent;
+  const L=(D._laps[lead]||D._laps[sel]||[]).map(l=>l.t).sort((a,b)=>a-b);
+  let target=null;
+  if(dir>0)target=L.find(x=>x>t+0.5);
+  else{const before=L.filter(x=>x<t-0.5);target=before[before.length-1]}
+  if(target==null)return;
+  F=clamp((target-D.meta.t0)*D.meta.hz,0,D.meta.frames-1);paint(true);
+}
+function tick(n){if(!playing)return;const dt=(n-last)/1000;last=n;const b=now();
+  F+=dt*D.meta.hz*parseFloat($('#rate').value);
+  if(F>=D.meta.frames-1){F=D.meta.frames-1;playing=false;$('#play').textContent='▶ PLAY'}
+  autoRadio(b,now());paint();requestAnimationFrame(tick)}
+function at(code,f){const p=D.pos[code],i=Math.floor(f),j=Math.min(i+1,D.meta.frames-1),a=f-i;
+  if(p.x[i]==null||p.x[j]==null)return null;return[p.x[i]*(1-a)+p.x[j]*a,p.y[i]*(1-a)+p.y[j]*a]}
+function lapAt(c,t){const L=D._laps[c]||[];let r=null;for(const l of L){if(l.t<=t)r=l;else break}return r}
+function progAt(c,f){const a=D.prog&&D.prog[c];return a?a[Math.round(f)]:null}
+const STCODE={'1':'GREEN','2':'YELLOW','4':'SC','5':'RED','6':'VSC','7':'GREEN'};
+function trackStatus(t){let st='GREEN';for(const r of (D.trackStatus||[])){if(r.t>t)break;st=STCODE[r.code]||'GREEN'}return st}
+
+function view(){const c=$('#mapc'),b=D._bb,pad=40*dpr,foc=$('#focus').value;
+  let s=Math.min((c.width-2*pad)/(b.x1-b.x0),(c.height-2*pad)/(b.y1-b.y0));
+  let cx=(b.x0+b.x1)/2,cy=(b.y0+b.y1)/2;
+  if(foc&&D.pos[foc]){const q=at(foc,F);if(q){s*=3.1;cx=q[0];cy=q[1]}}
+  return{s,ox:c.width/2-cx*s,oy:c.height/2+cy*s}}
+function pick(px,py){const{s,ox,oy}=view();let best=null,bd=1e9;
+  for(const c of codes){const q=at(c,F);if(!q)continue;
+    const dx=q[0]*s+ox-px*dpr,dy=-q[1]*s+oy-py*dpr,d=dx*dx+dy*dy;if(d<bd){bd=d;best=c}}
+  return bd<(32*dpr)**2?best:null}
+
+function bestSoFar(t){
+  const out={lap:null,s:[null,null,null]};
+  for(const s of D._sectors){if(s.t>t)break;
+    const cur=out.s[s.i-1];if(!cur||s.v<cur.v)out.s[s.i-1]={v:s.v,code:s.code,lap:s.lap}}
+  for(const l of D._lapsDone){if(l.t>t)break;
+    if(!out.lap||l.v<out.lap.v)out.lap={v:l.v,code:l.code,lap:l.lap}}
+  return out}
+function pbSector(c,k,t){let b=1e9;for(const l of (D._laps[c]||[])){
+  const v=l['s'+k],ts=l['s'+k+'t'];if(v&&ts&&ts<=t&&v<b)b=v}return b}
+function lastCompleted(c,t){const L=D._laps[c]||[];let r=null;
+  for(const l of L){if(l.s3t&&l.s3t<=t)r=l}return r}
+
+function paint(force){
+  // Canvases repaint every frame; the HTML panels do NOT. Rebuilding a 20-row table and
+  // a 40-item message list via innerHTML at 60fps forces a full relayout each time, which
+  // is what made the whole page flicker. 6 Hz is faster than anyone reads.
+  const t=now(),st=trackStatus(t),best=bestSoFar(t);
+  const nowMs=performance.now();
+  const doDom=force||!playing||(nowMs-lastDom)>160;
+  if(doDom)lastDom=nowMs;
+  (mapView==='tracker'?drawTracker(t,st):drawMap(t,st));
+  if(doDom){drawTiming(t,best);drawMsgs(t)}
+  drawTel();drawStints();drawLapChart();drawTimeline();
+  const w=(D.weather||[]).filter(x=>x.t<=t).pop();
+  $('#wx').innerHTML=w?`TRACK <b style="color:var(--fg)">${w.track.toFixed(1)}°C</b> · AIR ${w.air.toFixed(1)}°C<br>WIND ${w.wind.toFixed(1)}m/s · HUM ${w.hum.toFixed(0)}%${w.rain?' · <b style="color:#3671c6">RAIN</b>':''}`:'';
+  const el=t-D.meta.t0;
+  $('#sClock').textContent=`${Math.floor(el/60)}:${String(Math.floor(el%60)).padStart(2,'0')}`;
+  $('#flag').textContent={SC:'SAFETY CAR',VSC:'VIRTUAL SC',YELLOW:'YELLOW',RED:'RED FLAG',GREEN:'GREEN'}[st];
+  $('#flag').className='flag '+(st==='GREEN'?'':st);
+  $('#sFast').innerHTML=best.lap?`${fmt(best.lap.v)} <i>${best.lap.code}</i>`:'–';
+  for(const i of [1,2,3]){const b=best.s[i-1];
+    $('#sS'+i).innerHTML=b?`${b.v.toFixed(3)} <i>${b.code}</i>`:'–'}
+  $('#selc').textContent=sel;
+}
+
+function drawMap(t,st){
+  const c=$('#mapc'),g=c.getContext('2d');if(!c.width)return;
+  $('#mapr').textContent=D.track.corners.length+' corners';
+  const {s,ox,oy}=view();
+  g.clearRect(0,0,c.width,c.height);
+  if(st!=='GREEN'){g.fillStyle=st==='RED'?'rgba(232,0,45,.06)':'rgba(255,212,0,.045)';g.fillRect(0,0,c.width,c.height)}
+  const P=D.track.outline;g.lineJoin=g.lineCap='round';
+  g.beginPath();P.forEach(([x,y],i)=>i?g.lineTo(x*s+ox,-y*s+oy):g.moveTo(x*s+ox,-y*s+oy));g.closePath();
+  // dark casing first, then a light "asphalt" ribbon on top, so the circuit reads as a
+  // white line without the cars losing contrast against it
+  // floor the width: it scales with zoom, and at full-circuit zoom the scaled value fell
+  // under a couple of pixels, which is what made the track almost invisible
+  const tw=Math.max(6*dpr, 20*dpr*s/9);
+  g.strokeStyle='#050507';g.lineWidth=tw+7*dpr;g.stroke();
+  g.strokeStyle=st==='RED'?'#8d2a3c':(st==='GREEN'?'#f2f2f7':'#8d8129');g.lineWidth=tw;g.stroke();
+  const a=P[0],b=P[1]||P[0];
+  g.save();g.translate(a[0]*s+ox,-a[1]*s+oy);g.rotate(Math.atan2(-(b[1]-a[1]),b[0]-a[0]));
+  g.fillStyle='#fff';g.fillRect(-1.5*dpr,-10*dpr*s/9,3*dpr,20*dpr*s/9);g.restore();
+  g.font=`700 ${10*dpr}px ${getComputedStyle(document.body).fontFamily}`;
+  g.textAlign='center';g.textBaseline='middle';
+  D.track.corners.forEach(k=>{const X=k.x*s+ox,Y=-k.y*s+oy;
+    g.fillStyle='rgba(8,8,11,.85)';g.beginPath();g.arc(X,Y,8*dpr,0,TAU);g.fill();
+    g.fillStyle='#c8c8d2';g.fillText(k.n,X,Y)});
+
+  const rows=order(t),pts=[];
+  for(let i=rows.length-1;i>=0;i--){const code=rows[i].code,q=at(code,F);if(!q)continue;
+    const on=code===sel,X=q[0]*s+ox,Y=-q[1]*s+oy,col=D.drivers[code].color;
+    g.lineWidth=2.5*dpr;g.strokeStyle=col+'50';g.beginPath();
+    for(let k=0;k<4;k++){const p2=at(code,Math.max(0,F-k));if(!p2)break;
+      k?g.lineTo(p2[0]*s+ox,-p2[1]*s+oy):g.moveTo(p2[0]*s+ox,-p2[1]*s+oy)}
+    g.stroke();
+    if(on){g.beginPath();g.arc(X,Y,12*dpr,0,TAU);g.fillStyle=col+'25';g.fill()}
+    g.beginPath();g.arc(X,Y,(on?7.5:5.5)*dpr,0,TAU);g.fillStyle=col;g.fill();
+    g.lineWidth=(on?2.4:1.2)*dpr;g.strokeStyle=on?'#fff':'#000';g.stroke();
+    pts.push({X,Y,code,on,col,rank:i})}
+  placeLabels(g,pts);
+}
+
+/* TRACKER: the field strung out along the race distance, the way a timing "gap chart"
+   shows it. x is each car's PROGRESS (laps completed + fraction of the current lap),
+   which is the same quantity the gap calculation uses, so a car a full lap down sits
+   exactly one gridline behind. The window follows the leader, so the background scrolls
+   right to left as the race runs. y is race position, top to bottom. */
+function drawTracker(t,st){
+  const c=$('#mapc'),g=c.getContext('2d');if(!c.width)return;
+  g.clearRect(0,0,c.width,c.height);
+  if(st!=='GREEN'){g.fillStyle=st==='RED'?'rgba(232,0,45,.05)':'rgba(255,212,0,.04)';g.fillRect(0,0,c.width,c.height)}
+  const rows=order(t).filter(r=>r.pr!=null);
+  if(!rows.length){drawMap(t,st);return}
+
+  // x is the TIME gap behind the leader, not track distance. Distance spacing misleads:
+  // one second is ~83 m at 300 km/h but ~28 m at 100 km/h, so a distance axis squashes
+  // and stretches the field depending on where cars happen to be on the lap.
+  const leadCode=rows[0].code;
+  rows.forEach(r=>{r.gap=(r.code===leadCode)?0:(gapTo(leadCode,r.code)??null)});
+  const lapRef=(lastCompleted(leadCode,t)||{}).time||80;
+  const SPAN=narrow()?lapRef*1.35:lapRef*2.0;     // seconds of gap across the canvas
+  const padR=narrow()?58*dpr:96*dpr, padT=16*dpr, padB=8*dpr;
+  const W=c.width-padR, H=c.height-padT-padB;
+  const x=gap=>W-(gap/SPAN)*W;                    // leader pinned near the right edge
+  $('#mapr').textContent=Math.round(SPAN)+'s of gap shown';
+  const n=Math.max(rows.length,8);
+  const rowH=Math.min(H/n, 34*dpr);
+  const y=i=>padT+rowH*(i+0.5);
+
+  // gridlines every 10s, with a bolder rule at each whole lap down
+  g.textBaseline='alphabetic';
+  g.font=`700 ${11*dpr}px ${getComputedStyle(document.body).fontFamily}`;
+  for(let sec=0;sec<=SPAN;sec+=10){
+    const gx=x(sec);if(gx<0||gx>c.width)continue;
+    g.strokeStyle='#131319';g.lineWidth=1*dpr;
+    g.beginPath();g.moveTo(gx,padT-8*dpr);g.lineTo(gx,c.height-padB);g.stroke();
+    g.fillStyle='#2a2a34';g.textAlign='center';
+    if(sec)g.fillText('-'+sec+'s',gx,c.height-padB+0*dpr);
+  }
+  for(let k=1;k*lapRef<=SPAN;k++){
+    const gx=x(k*lapRef);if(gx<0||gx>c.width)continue;
+    g.strokeStyle='#26262e';g.lineWidth=2*dpr;
+    g.beginPath();g.moveTo(gx,padT-8*dpr);g.lineTo(gx,c.height-padB);g.stroke();
+    g.fillStyle='#3a3a46';g.font=`700 ${12*dpr}px ${getComputedStyle(document.body).fontFamily}`;
+    g.textAlign='left';g.fillText('+'+k+' LAP',gx+5*dpr,padT+4*dpr);
+  }
+
+  const COL={SOFT:'#e8002d',MEDIUM:'#ffd400',HARD:'#e9e9ee',INTERMEDIATE:'#22e07a',WET:'#3671c6'};
+  g.textBaseline='middle';
+  const MINX=48*dpr;
+  rows.forEach((r,i)=>{
+    // a car more than SPAN laps down would fall off the canvas entirely, so pin it to
+    // the left margin and flag it rather than let it silently disappear
+    let cx=(r.gap==null)?MINX:x(r.gap);const off=cx<MINX;if(off)cx=MINX;
+    const cy=y(i),on=r.code===sel,col=D.drivers[r.code].color;
+    const lp=r.lp,comp=lp.compound||'',h=Math.min(rowH*0.62,17*dpr);
+    // pit / stint marker, then tyre disc, then the car block, then the code
+    g.fillStyle=COL[comp]||'#44444e';
+    g.fillRect(cx-40*dpr,cy-h/2,5*dpr,h);
+    g.beginPath();g.arc(cx-24*dpr,cy,h*0.46,0,TAU);
+    g.strokeStyle=COL[comp]||'#44444e';g.lineWidth=1.8*dpr;g.stroke();
+    g.fillStyle=COL[comp]||'#8b8b96';g.font=`800 ${9*dpr}px ${getComputedStyle(document.body).fontFamily}`;
+    g.textAlign='center';g.fillText(comp.slice(0,1),cx-24*dpr,cy+0.5*dpr);
+    // the car itself
+    g.fillStyle=col;g.fillRect(cx-13*dpr,cy-h*0.34,24*dpr,h*0.68);
+    g.fillStyle='rgba(0,0,0,.45)';g.fillRect(cx-13*dpr,cy-h*0.34,6*dpr,h*0.68);
+    if(on){g.strokeStyle='#fff';g.lineWidth=2*dpr;g.strokeRect(cx-14*dpr,cy-h*0.34-1*dpr,26*dpr,h*0.68+2*dpr)}
+    g.fillStyle=on?'#fff':'#cfcfd8';
+    g.font=`800 ${12*dpr}px ${getComputedStyle(document.body).fontFamily}`;g.textAlign='left';
+    g.fillText(r.code,cx+16*dpr,cy);
+    if(lp.pit){g.fillStyle='#ff6c00';g.font=`800 ${8.5*dpr}px ${getComputedStyle(document.body).fontFamily}`;
+      g.fillText('PIT',cx+16*dpr,cy+10*dpr)}
+    if(off){g.fillStyle='#5a5a66';g.font=`800 ${11*dpr}px ${getComputedStyle(document.body).fontFamily}`;
+      g.textAlign='right';g.fillText('\u00ab',cx-44*dpr,cy)}
+  });
+}
+
+/* Labels pile on top of each other whenever the field bunches: a standing start, a
+   restart, a safety car. Place them by priority (selected car, then race order),
+   trying offsets around the dot, drawing a leader line when the label is pushed away,
+   and dropping any label that cannot find clear space. The selected car always wins. */
+function placeLabels(g,pts){
+  const CW=7.2*dpr,H=13*dpr,placed=[];
+  const CAND=[[0,-15],[0,15],[22,-9],[-22,-9],[22,9],[-22,9],[0,-28],[0,28],[34,-20],[-34,-20],[34,20],[-34,20]];
+  const hit=r=>placed.some(p=>Math.abs(p.x-r.x)<(p.w+r.w)/2+2&&Math.abs(p.y-r.y)<(p.h+r.h)/2+1);
+  g.font=`700 ${10*dpr}px ${getComputedStyle(document.body).fontFamily}`;
+  g.textAlign='center';g.textBaseline='middle';
+  for(const p of pts.slice().sort((a,b)=>(b.on-a.on)||(a.rank-b.rank))){
+    const w=p.code.length*CW+6*dpr;let put=null;
+    for(const [dx,dy] of CAND){const r={x:p.X+dx*dpr,y:p.Y+dy*dpr,w,h:H};if(!hit(r)){put=r;break}}
+    if(!put){if(!p.on)continue;put={x:p.X,y:p.Y-15*dpr,w,h:H}}
+    placed.push(put);
+    const far=Math.hypot(put.x-p.X,put.y-p.Y)>18*dpr;
+    if(far){g.strokeStyle=p.col+'80';g.lineWidth=1*dpr;g.beginPath();
+      g.moveTo(p.X,p.Y);g.lineTo(put.x,put.y);g.stroke()}
+    g.fillStyle='rgba(0,0,0,.78)';g.fillRect(put.x-w/2,put.y-H/2,w,H);
+    g.fillStyle=p.on?'#fff':p.col;g.fillText(p.code,put.x,put.y);
+  }
+}
+
+function order(t){
+  const rows=[];
+  for(const code of codes){const lp=lapAt(code,t);if(!lp)continue;if(!at(code,F))continue;
+    rows.push({code,lp,pr:progAt(code,F)})}
+  const havePr=rows.every(r=>r.pr!=null)&&trackStatus(t)!=='RED';
+  rows.sort((a,b)=>havePr?(b.pr-a.pr):((a.lp.pos||99)-(b.lp.pos||99)));
+  return rows}
+/* Progress is monotonic now, so "when was the leader at this progress" is a binary
+   search rather than a backwards scan. The leader's array is compacted first: it can
+   contain nulls (pit lane, missing samples) and a search that lands on one used to
+   return null, which silently pinned a merely lapped car to the far left of the
+   tracker as if it were minutes down. */
+let _pi={code:null,upto:-1,f:null,p:null};
+function leaderIndex(code,upto){
+  if(_pi.code===code&&_pi.upto===upto)return _pi;
+  const a=D.prog[code]||[],f=[],pv=[];
+  for(let i=0;i<=upto;i++){const v=a[i];if(v!=null){f.push(i);pv.push(v)}}
+  _pi={code,upto,f,p:pv};return _pi}
+function gapTo(lead,code){
+  const pb=progAt(code,F);if(pb==null)return null;
+  const up=Math.round(F),ix=leaderIndex(lead,up);
+  if(!ix.p.length)return null;
+  if(pb<=ix.p[0])return null;                    // leader was never this far back
+  let lo=0,hi=ix.p.length-1;
+  while(lo<hi){const mid=(lo+hi)>>1;if(ix.p[mid]<pb)lo=mid+1;else hi=mid}
+  // linear interpolation between the two straddling samples for sub-frame precision
+  const i1=lo,i0=Math.max(0,lo-1);
+  const p0=ix.p[i0],p1=ix.p[i1];
+  let fr=(p1>p0)?(pb-p0)/(p1-p0):0;
+  const frame=ix.f[i0]+(ix.f[i1]-ix.f[i0])*fr;
+  return (F-frame)/D.meta.hz}
+
+function drawTiming(t,best){
+  const rows=order(t);if(!rows.length)return;
+  const lead=rows[0].code,red=trackStatus(t)==='RED';
+  $('#sLead').textContent=lead;
+  $('#sLap').innerHTML=`${Math.min(D._maxLap,Math.max(...rows.map(r=>r.lp.lap)))}<i>/${D._maxLap}</i>`;
+  $('#clsr').textContent=rows.length+' running';
+  const html=rows.map((r,i)=>{
+    const d=D.drivers[r.code],lp=r.lp,prev=lastCompleted(r.code,t)||{};
+    let gs;
+    if(i===0)gs='LEADER';
+    else if(red)gs='–';
+    else{const down=(rows[0].pr!=null&&r.pr!=null)?Math.floor(rows[0].pr-r.pr):0;
+      if(down>=1)gs='+'+down+'L';else{const g=gapTo(lead,r.code);gs=g==null?'–':'+'+g.toFixed(1)}}
+    const secs=narrow()?'':[1,2,3].map(k=>{
+      const v=prev['s'+k];if(!v)return '<td class="sec"></td>';
+      const b=best.s[k-1];
+      const cls=(b&&b.code===r.code&&Math.abs(b.v-v)<1e-6)?'p':(v<=pbSector(r.code,k,t)+1e-6?'g':'y');
+      return `<td class="sec ${cls}">${v.toFixed(3)}</td>`}).join('');
+    return `<tr class="row${r.code===sel?' on':''}" onclick="sel='${r.code}';paint()">
+      <td class="pos">${i+1}</td>
+      <td><span class="bar" style="background:${d.color}"></span><span class="cd">${r.code}</span></td>
+      <td class="ty ${lp.compound||''}">${(lp.compound||'').slice(0,1)}<span style="color:var(--dim)">${lp.age??''}</span>${lp.pit?' <span class="pitf">PIT</span>':''}</td>
+      ${secs}<td class="gap">${gs}</td></tr>`}).join('');
+  if(html!==lastClsHTML){lastClsHTML=html;$('#cls').innerHTML=html}   // skip identical repaints
+}
+
+function drawTel(){const p=D.pos[sel],i=Math.round(F);
+  const v=p.v[i]??0,th=(p.thr?p.thr[i]:null)??0,br=(p.brk?p.brk[i]:null)??0;
+  $('#vv').textContent=v;$('#vb').style.width=(v/340*100)+'%';
+  $('#tt').textContent=Math.round(th)+'%';$('#tb').style.width=th+'%';
+  $('#bt').textContent=br?'ON':'off';$('#bb').style.width=(br?100:0)+'%'}
+
+function drawStints(){
+  const c=$('#stc'),g=c.getContext('2d');if(!c.width)return;g.clearRect(0,0,c.width,c.height);
+  const S=D.stints||{},rows=order(now()).map(r=>r.code).filter(x=>S[x]);if(!rows.length)return;
+  const padL=32*dpr,padT=12*dpr,h=(c.height-padT-6*dpr)/rows.length,W=c.width-padL-8*dpr;
+  const COL={SOFT:'#e8002d',MEDIUM:'#ffd400',HARD:'#e9e9ee',INTERMEDIATE:'#22e07a',WET:'#3671c6'};
+  g.font=`700 ${8.5*dpr}px ${getComputedStyle(document.body).fontFamily}`;g.textBaseline='middle';
+  rows.forEach((code,i)=>{const y=padT+i*h;
+    g.fillStyle=code===sel?'#fff':'rgba(234,234,240,.55)';g.textAlign='right';g.fillText(code,padL-5*dpr,y+h/2);
+    for(const st of S[code]){const x0=padL+(st.from-1)/D._maxLap*W,x1=padL+st.to/D._maxLap*W;
+      g.fillStyle=COL[st.compound]||'#44444e';g.fillRect(x0,y+1*dpr,Math.max(1.5*dpr,x1-x0-1*dpr),h-2.5*dpr)}});
+  const lapNow=Math.max(...order(now()).map(r=>r.lp.lap));
+  g.fillStyle='#ff6c00';g.fillRect(padL+lapNow/D._maxLap*W-1*dpr,padT-4*dpr,2*dpr,c.height-padT)}
+
+function drawLapChart(){
+  const c=$('#lcc'),g=c.getContext('2d');if(!c.width)return;g.clearRect(0,0,c.width,c.height);
+  const padL=22*dpr,padT=10*dpr,padB=8*dpr,W=c.width-padL-8*dpr,H=c.height-padT-padB,N=codes.length;
+  g.lineWidth=1*dpr;g.font=`${8*dpr}px ${getComputedStyle(document.body).fontFamily}`;
+  g.textAlign='right';g.textBaseline='middle';
+  for(let p=1;p<=N;p+=4){const y=padT+(p-1)/(N-1)*H;
+    g.strokeStyle='#141419';g.beginPath();g.moveTo(padL,y);g.lineTo(c.width-8*dpr,y);g.stroke();
+    g.fillStyle='#3a3a44';g.fillText(p,padL-3*dpr,y)}
+  for(const code of codes){const L=D._laps[code];if(!L)continue;
+    g.strokeStyle=code===sel?D.drivers[code].color:D.drivers[code].color+'3a';
+    g.lineWidth=(code===sel?2.2:1)*dpr;g.beginPath();let st=false;
+    for(const l of L){if(l.pos==null)continue;
+      const x=padL+(l.lap-1)/Math.max(1,D._maxLap-1)*W,y=padT+(l.pos-1)/(N-1)*H;
+      st?g.lineTo(x,y):g.moveTo(x,y);st=true}
+    g.stroke()}
+  const lapNow=Math.max(...order(now()).map(r=>r.lp.lap));
+  g.strokeStyle='#ff6c00';g.lineWidth=1.4*dpr;g.beginPath();
+  const x=padL+(lapNow-1)/Math.max(1,D._maxLap-1)*W;g.moveTo(x,padT-3*dpr);g.lineTo(x,padT+H+3*dpr);g.stroke()}
+
+function drawTimeline(){
+  const c=$('#tlc'),g=c.getContext('2d');if(!c.width)return;const W=c.width,H=c.height;
+  g.clearRect(0,0,W,H);const span=D.meta.t1-D.meta.t0,X=t=>(t-D.meta.t0)/span*W;
+  g.fillStyle='#0b0b0e';g.fillRect(0,H*.28,W,H*.44);
+  let cur='GREEN',prev=D.meta.t0;
+  for(const r of (D.trackStatus||[])){const s=STCODE[r.code]||'GREEN';
+    if(s!==cur){band(g,X(prev),X(r.t),cur,H);prev=r.t;cur=s}}
+  band(g,X(prev),W,cur,H);
+  const L=D._laps[sel]||[];
+  g.fillStyle='#1e1e26';for(const l of L)g.fillRect(X(l.t),H*.72,1,H*.12);
+  g.fillStyle='#ff6c00';for(const l of L)if(l.pit)g.fillRect(X(l.t)-1,H*.72,2.5,H*.2);
+  g.fillStyle='#ff8a3d';for(const r of D._radio)g.fillRect(X(r.t)-1,H*.06,2,H*.16);
+  const x=X(now());g.fillStyle='#fff';g.fillRect(x-1,0,2,H)}
+function band(g,x0,x1,st,H){if(st==='GREEN')return;
+  g.fillStyle=st==='RED'?'rgba(232,0,45,.55)':'rgba(255,212,0,.30)';
+  g.fillRect(x0,H*.28,Math.max(2,x1-x0),H*.44)}
+
+function drawMsgs(t){
+  const items=[...D._rc.filter(m=>m.t<=t).map(m=>({...m,k:'rc'})),
+               ...D._radio.filter(r=>r.t<=t).map(r=>({...r,k:'radio'}))]
+              .sort((a,b)=>a.t-b.t).slice(-40).reverse();
+  const html=items.map(m=>m.k==='radio'
+    ? `<div class="msg radio${nowPlaying===m.url?' on':''}" onclick="playRadio('${m.url}','${m.src||''}')"><b>${m.code}</b><span>${nowPlaying===m.url?'❚❚':'▸'} TEAM RADIO</span></div>`
+    : `<div class="msg ${(m.flag||'').replace(/\s+/g,'.')}"><b>L${m.lap??'–'}</b><span>${m.msg}</span></div>`).join('');
+  if(html!==lastMsgHTML){lastMsgHTML=html;$('#rc').innerHTML=html}}
+function playRadio(u,fb){const a=$('#au');nowPlaying=u;
+  a.onerror=()=>{if(fb&&a.src!==fb){a.onerror=null;a.src=fb;a.play().catch(()=>{})}};
+  a.src=u;a.play().catch(()=>{});paint()}
+function autoRadio(t0,t1){
+  if(!$('#autoradio').checked||parseFloat($('#rate').value)>20)return;
+  for(let i=0;i<D._radio.length;i++){const r=D._radio[i];
+    if(r.t>t0&&r.t<=t1&&i!==lastRadio){lastRadio=i;playRadio(r.url,r.src);break}}}
+</script>
+</html>

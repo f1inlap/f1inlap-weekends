@@ -1,0 +1,240 @@
+<!doctype html><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>INLAP · Radio log</title>
+<!--
+  Radio log — every team-radio clip in the race, in order, with what was happening around it.
+
+  The replay player answers "what is happening now"; this answers "what was said, and why".
+  Context per clip is derived from the same bundle: the driver's lap and running position at
+  that moment, their tyre, the track status (green / yellow / SC / VSC / red), and the race
+  control messages either side of it. Clips before the race start are labelled as grid radio
+  rather than given a lap number, because the lap clock has not begun.
+-->
+<style>
+:root{--bg:#0b0b0d;--card:#131318;--line:#26262c;--fg:#eee;--muted:#9a9aa2;--ok:#27f4d2;--accent:#ff8a3d;--bad:#e8002d;--warn:#ffd24a}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:-apple-system,Segoe UI,Roboto,sans-serif;margin:0;padding:0 16px 90px}
+.wrap{max-width:1000px;margin:0 auto}
+h1{font-weight:800;margin:22px 0 2px;font-size:24px}
+.sub{color:var(--muted);font-size:14px;margin-bottom:12px}
+.sector{height:4px;background:linear-gradient(90deg,#ff8000 0 25%,#e8002d 25% 50%,#00d2be 50% 75%,#3671c6 75%);border-radius:3px;margin:0 0 18px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;position:sticky;top:0;background:var(--bg);padding:10px 0;z-index:5;border-bottom:1px solid var(--line)}
+select,button{background:#1f1f27;color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+button.primary{background:#0c3b33;border-color:#12574c;color:var(--ok)}
+.t{color:var(--muted);font-size:12px}
+.clip{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+.clip.playing{background:#161010;box-shadow:inset 3px 0 0 var(--accent)}
+.when{flex:0 0 92px;text-align:right}
+.lap{font-weight:800;font-size:17px}
+.clock{color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
+.body{flex:1;min-width:0}
+.who{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.code{font-weight:800;font-size:16px;letter-spacing:.5px}
+.pos{background:#1c1c22;border-radius:5px;padding:1px 7px;font-size:12px;font-weight:800;color:var(--muted)}
+.tyre{font-size:11px;font-weight:800;padding:1px 7px;border-radius:5px}
+.S{background:#3a1013;color:#ff6b73}.M{background:#3a3410;color:#ffd12e}.H{background:#24242a;color:#e8e8ea}
+.I{background:#0d2e13;color:#43b02a}.W{background:#0b2440;color:#5aa9e6}
+.flagpill{font-size:11px;font-weight:800;padding:1px 7px;border-radius:5px}
+.f-green{background:#0c3b33;color:var(--ok)}.f-yellow{background:#3a3410;color:var(--warn)}
+.f-sc{background:#3a2a10;color:#ffb44a}.f-red{background:#3a1013;color:#ff6b73}
+.ctx{color:var(--muted);font-size:12.5px;margin-top:6px;line-height:1.5}
+.ctx b{color:#cfcfd6;font-weight:600}
+.rc{margin-top:5px;font-size:12px;color:#8f8f98}
+.rc span{display:inline-block;background:#16161c;border:1px solid var(--line);border-radius:5px;padding:1px 7px;margin:2px 4px 0 0}
+.play{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:6px}
+.play button{width:44px;height:44px;border-radius:50%;font-size:15px;padding:0}
+.dl{display:flex;align-items:center;justify-content:center;width:52px;height:24px;
+    border:1px solid var(--line);border-radius:7px;background:#16161c;color:var(--muted);
+    text-decoration:none;font-size:10.5px;font-weight:800;letter-spacing:.3px}
+.dl:hover{background:#23232c;color:var(--fg);border-color:#3a3a45}
+.empty{color:var(--muted);padding:30px 0}
+.ev{display:flex;gap:12px;align-items:center;padding:9px 0;margin:4px 0;font-size:12px;
+    font-weight:800;letter-spacing:.6px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.ev .evt{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 92px;text-align:right;font-weight:600}
+.ev-start{color:var(--ok)}.ev-red{color:#ff6b73;background:#1a0d0f}
+.ev-sc{color:#ffb44a;background:#1a140a}.ev-vsc{color:#ffb44a;background:#1a140a}
+.ev-clear{color:var(--ok)}
+</style>
+<div class=wrap>
+  <h1 id=title>Radio log</h1>
+  <div class=sub id=sub>loading…</div>
+  <div class=sector></div>
+  <div class=bar>
+    <select id=drv onchange=render()><option value="">All drivers</option></select>
+    <button class=primary id=playall onclick=toggleAll()>▶ Play all</button>
+    <span class=t id=count></span>
+    <span style="flex:1"></span>
+    <a id=replaylink class=t href="#" target=_blank>open replay →</a>
+  </div>
+  <div id=list></div>
+</div>
+<audio id=au></audio>
+<script>
+const $=s=>document.querySelector(s);
+const P=new URLSearchParams(location.search);
+const FILE=P.get('f')||'replay-2026-13-R.json';
+let D=null, CLIPS=[], EV=[], playing=-1, chain=false;
+
+const esc=t=>(t||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const mmss=s=>{const neg=s<0;s=Math.abs(Math.round(s));
+  return (neg?'-':'')+Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+
+// last entry at or before t — the state the race was in when the clip was recorded
+function at(arr,t,key='t'){let r=null;for(const x of arr){if(x[key]<=t)r=x;else break}return r}
+
+function flagOf(t){
+  const s=at(D.trackStatus||[],t);
+  if(!s) return {cls:'f-green',txt:'GREEN'};
+  const m=(s.msg||'').toUpperCase(), c=String(s.code);
+  if(c==='5'||m.includes('RED')) return {cls:'f-red',txt:'RED FLAG'};
+  if(c==='4'||m.includes('SAFETY')) return {cls:'f-sc',txt:'SAFETY CAR'};
+  if(c==='6'||c==='7'||m.includes('VIRTUAL')) return {cls:'f-sc',txt:'VSC'};
+  if(c==='2'||m.includes('YELLOW')) return {cls:'f-yellow',txt:'YELLOW'};
+  return {cls:'f-green',txt:'GREEN'};
+}
+
+function build(){
+  const rc=(D.raceControl||[]).slice().sort((a,b)=>a.t-b.t);
+  CLIPS=(D.radio||[]).slice().sort((a,b)=>a.t-b.t).map(r=>{
+    const laps=D.laps[r.code]||[];
+    const lap=at(laps,r.t);                       // the lap this driver was ON
+    const pre=r.t < (D.meta.t0||0);               // before the lights: grid radio
+    const st=(D.stints[r.code]||[]).filter(s=>s.tFrom<=r.t).pop();
+    // race control either side: what prompted it, and what it led to
+    const near=rc.filter(m=>m.t>=r.t-50 && m.t<=r.t+20)
+                 .filter(m=>!/^CLEAR IN TRACK SECTOR/i.test(m.msg||''))
+                 .slice(0,3);
+    return {...r, lap:pre?null:(lap?lap.lap:null), pos:lap?lap.pos:null,
+            pitting:lap?!!lap.pit:false, compound:st?st.compound:(lap?lap.compound:null),
+            age:lap?lap.age:null, pre, flag:flagOf(r.t), rc:near,
+            team:(D.drivers[r.code]||{}).team||'', col:(D.drivers[r.code]||{}).color||'#888'};
+  });
+}
+
+// The big moments belong in the series even when no radio coincided with them: a red flag
+// with no clip beside it is still the reason the next clip sounds like it does. Built from
+// trackStatus TRANSITIONS rather than every entry, so a flurry of yellows is one marker.
+function events(){
+  const out=[], ts=(D.trackStatus||[]).slice().sort((a,b)=>a.t-b.t);
+  const t0=D.meta.t0||0;
+  out.push({t:t0, kind:'start', txt:'RACE START'});
+  let openKind=null;
+  for(const x of ts){
+    const c=String(x.code), m=(x.msg||'').toUpperCase();
+    let kind=null;
+    // VSC MUST be tested before SC: the message "VSCDeployed" CONTAINS "SCDeployed", so a
+    // naive substring test labels every virtual safety car as a full safety car — a
+    // materially different race.
+    if(c==='5'||m.includes('RED')) kind='red';
+    else if(c==='6'||m.startsWith('VSC')||m.includes('VIRTUAL')) kind='vsc';
+    else if(c==='4'||m.includes('SAFETYCAR')||m.startsWith('SCDEPLOYED')) kind='sc';
+    if(kind && kind!==openKind && x.t>=t0){
+      out.push({t:x.t, kind, txt:{red:'RED FLAG - RACE SUSPENDED',
+        sc:'SAFETY CAR DEPLOYED', vsc:'VIRTUAL SAFETY CAR'}[kind]});
+      openKind=kind;
+    }
+    if((c==='1'||m.includes('ALLCLEAR')) && openKind && x.t>=t0){
+      out.push({t:x.t, kind:'clear', txt:'TRACK CLEAR - RACING RESUMES'});
+      openKind=null;
+    }
+  }
+  return out;
+}
+
+function dlName(c){
+  const m=D.meta||{};
+  const when = c.pre ? 'GRID' : ('L'+String(c.lap||0).padStart(2,'0'));
+  const ev = (m.event||'race').replace(/[^A-Za-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  return `${ev}-${m.year||''}-${when}-${c.code}.mp3`;
+}
+
+function render(){
+  const f=$('#drv').value;
+  const rows=CLIPS.filter(c=>!f||c.code===f);
+  $('#count').textContent=`${rows.length} clip${rows.length===1?'':'s'}`;
+  if(!rows.length){$('#list').innerHTML='<div class=empty>No radio clips.</div>';return}
+  const merged=[...rows.map(c=>({t:c.t,clip:c})), ...EV.map(e=>({t:e.t,ev:e}))]
+                 .sort((a,b)=>a.t-b.t);
+  $('#list').innerHTML=merged.map(row=>{
+    if(row.ev){
+      const e=row.ev;
+      return `<div class="ev ev-${e.kind}">
+        <span class=evt>${mmss(e.t-(D.meta.t0||0))}</span>
+        <span>${esc(e.txt)}</span></div>`;
+    }
+    const c=row.clip;
+    const i=CLIPS.indexOf(c);
+    const tyre=c.compound?`<span class="tyre ${c.compound[0]}">${c.compound[0]}${c.age?'&nbsp;'+c.age:''}</span>`:'';
+    const bits=[];
+    if(c.pre) bits.push('<b>Before the start</b> — on the grid');
+    else{
+      if(c.pos) bits.push(`running <b>P${c.pos}</b>`);
+      if(c.pitting) bits.push('<b>in the pits</b> this lap');
+    }
+    if(c.team) bits.push(esc(c.team));
+    return `<div class="clip${playing===i?' playing':''}" id=c${i}>
+      <div class=when>
+        <div class=lap style="color:${c.col}">${c.pre?'GRID':'L'+(c.lap||'?')}</div>
+        <div class=clock>${mmss(c.t-(D.meta.t0||0))}</div>
+      </div>
+      <div class=play>
+        <button onclick="play(${i})">${playing===i?'❚❚':'▶'}</button>
+        <a class=dl href="${esc(c.url)}" download="${esc(dlName(c))}"
+           title="Download ${esc(dlName(c))}" onclick="event.stopPropagation()">↓ MP3</a>
+      </div>
+      <div class=body>
+        <div class=who>
+          <span class=code style="color:${c.col}">${esc(c.code)}</span>
+          ${c.pos?`<span class=pos>P${c.pos}</span>`:''}
+          ${tyre}
+          <span class="flagpill ${c.flag.cls}">${c.flag.txt}</span>
+        </div>
+        <div class=ctx>${bits.join(' · ')}</div>
+        ${c.rc.length?`<div class=rc>${c.rc.map(m=>`<span>${esc(m.msg)}</span>`).join('')}</div>`:''}
+      </div></div>`;
+  }).join('');
+}
+
+function play(i){
+  const a=$('#au'), c=CLIPS[i];
+  if(playing===i && !a.paused){a.pause();playing=-1;render();return}
+  playing=i;
+  a.onerror=()=>{if(c.src&&a.src!==c.src){a.onerror=null;a.src=c.src;a.play().catch(()=>{})}};
+  a.src=c.url; a.play().catch(()=>{});
+  render();
+  const el=document.getElementById('c'+i); if(el) el.scrollIntoView({block:'center',behavior:'smooth'});
+}
+function toggleAll(){
+  chain=!chain; $('#playall').textContent=chain?'■ Stop':'▶ Play all';
+  if(chain) play(nextIdx(-1));
+  else{$('#au').pause();playing=-1;render()}
+}
+function nextIdx(from){
+  const f=$('#drv').value;
+  for(let i=from+1;i<CLIPS.length;i++) if(!f||CLIPS[i].code===f) return i;
+  return -1;
+}
+$('#au').addEventListener('ended',()=>{
+  if(!chain){playing=-1;render();return}
+  const n=nextIdx(playing);
+  if(n<0){chain=false;$('#playall').textContent='▶ Play all';playing=-1;render()}
+  else play(n);
+});
+
+fetch(FILE).then(r=>r.json()).then(d=>{
+  // same phantom-entrant guard as the player: a car with no laps would break context lookup
+  for(const c of Object.keys(d.drivers||{})){
+    if(!(d.laps&&d.laps[c]&&d.laps[c].length)){ delete d.drivers[c];
+      d.radio=(d.radio||[]).filter(r=>r.code!==c); }
+  }
+  D=d; build(); EV=events();
+  $('#title').textContent=`Radio log · ${d.meta.event}`;
+  $('#sub').textContent=`${d.meta.year} round ${d.meta.round} · ${d.meta.session} · `
+    +`${(d.radio||[]).length} clips across ${d.meta.totalLaps} laps`;
+  $('#replaylink').href='dashboard.html?f='+encodeURIComponent(FILE);
+  const codes=[...new Set(CLIPS.map(c=>c.code))].sort();
+  $('#drv').innerHTML='<option value="">All drivers</option>'
+    +codes.map(c=>`<option value="${c}">${c} (${CLIPS.filter(x=>x.code===c).length})</option>`).join('');
+  render();
+}).catch(e=>{$('#sub').textContent='Could not load '+FILE+': '+e});
+</script>
