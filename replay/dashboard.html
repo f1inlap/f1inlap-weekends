@@ -75,12 +75,38 @@
   .INTERMEDIATE{color:var(--green)}.WET{color:#3671c6}
   .pitf{color:var(--accent);font-weight:800;font-size:9px}
 
-  #tel{padding:7px 9px}
+  #tel{padding:7px 9px;display:flex;flex-direction:column;gap:5px}
   .kv{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
   .kv b{color:var(--fg)}
-  .meter{height:5px;background:#16161c;border-radius:2px;overflow:hidden;margin:2px 0 6px}
-  .meter span{display:block;height:100%}
-  #wx{color:var(--dim);font-size:10.5px;line-height:1.7;margin-top:4px}
+  .meter{height:5px;background:#16161c;border-radius:2px;overflow:hidden}
+  .meter span{display:block;height:100%;width:0}
+  /* Speed and gear read as the headline; everything else supports them. */
+  .tbig{display:flex;align-items:flex-end;gap:10px}
+  .spd{flex:1 1 auto;min-width:0;display:flex;align-items:baseline;gap:5px}
+  .spd b{font-size:30px;font-weight:800;line-height:.95;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .spd s{text-decoration:none;font-size:9px;letter-spacing:.14em;color:var(--dim)}
+  .gearbox{flex:0 0 auto;text-align:center;border:1px solid var(--line);border-radius:6px;
+           background:#101016;padding:0 10px 2px;min-width:46px}
+  .gearbox b{display:block;font-size:21px;font-weight:800;line-height:1.1;color:var(--accent);
+             font-variant-numeric:tabular-nums}
+  .gearbox s{text-decoration:none;display:block;font-size:7.5px;letter-spacing:.14em;color:var(--dim)}
+  /* Bars anchor their gradient to the TRACK and reveal it with a cover from the right. A
+     gradient on the filled span itself would rescale as the value changes, so the same
+     colour would mean a different number from one frame to the next. */
+  .row{display:flex;align-items:center;gap:7px;font-size:9px;letter-spacing:.12em;color:var(--dim)}
+  .row>s{text-decoration:none;flex:0 0 40px}
+  .row>b{flex:0 0 52px;text-align:right;color:var(--fg);font-size:11px;letter-spacing:0;
+         font-variant-numeric:tabular-nums}
+  .track{position:relative;flex:1 1 auto;height:7px;border-radius:3px;overflow:hidden;background:#16161c}
+  .track>span{position:absolute;top:0;right:0;height:100%;background:#16161c}
+  #rpmt{background:linear-gradient(90deg,#2a7d4f 0 55%,#ffd400 55% 82%,#e8002d 82%)}
+  .track.thr{background:var(--green)} .track.brk{background:var(--red)}
+  #telc{width:100%;height:54px;display:block;border-radius:5px;background:#08080b}
+  .gtrack{position:relative;flex:1 1 auto;height:8px;border-radius:3px;overflow:hidden;background:#16161c}
+  .gtrack i{position:absolute;left:50%;top:0;width:1px;height:100%;background:#3a3a45}
+  .gtrack u{position:absolute;top:0;height:100%;width:0;left:50%;text-decoration:none}
+  #wx{color:var(--dim);font-size:10px;line-height:1.45;margin-top:1px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
   /* Without this #right is a grid item full of auto-height blocks, and the timing table
      (22 rows) spills out of its row and overlaps RACE CONTROL below it. Telemetry keeps its
@@ -166,12 +192,17 @@
       <div class="body" id="clswrap"><table id="cls"></table></div></div>
     <div class="panel" id="pTel"><h2>TELEMETRY <span class="r" id="selc"></span></h2>
       <div class="body" id="tel">
-        <div class="kv"><span>SPEED</span><b><span id="vv">0</span> km/h</b></div>
-        <div class="meter"><span id="vb" style="background:linear-gradient(90deg,#ff6c00,#ffd400)"></span></div>
-        <div class="kv"><span>THROTTLE</span><b id="tt">0%</b></div>
-        <div class="meter"><span id="tb" style="background:var(--green)"></span></div>
-        <div class="kv"><span>BRAKE</span><b id="bt">off</b></div>
-        <div class="meter"><span id="bb" style="background:var(--red)"></span></div>
+        <div class="tbig">
+          <div class="spd"><b id="vv">0</b><s>KM/H</s></div>
+          <div class="gearbox" id="gearwrap"><b id="gr">N</b><s>GEAR</s></div>
+        </div>
+        <div class="row" id="rpmrow"><s>RPM</s>
+          <div class="track" id="rpmt"><span id="rb"></span></div><b id="rv">0</b></div>
+        <canvas id="telc"></canvas>
+        <div class="row"><s>THR</s><div class="track thr"><span id="tb"></span></div><b id="tt">0%</b></div>
+        <div class="row"><s>BRK</s><div class="track brk"><span id="bb"></span></div><b id="bt">off</b></div>
+        <div class="row"><s>LONG G</s>
+          <div class="gtrack"><i></i><u id="gb"></u></div><b id="gv">0.0</b></div>
         <div id="wx"></div></div></div>
   </div>
 
@@ -283,7 +314,7 @@ function setView(v){mapView=v;
   paint()}
 const fmt=s=>s==null?'–':(s>=60?`${Math.floor(s/60)}:${(s%60).toFixed(3).padStart(6,'0')}`:s.toFixed(3));
 function now(){return D.meta.t0+F/D.meta.hz}
-function size(){for(const id of['mapc','stc','lcc','tlc']){const c=document.getElementById(id);
+function size(){for(const id of['mapc','stc','lcc','tlc','telc']){const c=document.getElementById(id);
   if(!c||!c.clientWidth)continue;c.width=c.clientWidth*dpr;c.height=c.clientHeight*dpr}}
 
 function jumpLap(dir){
@@ -341,7 +372,7 @@ function paint(force){
   if(doDom){drawTiming(t,best);drawMsgs(t)}
   drawTel();drawStints();drawLapChart();drawTimeline();
   const w=(D.weather||[]).filter(x=>x.t<=t).pop();
-  $('#wx').innerHTML=w?`TRACK <b style="color:var(--fg)">${w.track.toFixed(1)}°C</b> · AIR ${w.air.toFixed(1)}°C<br>WIND ${w.wind.toFixed(1)}m/s · HUM ${w.hum.toFixed(0)}%${w.rain?' · <b style="color:#3671c6">RAIN</b>':''}`:'';
+  $('#wx').innerHTML=w?`TRACK <b style="color:var(--fg)">${w.track.toFixed(1)}°</b> · AIR ${w.air.toFixed(1)}° · WIND ${w.wind.toFixed(1)}m/s · HUM ${w.hum.toFixed(0)}%${w.rain?' · <b style="color:#3671c6">RAIN</b>':''}`:'';
   const el=t-D.meta.t0;
   $('#sClock').textContent=`${Math.floor(el/60)}:${String(Math.floor(el%60)).padStart(2,'0')}`;
   $('#flag').textContent={SC:'SAFETY CAR',VSC:'VIRTUAL SC',YELLOW:'YELLOW',RED:'RED FLAG',GREEN:'GREEN'}[st];
@@ -546,11 +577,82 @@ function drawTiming(t,best){
   if(html!==lastClsHTML){lastClsHTML=html;$('#cls').innerHTML=html}   // skip identical repaints
 }
 
-function drawTel(){const p=D.pos[sel],i=Math.round(F);
-  const v=p.v[i]??0,th=(p.thr?p.thr[i]:null)??0,br=(p.brk?p.brk[i]:null)??0;
-  $('#vv').textContent=v;$('#vb').style.width=(v/340*100)+'%';
-  $('#tt').textContent=Math.round(th)+'%';$('#tb').style.width=th+'%';
-  $('#bt').textContent=br?'ON':'off';$('#bb').style.width=(br?100:0)+'%'}
+// Longitudinal g from the speed channel. There is no accelerometer in the feed, so this is
+// a central difference over one second (dv/dt / 9.81), which smooths the 2 Hz sampling. It
+// under-reads true peaks: real braking touches ~5g, this tops out nearer 3.5g. TRACE_S is
+// how many race-seconds of history the trace shows.
+const TRACE_S=24, G_FS=5;      // g full-scale on the bar (peak braking here reads ~4.4)
+function gAt(p,i){
+  const a=p.v[i-1],b=p.v[i+1];
+  if(a==null||b==null)return 0;
+  return ((b-a)/3.6)/(2/D.meta.hz)/9.81;
+}
+function drawTel(){
+  const p=D.pos[sel],i=Math.round(F);
+  const v=p.v[i]??0, th=(p.thr?p.thr[i]:null)??0, br=(p.brk?p.brk[i]:null)??0;
+  $('#vv').textContent=v;
+  $('#tt').textContent=Math.round(th)+'%'; $('#tb').style.width=(100-th)+'%';
+  $('#bt').textContent=br?'ON':'off';      $('#bb').style.width=(br?0:100)+'%';
+
+  // gear + rpm only exist in bundles exported after Sep 2026; hide the rows for older ones
+  const hasG=!!p.gear, hasR=!!p.rpm;
+  $('#gearwrap').style.display=hasG?'':'none';
+  $('#rpmrow').style.display=hasR?'':'none';
+  if(hasG){const g=p.gear[i]; $('#gr').textContent=(g==null||g<1)?'N':g}
+  if(hasR){
+    const r=(p.rpm[i]??0)*100;
+    // full scale = the highest RPM anyone hit all session, floored at 11,000. Compute it with
+    // a loop: rpm arrays are ~11.5k long per car and Math.max(...arr) spreads every element
+    // as an argument, which is a stack-overflow risk across 22 cars. Units matter here — the
+    // arrays are RPM/100, so scale to real RPM BEFORE applying the floor.
+    if(D._rpmMax==null){
+      let mx=0;
+      for(const q of Object.values(D.pos)){if(!q.rpm)continue;
+        for(const x of q.rpm)if(x!=null&&x>mx)mx=x}
+      D._rpmMax=Math.max(11000,mx*100);
+    }
+    $('#rv').textContent=r?r.toLocaleString():'0';
+    $('#rb').style.width=(100-Math.min(100,r/D._rpmMax*100))+'%';
+  }
+
+  const gg=gAt(p,i);
+  $('#gv').textContent=(gg>=0?'+':'')+gg.toFixed(1)+'g';
+  const w=Math.min(50,Math.abs(gg)/G_FS*50), u=$('#gb');
+  u.style.background=gg>=0?'var(--green)':'var(--red)';
+  u.style.left=(gg>=0?50:50-w)+'%'; u.style.width=w+'%';
+
+  drawTrace(p,i);
+}
+
+// Rolling trace: speed line over a green throttle floor, with braking shaded red. This is
+// what makes the panel read as live rather than as a set of numbers that happen to change.
+function drawTrace(p,i){
+  const c=$('#telc'),g=c.getContext('2d');if(!c.width)return;
+  g.clearRect(0,0,c.width,c.height);
+  const n=Math.round(TRACE_S*D.meta.hz), i0=Math.max(0,i-n), W=c.width, H=c.height;
+  const span=Math.max(1,i-i0), X=k=>(k-i0)/span*W;
+  const vmax=Math.max(120,...p.v.slice(i0,i+1).filter(x=>x!=null));
+  const Y=v=>H-6*dpr-(v/vmax)*(H-12*dpr);
+
+  for(let k=i0;k<i;k++){                                   // brake shading
+    if((p.brk?p.brk[k]:0)>0){g.fillStyle='rgba(232,0,45,.22)';g.fillRect(X(k),0,Math.max(1,X(k+1)-X(k)),H)}
+  }
+  g.beginPath();g.moveTo(X(i0),H);                          // throttle floor
+  for(let k=i0;k<=i;k++)g.lineTo(X(k),H-((p.thr?p.thr[k]:0)??0)/100*(H*0.34));
+  g.lineTo(X(i),H);g.closePath();g.fillStyle='rgba(34,224,122,.20)';g.fill();
+
+  g.beginPath();                                            // speed trace
+  let started=false;
+  for(let k=i0;k<=i;k++){const v=p.v[k];if(v==null)continue;
+    started?g.lineTo(X(k),Y(v)):(g.moveTo(X(k),Y(v)),started=true)}
+  g.strokeStyle='#ff6c00';g.lineWidth=1.6*dpr;g.lineJoin='round';g.stroke();
+
+  const v=p.v[i];                                           // head marker
+  if(v!=null){g.beginPath();g.arc(X(i),Y(v),2.6*dpr,0,TAU);g.fillStyle='#fff';g.fill()}
+  g.fillStyle='#5a5a66';g.font=`${8*dpr}px ${getComputedStyle(document.body).fontFamily}`;
+  g.textBaseline='top';g.fillText(`${Math.round(vmax)} km/h`,4*dpr,3*dpr);
+  g.textBaseline='bottom';g.fillText(`${TRACE_S}s`,4*dpr,H-3*dpr);
+}
 
 function drawStints(){
   const c=$('#stc'),g=c.getContext('2d');if(!c.width)return;g.clearRect(0,0,c.width,c.height);
