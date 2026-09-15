@@ -166,7 +166,7 @@ function render(){
     const i=CLIPS.indexOf(c);
     const tyre=c.compound?`<span class="tyre ${c.compound[0]}">${c.compound[0]}${c.age?'&nbsp;'+c.age:''}</span>`:'';
     const bits=[];
-    if(c.pre) bits.push('<b>Before the start</b> — on the grid');
+    if(c.pre) bits.push('<b>Before the start</b>, on the grid');
     else{
       if(c.pos) bits.push(`running <b>P${c.pos}</b>`);
       if(c.pitting) bits.push('<b>in the pits</b> this lap');
