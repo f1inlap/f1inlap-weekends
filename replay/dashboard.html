@@ -102,6 +102,52 @@
   #rpmt{background:linear-gradient(90deg,#2a7d4f 0 55%,#ffd400 55% 82%,#e8002d 82%)}
   .track.thr{background:var(--green)} .track.brk{background:var(--red)}
   #telc{width:100%;height:54px;display:block;border-radius:5px;background:#08080b}
+  /* ---- analysis tabs (CAR / SECTORS / BATTLE) ---------------------------------- */
+  #anaBody{display:flex;flex-direction:column;min-height:0}
+  #anaBody>div{min-height:0}
+  .pad{padding:7px 9px}
+  .sublabel{font-size:8.5px;letter-spacing:.12em;color:var(--dim);margin:0 0 5px}
+  /* SECTORS: one line per sector, fastest first, so the eye reads down the S column */
+  .srow{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #121218}
+  .srow:last-child{border-bottom:0}
+  .sk{flex:0 0 22px;font-size:11px;font-weight:800;color:var(--dim);letter-spacing:.06em}
+  .sents{display:flex;gap:6px;flex:1 1 auto;min-width:0}
+  .se{display:flex;align-items:center;gap:4px;flex:1 1 0;min-width:0}
+  .se i{flex:0 0 3px;height:13px;border-radius:1px}
+  .se b{font-size:11.5px;font-weight:800;letter-spacing:.03em;white-space:nowrap}
+  .se u,.se span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .se u{text-decoration:none;font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .se.top b{color:var(--purple)} .se.top u{color:var(--fg)}
+  .se.mine b{color:var(--accent)}
+  .ideal{margin-top:7px;padding-top:6px;border-top:1px solid var(--line);
+         font-size:10px;color:var(--dim);display:flex;justify-content:space-between;gap:8px}
+  .ideal b{color:var(--fg);font-variant-numeric:tabular-nums}
+  /* BATTLE: A on the left, rival on the right, bars point at whoever is winning that sector */
+  .bhead{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+  .bhead b{font-size:15px;font-weight:800}
+  .bhead span{color:var(--dim);font-size:10px}
+  .bhead select{flex:1 1 auto;min-width:0}
+  .bstat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);
+         border:1px solid var(--line);border-radius:5px;overflow:hidden;margin-bottom:8px}
+  .bstat div{background:#0d0d11;padding:4px 7px;min-width:0}
+  .bstat s{display:block;text-decoration:none;font-size:7.5px;letter-spacing:.11em;color:var(--dim);white-space:nowrap}
+  .bstat b{display:block;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;
+           white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .brow{display:flex;align-items:center;gap:7px;margin:5px 0;font-size:9.5px;letter-spacing:.1em;color:var(--dim)}
+  .brow>s{text-decoration:none;flex:0 0 26px}
+  .brow>b{flex:0 0 54px;text-align:right;font-size:11px;letter-spacing:0;font-variant-numeric:tabular-nums}
+  .btr{position:relative;flex:1 1 auto;height:11px;border-radius:3px;background:#131318;overflow:hidden}
+  .btr i{position:absolute;left:50%;top:0;width:1px;height:100%;background:#3a3a45}
+  .btr u{position:absolute;top:0;height:100%;width:0;left:50%;text-decoration:none;border-radius:2px}
+  .brow.tot{margin-top:7px;padding-top:6px;border-top:1px solid var(--line)}
+  .brow.tot>b{font-size:12px}
+  .bnote{margin-top:8px;font-size:9.5px;line-height:1.5;color:var(--dim)}
+  .bnote b{color:var(--fg2)}
+  /* delta legend drawn under the map when the DELTA view is on */
+  .dlg{display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:.1em;color:var(--dim)}
+  .dlg span{width:40px;height:6px;border-radius:2px}
+  .trend{font-size:9px;font-weight:800;margin-left:3px}
+  .trend.up{color:var(--green)} .trend.dn{color:#ff5a6e}
   .gtrack{position:relative;flex:1 1 auto;height:8px;border-radius:3px;overflow:hidden;background:#16161c}
   .gtrack i{position:absolute;left:50%;top:0;width:1px;height:100%;background:#3a3a45}
   .gtrack u{position:absolute;top:0;height:100%;width:0;left:50%;text-decoration:none}
@@ -182,16 +228,25 @@
   <div class="panel map" id="pMap">
     <h2><span id="mapTitle">CIRCUIT</span>
       <span class="seg" onclick="event.stopPropagation()">
-        <button id="vCircuit" class="on" onclick="setView('circuit')">CIRCUIT</button><button id="vTracker" onclick="setView('tracker')">TRACKER</button>
+        <button id="vCircuit" class="on" onclick="setView('circuit')">CIRCUIT</button><button id="vTracker" onclick="setView('tracker')">TRACKER</button><button id="vDelta" onclick="setView('delta')">DELTA</button>
       </span>
       <span class="r" id="mapr"></span></h2>
     <div class="body"><canvas id="mapc"></canvas></div></div>
 
   <div id="right">
-    <div class="panel" id="pCls"><h2>TIMING <span class="r" id="clsr"></span></h2>
+    <div class="panel" id="pCls"><h2>TIMING
+      <span class="seg" onclick="event.stopPropagation()">
+        <button id="gmLead" class="on" onclick="setGapMode('lead')">LEADER</button><button id="gmInt" onclick="setGapMode('int')">INTERVAL</button>
+      </span>
+      <span class="r" id="clsr"></span></h2>
       <div class="body" id="clswrap"><table id="cls"></table></div></div>
-    <div class="panel" id="pTel"><h2>TELEMETRY <span class="r" id="selc"></span></h2>
-      <div class="body" id="tel">
+    <div class="panel" id="pTel"><h2>
+      <span class="seg" onclick="event.stopPropagation()">
+        <button id="tabCar" class="on" onclick="setTab('car')">CAR</button><button id="tabSec" onclick="setTab('sec')">SECTORS</button><button id="tabBat" onclick="setTab('bat')">BATTLE</button>
+      </span>
+      <span class="r" id="selc"></span></h2>
+      <div class="body" id="anaBody">
+      <div id="tel">
         <div class="tbig">
           <div class="spd"><b id="vv">0</b><s>KM/H</s></div>
           <div class="gearbox" id="gearwrap"><b id="gr">N</b><s>GEAR</s></div>
@@ -203,7 +258,28 @@
         <div class="row"><s>BRK</s><div class="track brk"><span id="bb"></span></div><b id="bt">off</b></div>
         <div class="row"><s>LONG G</s>
           <div class="gtrack"><i></i><u id="gb"></u></div><b id="gv">0.0</b></div>
-        <div id="wx"></div></div></div>
+        <div id="wx"></div></div>
+
+      <div id="secv" class="pad" style="display:none">
+        <div class="sublabel">FASTEST IN EACH SECTOR
+          <span class="seg" onclick="event.stopPropagation()" style="margin-left:6px">
+            <button id="smForm" class="on" onclick="setSecMode('form')">RECENT</button><button id="smBest" onclick="setSecMode('best')">BEST</button>
+          </span></div>
+        <div id="secrows"></div>
+        <div class="ideal" id="secideal"></div>
+      </div>
+
+      <div id="batv" class="pad" style="display:none">
+        <div class="bhead"><b id="batA">–</b><span>vs</span><select id="rival"></select></div>
+        <div class="bstat">
+          <div><s>GAP NOW</s><b id="bgNow">–</b></div>
+          <div><s>TREND</s><b id="bgTrend">–</b></div>
+          <div><s>CLOSING IN</s><b id="bgCatch">–</b></div>
+        </div>
+        <div id="batbars"></div>
+        <div class="bnote" id="batnote"></div>
+      </div>
+      </div></div>
   </div>
 
   <div id="bottom">
@@ -282,6 +358,10 @@ function init(){
   if(h.get('v')==='tracker')mapView='tracker';
   const fo=$('#focus');codes.slice().sort().forEach(c=>fo.insertAdjacentHTML('beforeend',`<option value="${c}">follow ${c}</option>`));
   $('#load').remove();
+  // rival list for the BATTLE tab; empty value = whichever car is currently ahead on track
+  $('#rival').innerHTML='<option value="">car ahead</option>'+
+    codes.slice().sort().map(c=>`<option value="${c}">${c}</option>`).join('');
+  $('#rival').onchange=()=>paint(true);
 
   document.querySelectorAll('.panel>h2').forEach(x=>x.onclick=()=>{
     x.parentElement.classList.toggle('collapsed');requestAnimationFrame(()=>{size();paint()})});
@@ -310,7 +390,9 @@ const narrow=()=>matchMedia('(max-width:900px)').matches;
 function setView(v){mapView=v;
   document.getElementById('vCircuit').classList.toggle('on',v==='circuit');
   document.getElementById('vTracker').classList.toggle('on',v==='tracker');
-  document.getElementById('mapTitle').textContent=v==='circuit'?'CIRCUIT':'TRACKER';
+  document.getElementById('vDelta').classList.toggle('on',v==='delta');
+  document.getElementById('mapTitle').textContent=
+    v==='circuit'?'CIRCUIT':(v==='tracker'?'TRACKER':'SPEED DELTA');
   paint()}
 const fmt=s=>s==null?'–':(s>=60?`${Math.floor(s/60)}:${(s%60).toFixed(3).padStart(6,'0')}`:s.toFixed(3));
 function now(){return D.meta.t0+F/D.meta.hz}
@@ -368,9 +450,12 @@ function paint(force){
   const nowMs=performance.now();
   const doDom=force||!playing||(nowMs-lastDom)>160;
   if(doDom)lastDom=nowMs;
-  (mapView==='tracker'?drawTracker(t,st):drawMap(t,st));
+  (mapView==='tracker'?drawTracker(t,st):drawMap(t,st));   // delta draws over the map
   if(doDom){drawTiming(t,best);drawMsgs(t)}
-  drawTel();drawStints();drawLapChart();drawTimeline();
+  if(anaTab==='car')drawTel();
+  else if(doDom&&anaTab==='sec')drawSectors(t);
+  else if(doDom&&anaTab==='bat')drawBattle(t);
+  drawStints();drawLapChart();drawTimeline();
   const w=(D.weather||[]).filter(x=>x.t<=t).pop();
   $('#wx').innerHTML=w?`TRACK <b style="color:var(--fg)">${w.track.toFixed(1)}°</b> · AIR ${w.air.toFixed(1)}° · WIND ${w.wind.toFixed(1)}m/s · HUM ${w.hum.toFixed(0)}%${w.rain?' · <b style="color:#3671c6">RAIN</b>':''}`:'';
   const el=t-D.meta.t0;
@@ -383,12 +468,62 @@ function paint(force){
   $('#selc').textContent=sel;
 }
 
+/* Colour the circuit by where the selected car carries more speed than its rival, averaged
+   over their recent racing laps. Drawn from the cars' OWN binned positions rather than the
+   stored outline: both the colour and the geometry then come from the same progress index,
+   so a segment cannot be coloured with a neighbour's data. Labelled in km/h, never seconds -
+   a time delta at this sample rate would not be honest (see the note above drawSectors). */
+function drawDelta(t){
+  const c=$('#mapc'),g=c.getContext('2d');if(!c.width)return;
+  const riv=rivalOf(t);
+  const ra=repLapRange(sel,t,8),rb=riv?repLapRange(riv,t,8):null;
+  $('#mapr').textContent=riv?`${sel} vs ${riv} · last ${Math.min(ra?ra.n:0,rb?rb.n:0)} laps`:'no rival';
+  if(!riv||!ra||!rb||ra.n<2||rb.n<2){
+    g.font=`${11*dpr}px ${getComputedStyle(document.body).fontFamily}`;
+    g.fillStyle='#8d8d98';g.textAlign='center';g.textBaseline='middle';
+    g.fillText('not enough racing laps yet for a comparison',c.width/2,c.height/2);
+    return}
+  const A=speedProfile(sel,ra.from,ra.to),B=speedProfile(riv,rb.from,rb.to);
+  const {s,ox,oy}=view();
+  // 3-bin moving average (~260 m). The bin-to-bin signal flips sign 20 times a lap raw and
+  // 12 times smoothed: the extra flips are sampling noise, not the cars trading advantage
+  // every 90 metres, and they made the circuit read as green/red dashes.
+  const raw=[];
+  for(let k=0;k<NBIN;k++)raw[k]=(A.v[k]!=null&&B.v[k]!=null)?A.v[k]-B.v[k]:null;
+  const dvs=[];
+  for(let k=0;k<NBIN;k++){
+    const w=[raw[(k-1+NBIN)%NBIN],raw[k],raw[(k+1)%NBIN]].filter(x=>x!=null);
+    dvs[k]=w.length?w.reduce((a,b)=>a+b,0)/w.length:null}
+  let mx=0;
+  for(let k=0;k<NBIN;k++)if(dvs[k]!=null)mx=Math.max(mx,Math.abs(dvs[k]));
+  mx=Math.max(5,mx);
+  const tw=Math.max(9*dpr,26*dpr*s/9);
+  g.lineCap='round';g.lineJoin='round';
+  for(let k=0;k<NBIN;k++){
+    const p0=A.xy[k],p1=A.xy[(k+1)%NBIN];
+    if(!p0||!p1)continue;
+    const dv=dvs[k];
+    g.beginPath();
+    g.moveTo(p0[0]*s+ox,-p0[1]*s+oy);g.lineTo(p1[0]*s+ox,-p1[1]*s+oy);
+    if(dv==null){g.strokeStyle='#2a2a33'}
+    else{const f=Math.min(1,Math.abs(dv)/mx);
+      g.strokeStyle=dv>=0?`rgba(34,224,122,${0.25+0.75*f})`:`rgba(232,0,45,${0.25+0.75*f})`}
+    g.lineWidth=tw;g.stroke()}
+  // scale + legend, top-left
+  g.font=`700 ${9*dpr}px ${getComputedStyle(document.body).fontFamily}`;
+  g.textAlign='left';g.textBaseline='top';
+  g.fillStyle='#22e07a';g.fillText(`${sel} FASTER`,10*dpr,10*dpr);
+  g.fillStyle='#e8002d';g.fillText(`${riv} FASTER`,10*dpr,24*dpr);
+  g.fillStyle='#5a5a66';g.fillText(`full colour = ${mx.toFixed(0)} km/h`,10*dpr,38*dpr);
+}
+
 function drawMap(t,st){
   const c=$('#mapc'),g=c.getContext('2d');if(!c.width)return;
   $('#mapr').textContent=D.track.corners.length+' corners';
   const {s,ox,oy}=view();
   g.clearRect(0,0,c.width,c.height);
   if(st!=='GREEN'){g.fillStyle=st==='RED'?'rgba(232,0,45,.06)':'rgba(255,212,0,.045)';g.fillRect(0,0,c.width,c.height)}
+  if(mapView==='delta'){drawDelta(t)}else{
   const P=D.track.outline;g.lineJoin=g.lineCap='round';
   g.beginPath();P.forEach(([x,y],i)=>i?g.lineTo(x*s+ox,-y*s+oy):g.moveTo(x*s+ox,-y*s+oy));g.closePath();
   // dark casing first, then a light "asphalt" ribbon on top, so the circuit reads as a
@@ -401,6 +536,7 @@ function drawMap(t,st){
   const a=P[0],b=P[1]||P[0];
   g.save();g.translate(a[0]*s+ox,-a[1]*s+oy);g.rotate(Math.atan2(-(b[1]-a[1]),b[0]-a[0]));
   g.fillStyle='#fff';g.fillRect(-1.5*dpr,-10*dpr*s/9,3*dpr,20*dpr*s/9);g.restore();
+  }
   g.font=`700 ${10*dpr}px ${getComputedStyle(document.body).fontFamily}`;
   g.textAlign='center';g.textBaseline='middle';
   D.track.corners.forEach(k=>{const X=k.x*s+ox,Y=-k.y*s+oy;
@@ -531,25 +667,119 @@ function order(t){
    contain nulls (pit lane, missing samples) and a search that lands on one used to
    return null, which silently pinned a merely lapped car to the far left of the
    tracker as if it were minutes down. */
-let _pi={code:null,upto:-1,f:null,p:null};
-function leaderIndex(code,upto){
-  if(_pi.code===code&&_pi.upto===upto)return _pi;
+/* The compacted progress array does NOT depend on the current frame, so it is built ONCE
+   per car and kept. The old version rebuilt it per (code, upto) and cached a single entry,
+   which was fine while every call shared one frame — but the trend arrows need the gap as
+   it was 30s ago too, and two alternating `upto` values would have thrashed that cache and
+   rebuilt an 11.5k-element array on every row of every repaint.
+   Searching the whole array rather than a prefix is also more correct: prog is cumulative,
+   so the crossing for a car that is behind always lies in the past anyway. */
+const _comp={};
+function compact(code){
+  if(_comp[code])return _comp[code];
   const a=D.prog[code]||[],f=[],pv=[];
-  for(let i=0;i<=upto;i++){const v=a[i];if(v!=null){f.push(i);pv.push(v)}}
-  _pi={code,upto,f,p:pv};return _pi}
-function gapTo(lead,code){
-  const pb=progAt(code,F);if(pb==null)return null;
-  const up=Math.round(F),ix=leaderIndex(lead,up);
-  if(!ix.p.length)return null;
-  if(pb<=ix.p[0])return null;                    // leader was never this far back
+  for(let i=0;i<a.length;i++){const v=a[i];if(v!=null){f.push(i);pv.push(v)}}
+  return _comp[code]={f,p:pv}}
+/* Seconds between `code` and `ahead`: how long ago was `ahead` at the point `code` has just
+   reached. Measured, not estimated — multiplying a progress difference by a lap time looked
+   tempting and is wrong by up to 5s, because a lap fraction is not linear in time. */
+function gapAt(ahead,code,frame){
+  const a=D.prog[code];if(!a)return null;
+  const pb=a[Math.round(frame)];if(pb==null)return null;
+  const ix=compact(ahead);
+  if(!ix.p.length||pb<=ix.p[0])return null;      // never was this far back
   let lo=0,hi=ix.p.length-1;
   while(lo<hi){const mid=(lo+hi)>>1;if(ix.p[mid]<pb)lo=mid+1;else hi=mid}
-  // linear interpolation between the two straddling samples for sub-frame precision
   const i1=lo,i0=Math.max(0,lo-1);
   const p0=ix.p[i0],p1=ix.p[i1];
-  let fr=(p1>p0)?(pb-p0)/(p1-p0):0;
-  const frame=ix.f[i0]+(ix.f[i1]-ix.f[i0])*fr;
-  return (F-frame)/D.meta.hz}
+  const fr=(p1>p0)?(pb-p0)/(p1-p0):0;
+  const fm=ix.f[i0]+(ix.f[i1]-ix.f[i0])*fr;
+  return (frame-fm)/D.meta.hz}
+function gapTo(lead,code){return gapAt(lead,code,F)}
+
+/* ---- representative laps -------------------------------------------------------------
+   Any comparison between two drivers is meaningless unless both laps were raced. Drop the
+   in-lap, the out-lap after it, and anything more than 10% off that driver's own best,
+   which is what removes safety-car laps, traffic and mistakes. Verified on Madrid: 54 of
+   57 laps survive for Norris, the three dropped being exactly his stop and the lap out. */
+const REP_TOL=1.10;
+function repLaps(code,t,n){
+  const L=D._laps[code]||[];
+  let best=1e9;
+  for(const l of L)if(l.t<=t&&l.time&&l.time<best)best=l.time;
+  if(best>=1e9)return[];
+  const out=[];
+  for(let i=0;i<L.length;i++){const l=L[i];
+    if(!l.time||!l.s3t||l.s3t>t)continue;
+    if(l.pit)continue;
+    if(i&&L[i-1].pit)continue;
+    if(l.time>best*REP_TOL)continue;
+    out.push(l)}
+  return n?out.slice(-n):out}
+const median=a=>{const b=a.slice().sort((x,y)=>x-y),m=b.length>>1;
+  return b.length%2?b[m]:(b[m-1]+b[m])/2};
+const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
+/* "Recent form" is the MEAN, not the median, and that choice matters. Sector times sum to
+   the lap time EXACTLY in the feed (verified: diff 0.0000), and means preserve that -
+   medians do not. With medians the three sector deltas read -0.152/-0.293/-0.120 while the
+   lap delta read -0.386, so anyone adding up the sectors got a different answer from the
+   total sitting underneath them. The representative-lap filter already removes the outliers
+   a median would protect against, so additivity is the better trade. */
+/* BEST and RECENT deliberately use DIFFERENT lap sets, because they answer different
+   questions. BEST is the fastest sector of the session on F1's own convention - every lap
+   counts, including the one where the driver pitted at the end, because a sector is still
+   a sector. It therefore agrees exactly with the BEST S1/S2/S3 boxes in the stats bar,
+   which matters: the same number appearing twice on one screen with two values destroys
+   trust faster than either being slightly off. RECENT is about representative race pace,
+   so it uses the filtered racing laps only.
+   Timing is per SECTOR, not per lap: S1 counts the moment S1 is set, not when the lap ends,
+   or a replay would show a sector best appearing a lap late. */
+function sectorVal(code,t,k,mode,n){
+  if(mode==='best'){
+    let b=null;
+    for(const l of (D._laps[code]||[])){
+      const v=l['s'+k],ts=l['s'+k+'t'];
+      if(v&&ts&&ts<=t&&(b==null||v<b))b=v}
+    return b}
+  const v=repLaps(code,t,n).map(l=>l['s'+k]).filter(Boolean);
+  return v.length?mean(v):null}
+function lapVal(code,t,mode,n){
+  if(mode==='best'){
+    let b=null;
+    for(const l of (D._laps[code]||[]))
+      if(l.time&&l.s3t&&l.s3t<=t&&(b==null||l.time<b))b=l.time;
+    return b}
+  const v=repLaps(code,t,n).map(l=>l.time).filter(Boolean);
+  return v.length?mean(v):null}
+function sectorRank(t,k,mode,n){
+  const rows=[];
+  for(const c of codes){const v=sectorVal(c,t,k,mode,n);if(v)rows.push({code:c,v})}
+  return rows.sort((a,b)=>a.v-b.v)}
+
+/* Mean speed per track-fraction bin over a set of laps. Single-lap comparisons are NOT
+   usable at 2 Hz (a speed-derived lap delta carries ~0.5s of error, as large as the
+   differences being measured), but averaged over several laps the profile repeats across
+   disjoint windows at r~0.7, so it is a real characteristic of how the two cars differ. */
+const NBIN=60, _sp={};
+function speedProfile(code,fromLap,toLap){
+  const key=code+'|'+fromLap+'|'+toLap;
+  if(_sp[key])return _sp[key];
+  const a=D.prog[code]||[],v=(D.pos[code]||{}).v||[],X=(D.pos[code]||{}).x||[],Y=(D.pos[code]||{}).y||[];
+  const sv=new Float64Array(NBIN),sx=new Float64Array(NBIN),sy=new Float64Array(NBIN),n=new Int32Array(NBIN);
+  for(let i=0;i<a.length;i++){const pr=a[i];if(pr==null)continue;
+    const fl=Math.floor(pr),lap=fl+1;
+    if(lap<fromLap||lap>toLap)continue;
+    if(v[i]==null||X[i]==null||Y[i]==null)continue;
+    let k=((pr-fl)*NBIN)|0;if(k<0)k=0;if(k>=NBIN)k=NBIN-1;
+    sv[k]+=v[i];sx[k]+=X[i];sy[k]+=Y[i];n[k]++}
+  const out={v:new Array(NBIN),xy:new Array(NBIN)};
+  for(let k=0;k<NBIN;k++){
+    out.v[k]=n[k]?sv[k]/n[k]:null;
+    out.xy[k]=n[k]?[sx[k]/n[k],sy[k]/n[k]]:null}
+  return _sp[key]=out}
+function repLapRange(code,t,n){
+  const L=repLaps(code,t,n);
+  return L.length?{from:L[0].lap,to:L[L.length-1].lap,n:L.length}:null}
 
 function drawTiming(t,best){
   const rows=order(t);if(!rows.length)return;
@@ -563,7 +793,21 @@ function drawTiming(t,best){
     if(i===0)gs='LEADER';
     else if(red)gs='–';
     else{const down=(rows[0].pr!=null&&r.pr!=null)?Math.floor(rows[0].pr-r.pr):0;
-      if(down>=1)gs='+'+down+'L';else{const g=gapTo(lead,r.code);gs=g==null?'–':'+'+g.toFixed(1)}}
+      if(down>=1)gs='+'+down+'L';
+      else{
+        // LEADER = gap to the front of the race. INTERVAL = gap to the car directly ahead,
+        // which is the one that actually decides whether a pass is coming.
+        const ref=gapMode==='int'?rows[i-1].code:lead;
+        const g=gapAt(ref,r.code,F);
+        if(g==null)gs='–';
+        else{
+          // is that gap closing or stretching? same exact measurement, TREND_W seconds back
+          const gp=gapAt(ref,r.code,Math.max(0,F-TREND_W*D.meta.hz));
+          let tr='';
+          if(gp!=null){const dd=g-gp;
+            if(dd<-0.15)tr='<span class="trend up">▲</span>';
+            else if(dd>0.15)tr='<span class="trend dn">▼</span>'}
+          gs='+'+g.toFixed(1)+tr}}}
     const secs=narrow()?'':[1,2,3].map(k=>{
       const v=prev['s'+k];if(!v)return '<td class="sec"></td>';
       const b=best.s[k-1];
@@ -587,6 +831,159 @@ function gAt(p,i){
   if(a==null||b==null)return 0;
   return ((b-a)/3.6)/(2/D.meta.hz)/9.81;
 }
+/* ---- SECTORS + BATTLE -----------------------------------------------------------------
+   Everything quantitative here comes from the SECTOR TIMES, which are exact in the feed.
+   A tempting alternative was to derive a continuous delta trace from the speed channel,
+   but at 2 Hz that carries ~0.5s of error on a lap - the same size as the gaps being
+   measured - so it is only used for the qualitative on-track DELTA view, in km/h, averaged
+   over several laps where the profile is demonstrably repeatable. */
+let anaTab='car', secMode='form', gapMode='lead', FORM_N=5, TREND_W=45;
+
+function setTab(v){anaTab=v;
+  for(const [id,k] of [['tabCar','car'],['tabSec','sec'],['tabBat','bat']])
+    $('#'+id).classList.toggle('on',k===v);
+  $('#tel').style.display=v==='car'?'':'none';
+  $('#secv').style.display=v==='sec'?'':'none';
+  $('#batv').style.display=v==='bat'?'':'none';
+  paint(true)}
+function setSecMode(v){secMode=v;
+  $('#smForm').classList.toggle('on',v==='form');$('#smBest').classList.toggle('on',v==='best');
+  paint(true)}
+function setGapMode(v){gapMode=v;
+  $('#gmLead').classList.toggle('on',v==='lead');$('#gmInt').classList.toggle('on',v==='int');
+  lastClsHTML='';paint(true)}
+
+// the car directly ahead of `code` on the road, or null if it is leading
+function carAhead(t,code){
+  const rows=order(t),i=rows.findIndex(r=>r.code===code);
+  return i>0?rows[i-1].code:null}
+function rivalOf(t){
+  const r=$('#rival').value;
+  if(r&&r!==sel&&D.pos[r])return r;
+  return carAhead(t,sel)}
+
+function drawSectors(t){
+  const n=FORM_N,rows=[];
+  for(const k of [1,2,3]){
+    const rk=sectorRank(t,k,secMode,n);
+    if(!rk.length){rows.push(`<div class="srow"><div class="sk">S${k}</div><div class="sents"><span style="color:var(--dim);font-size:10px">no laps yet</span></div></div>`);continue}
+    const top=rk[0];
+    const mineIx=rk.findIndex(x=>x.code===sel);
+    // ALWAYS three slots. The panel is 350px: a fourth entry ran off the edge and clipped
+    // its own rank badge. If the selected car is outside the top three it takes the third
+    // slot and carries its real position, so you can still see where your car stands.
+    const show=mineIx>2?rk.slice(0,2).concat([rk[mineIx]]):rk.slice(0,3);
+    const ents=show.map((x,i)=>{
+      const d=D.drivers[x.code]||{};
+      const val=i===0?x.v.toFixed(3):'+'+(x.v-top.v).toFixed(3);
+      const cls='se'+(i===0?' top':'')+(x.code===sel?' mine':'');
+      const rank=(mineIx>2&&i===2)?`<span style="color:var(--dim);font-size:9px">P${mineIx+1}</span>`:'';
+      return `<div class="${cls}"><i style="background:${d.color||'#555'}"></i><b>${x.code}</b><u>${val}</u>${rank}</div>`}).join('');
+    rows.push(`<div class="srow"><div class="sk">S${k}</div><div class="sents">${ents}</div></div>`);
+  }
+  $('#secrows').innerHTML=rows.join('');
+  // ideal lap = the three fastest sectors added together, whoever set them
+  const bests=[1,2,3].map(k=>sectorRank(t,k,secMode,n)[0]).filter(Boolean);
+  if(bests.length===3){
+    const ideal=bests.reduce((a,x)=>a+x.v,0);
+    const mine=[1,2,3].map(k=>sectorVal(sel,t,k,secMode,n));
+    const mineSum=mine.every(Boolean)?mine.reduce((a,b)=>a+b,0):null;
+    $('#secideal').innerHTML=
+      `<span>IDEAL LAP <b>${fmt(ideal)}</b></span>`+
+      (mineSum?`<span>${sel} <b>${fmt(mineSum)}</b> <span style="color:var(--dim)">${mineSum>ideal?'+'+(mineSum-ideal).toFixed(3):''}</span></span>`:'');
+  } else $('#secideal').innerHTML='';
+}
+
+function bar(el,val,scale,invert){
+  // diverging bar: negative (quicker) points LEFT toward the selected car's name
+  const w=Math.min(50,Math.abs(val)/scale*50);
+  el.style.width=w+'%';
+  el.style.left=(val<0?50-w:50)+'%';
+  el.style.background=(val<0)!==!!invert?'var(--green)':'#ff5a6e'}
+
+function drawBattle(t){
+  const riv=rivalOf(t);
+  $('#batA').textContent=sel;
+  $('#batA').style.color=(D.drivers[sel]||{}).color||'#fff';
+  if(!riv||riv===sel){
+    $('#batbars').innerHTML='';
+    $('#batnote').textContent='Leading the race - no car ahead to compare against. Pick a rival above.';
+    for(const id of ['bgNow','bgTrend','bgCatch'])$('#'+id).textContent='–';
+    return}
+  // exact, measured gap - and the same measurement TREND_W seconds ago for the trend
+  let catchNote='';
+  const gNow=gapAt(riv,sel,F),gThen=gapAt(riv,sel,Math.max(0,F-TREND_W*D.meta.hz));
+  const lp=lapAt(sel,t),lt=(lp&&lp.time)||median(repLaps(sel,t,5).map(l=>l.time))||95;
+  $('#bgNow').textContent=gNow==null?'–':(gNow>=0?'+':'')+gNow.toFixed(2)+'s';
+  let perLap=null;
+  // A trend only means anything while both cars are actually racing. In qualifying, or
+  // across a pit stop, the gap to the car ahead jumps by half a minute and the arithmetic
+  // faithfully reported "94.72s/lap", which is worse than saying nothing.
+  const TREND_MAX=5;
+  if(gNow!=null&&gThen!=null&&Math.abs((gNow-gThen)*(lt/TREND_W))<=TREND_MAX){
+    perLap=(gNow-gThen)*(lt/TREND_W);           // seconds gained or lost per lap
+    const closing=perLap<0;
+    $('#bgTrend').innerHTML=`<span style="color:${closing?'var(--green)':'#ff5a6e'}">`+
+      `${closing?'▲':'▼'} ${Math.abs(perLap).toFixed(2)}s<span style="font-size:9px">/lap</span></span>`;
+    const lapNow=(lapAt(sel,t)||{}).lap||0, left=Math.max(0,D._maxLap-lapNow);
+    if(closing&&gNow>0&&Math.abs(perLap)>0.02){
+      const laps=Math.ceil(gNow/Math.abs(perLap));
+      // at this rate, does the catch actually happen before the chequered flag?
+      $('#bgCatch').innerHTML=laps<=left
+        ? `<span style="color:var(--green)">${laps} lap${laps===1?'':'s'}</span>`
+        : `<span style="color:var(--muted)">${laps} laps</span>`;
+      catchNote=laps<=left
+        ? `At this rate the catch comes with <b>${left-laps}</b> lap${left-laps===1?'':'s'} to spare.`
+        : `At this rate that takes <b>${laps}</b> laps, and only <b>${left}</b> remain.`;
+    } else $('#bgCatch').innerHTML=closing?'—':'<span style="color:var(--muted)">losing ground</span>';
+  } else {$('#bgTrend').innerHTML='<span style="color:var(--dim)">–</span>';
+          $('#bgCatch').innerHTML='<span style="color:var(--dim)">–</span>'}
+
+  // Where the time actually goes, from the exact sector times. Averaging RACING laps is the
+  // right comparison in a Grand Prix, but a qualifying session has none by construction -
+  // every lap is an out-lap, a flyer or an in-lap - so the panel fell back to "the last 0
+  // racing laps" and drew four empty bars. Compare best sectors instead when that happens,
+  // which is the comparison that actually means something in qualifying.
+  const nA0=repLaps(sel,t,FORM_N).length,nB0=repLaps(riv,t,FORM_N).length;
+  const mode=Math.min(nA0,nB0)>=3?'form':'best';
+  const d=[1,2,3].map(k=>{
+    const a=sectorVal(sel,t,k,mode,FORM_N),b=sectorVal(riv,t,k,mode,FORM_N);
+    return (a!=null&&b!=null)?a-b:null});
+  // the total is the SUM of the parts by construction, so the panel always reconciles
+  const tot=d.every(x=>x!=null)?d[0]+d[1]+d[2]:null;
+  // every bar shares ONE scale, including the total: scaling the LAP bar separately made a
+  // -0.290 total draw exactly as long as a -0.180 sector, which reads as "the same size"
+  const scale=Math.max(0.05,...d.filter(x=>x!=null).map(Math.abs),Math.abs(tot||0));
+  if(d.every(x=>x==null)){
+    $('#batbars').innerHTML='';
+    $('#batnote').innerHTML=`No comparable sector times for <b>${sel}</b> and <b>${riv}</b> yet.`;
+    return}
+  $('#batbars').innerHTML=[1,2,3].map(k=>{
+    const v=d[k-1];
+    return `<div class="brow"><s>S${k}</s><div class="btr"><i></i><u id="bb${k}"></u></div>`+
+      `<b style="color:${v==null?'var(--dim)':(v<0?'var(--green)':'#ff5a6e')}">`+
+      `${v==null?'–':(v>0?'+':'')+v.toFixed(3)}</b></div>`}).join('')+
+    `<div class="brow tot"><s>LAP</s><div class="btr"><i></i><u id="bbT"></u></div>`+
+    `<b style="color:${tot==null?'var(--dim)':(tot<0?'var(--green)':'#ff5a6e')}">`+
+    `${tot==null?'–':(tot>0?'+':'')+tot.toFixed(3)}</b></div>`;
+  for(const k of [1,2,3])if(d[k-1]!=null)bar($('#bb'+k),d[k-1],scale);
+  if(tot!=null)bar($('#bbT'),tot,scale);
+
+  let verdict='';
+  if(tot!=null&&d.every(x=>x!=null)){
+    const wsec=d.indexOf(Math.min(...d)),lsec=d.indexOf(Math.max(...d));
+    verdict=`Strongest in <b>S${wsec+1}</b> (${d[wsec]>0?'+':''}${d[wsec].toFixed(3)}), `+
+            `weakest in <b>S${lsec+1}</b> (${d[lsec]>0?'+':''}${d[lsec].toFixed(3)}). `+
+            `Sectors add up to the lap figure.`;
+  }
+  const basis=mode==='form'
+    ? `Average of the last <b>${Math.min(nA0,nB0)}</b> racing laps for each (pit, out and safety-car laps excluded).`
+    : `<b>Best sector</b> of the session for each: not enough green racing laps yet for a pace average.`;
+  $('#batnote').innerHTML=`${basis} ${verdict} `+
+    `<span style="color:var(--dim)">Negative means ${sel} is quicker.</span>`+
+    (catchNote?` ${catchNote}`:'');
+}
+
 function drawTel(){
   const p=D.pos[sel],i=Math.round(F);
   const v=p.v[i]??0, th=(p.thr?p.thr[i]:null)??0, br=(p.brk?p.brk[i]:null)??0;
