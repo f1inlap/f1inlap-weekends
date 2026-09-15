@@ -15,7 +15,14 @@
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
   body{margin:0;background:var(--bg);color:var(--fg);overflow:hidden;
-       font:13px/1.4 var(--mono);padding-bottom:env(safe-area-inset-bottom)}
+       font:13px/1.4 var(--mono);padding-bottom:env(safe-area-inset-bottom);
+       display:flex;flex-direction:column}
+  /* header and footer size to their own content; main takes whatever is left. main used to
+     be height:calc(100vh - 136px), which hardcoded the header height AND left nothing at all
+     for the footer, so on any screen shorter than a big Mac display the transport controls
+     rendered below the fold. With overflow:hidden on body they could not be scrolled to
+     either: on a 1366x768 PC the PLAY button was sliced in half and the rest was gone. */
+  header,footer{flex:0 0 auto}
   #load{position:fixed;inset:0;display:grid;place-items:center;background:#000;z-index:99;color:var(--muted)}
 
   header{border-bottom:1px solid var(--line);background:#050507}
@@ -38,8 +45,9 @@
   .st b i{font-style:normal;color:var(--muted);font-size:11px}
   .p{color:var(--purple)} .g{color:var(--green)} .y{color:var(--yellow)}
 
-  main{display:grid;grid-template-columns:minmax(0,1fr) 350px;grid-template-rows:minmax(0,1fr) 200px;
-       gap:8px;padding:8px;height:calc(100vh - 136px)}
+  main{display:grid;grid-template-columns:minmax(0,1fr) 350px;
+       grid-template-rows:minmax(0,1fr) minmax(0,200px);
+       gap:8px;padding:8px;flex:1 1 auto;min-height:0}
   .panel{background:var(--card);border:1px solid var(--line);border-radius:6px;
          display:flex;flex-direction:column;overflow:hidden;min-height:0}
   .panel>h2{margin:0;padding:6px 9px;font-size:9px;letter-spacing:.14em;color:var(--dim);font-weight:700;
@@ -74,6 +82,13 @@
   .meter span{display:block;height:100%}
   #wx{color:var(--dim);font-size:10.5px;line-height:1.7;margin-top:4px}
 
+  /* Without this #right is a grid item full of auto-height blocks, and the timing table
+     (22 rows) spills out of its row and overlaps RACE CONTROL below it. Telemetry keeps its
+     natural height; timing takes the rest and scrolls inside itself. */
+  #right{display:flex;flex-direction:column;gap:8px;min-height:0}
+  #right>#pCls{flex:1 1 auto;min-height:0}
+  #right>#pTel{flex:0 0 auto}
+
   #bottom{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) 300px;gap:8px;min-height:0}
   .msg{font-size:11px;color:var(--muted);padding:2px 9px;border-bottom:1px solid #121218;display:flex;gap:6px}
   .msg b{color:var(--fg);flex:0 0 28px}
@@ -101,7 +116,7 @@
     .stats{grid-template-columns:repeat(3,minmax(0,1fr))}
     .top{flex-wrap:nowrap}
     #evt{display:none}
-    main{grid-template-columns:1fr;grid-template-rows:none;grid-auto-rows:min-content;height:auto;padding:6px;gap:6px}
+    main{grid-template-columns:1fr;grid-template-rows:none;grid-auto-rows:min-content;height:auto;padding:6px;gap:6px;flex:0 0 auto}
     .panel.map>.body{height:52vh}
     #right{display:contents}
     #bottom{grid-column:auto;grid-template-columns:1fr;gap:6px}
