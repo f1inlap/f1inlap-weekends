@@ -457,10 +457,19 @@ function drawTrap(target){
 function drawHeat(target){
   const TGT=target||'#heat';
   const n=D.drivers.length;
-  // rank -> one of seven steps, brightest = quickest. Seven bands instead of four means a
-  // P4 and a P9 no longer share a colour, which is what made the old grid read as flat.
+  /* rank -> one of seven steps, brightest = quickest.
+     The mapping is deliberately NOT linear. Spreading 22 drivers evenly over 7 bands puts
+     P1, P2 and P3 in the same shade - the front of the field, where the differences matter
+     most, came out flat. A power curve on the normalised rank (exponent 0.45) spends the
+     scale where the reader is looking: the top five get four distinct steps instead of two,
+     P1/P2/P3 are each their own, and the tail compresses. All seven steps are still used.
+     The rank is printed in every cell, so the compressed end never hides a number. */
   const RAMP=['var(--seq-7)','var(--seq-6)','var(--seq-5)','var(--seq-4)','var(--seq-3)','var(--seq-2)','var(--seq-1)'];
-  const step=r=>RAMP[Math.min(RAMP.length-1,Math.floor((r-1)/n*RAMP.length))];
+  const RANK_EXP=0.45;
+  const step=r=>{
+    const q=n>1?Math.pow((r-1)/(n-1),RANK_EXP):0;
+    return RAMP[Math.min(RAMP.length-1,Math.floor(q*RAMP.length))];
+  };
   $(TGT).innerHTML=`<table class="heat"><thead><tr><th></th><th>Driver</th>
       <th style="text-align:center">S1</th><th style="text-align:center">S2</th><th style="text-align:center">S3</th>
       <th class="num">Best lap</th><th class="num" id="heatGapHd">Gap</th><th class="num">Trap</th></tr></thead><tbody>
@@ -482,7 +491,8 @@ function drawHeat(target){
       <span class="k"><span class="sw" style="background:var(--seq-3)"></span></span>
       <span class="k"><span class="sw" style="background:var(--seq-2)"></span></span>
       <span class="k"><span class="sw" style="background:var(--seq-1)"></span>slowest</span>
-      <span>the rank is printed in every cell, so the ramp is never the only cue</span></div>`;
+      <span>scale weighted to the front of the field, so P1 to P3 are told apart; the rank is
+        printed in every cell, so the ramp is never the only cue</span></div>`;
   const gh=document.querySelector(TGT+' #heatGapHd')||document.getElementById('heatGapHd');
   if(gh)gh.textContent = gapMode==='next'?'To next':'To leader';
   document.querySelectorAll(TGT+' tbody tr').forEach(tr=>{
