@@ -1,0 +1,404 @@
+<!doctype html><html lang="en"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>INLAP · Session Summary</title>
+<!--
+  SESSION SUMMARY - practice and qualifying, told as data rather than replayed.
+
+  Why this is not the replay player: nobody wants to watch FP2 back lap by lap. They
+  want to know what the session SAID. So there is no track map and no playback here -
+  the session's story is carried by the numbers, for someone who has seen no footage.
+
+  COLOUR, and why it is built the way it is (rules from the data-viz method):
+  * 22 drivers is far past the ~7-class ceiling for categorical colour, so drivers are
+    NEVER colour-encoded. Every per-driver panel is a SMALL MULTIPLE: one series, one
+    hue. Team colour appears only as a 3px identity chip beside the name - a coloured
+    mark next to the label, never the chart's encoding.
+  * Top-speed bars are ONE colour for every bar. Drivers are a nominal category, and
+    shading each bar darker-where-faster would double-encode length as hue.
+  * The sector grid is a heatmap of RANK, which IS ordered, so it uses a single-hue
+    sequential ramp - the one place a ramp is correct here.
+  * Every palette below was validated with the method's own validator against this
+    surface (#0b0b0e), not eyeballed:
+      - sequential cyan ramp .... ok, light-end contrast 2.60:1
+      - series + emphasis ....... ok, CVD dE 20.4 (deutan), normal-vision dE 28.8
+      - tyre compounds .......... F1's own semantic colours. They FAIL the lightness
+        band and the chroma floor (the hard tyre's white reads as grey), but they are
+        constants the audience already knows and changing them would make the chart
+        wrong. Kept, and ALWAYS paired with the letter S/M/H as secondary encoding,
+        which is what the method requires for a borderline pair.
+-->
+<style>
+:root{
+  color-scheme: dark;
+  --surface-0:#08080a; --surface-1:#0b0b0e; --surface-2:#131318; --line:#23232a;
+  --ink-1:#ececf0; --ink-2:#b9b9c2; --ink-3:#8d8d98; --ink-4:#5c5c66;
+  --series:#1b9ec0;          /* validated: single-series marks */
+  --emphasis:#d95926;        /* validated: the highlighted driver */
+  --seq-1:#125c6e; --seq-2:#17788f; --seq-3:#1d95b0; --seq-4:#24b2d1;  /* validated ramp */
+  --good:#27f4d2; --bad:#ff5a6e;
+  --mono:'SF Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface-0);color:var(--ink-1);
+     font:14px/1.5 -apple-system,"SF Pro Text",Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+     -webkit-font-smoothing:antialiased;padding:0 18px 90px}
+.wrap{max-width:1280px;margin:0 auto}
+a{color:var(--seq-4);text-decoration:none}a:hover{text-decoration:underline}
+.top{display:flex;align-items:baseline;justify-content:space-between;gap:16px;
+     flex-wrap:wrap;padding:20px 0 10px}
+.mark{font-weight:900;letter-spacing:.5px;font-size:14px}
+.mark span{color:var(--ink-3);font-weight:600;margin-left:8px;font-size:12px}
+h1{font-size:26px;margin:4px 0 2px;letter-spacing:-.3px}
+.sub{color:var(--ink-3);font-size:13px;margin-bottom:16px}
+.sector{height:3px;border-radius:2px;margin:0 0 18px;
+  background:linear-gradient(90deg,#ff8000 0 25%,#e8002d 25% 50%,#00d2be 50% 75%,#3671c6 75%)}
+h2{font-size:11px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;
+   color:var(--ink-3);margin:30px 0 10px;display:flex;align-items:baseline;gap:10px}
+h2 em{font-style:normal;color:var(--ink-4);font-weight:600;letter-spacing:0;
+      text-transform:none;font-size:11.5px}
+/* ---- KPI row: headline numbers are stat tiles, never one-bar charts ---- */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.kpi{background:var(--surface-1);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+.kpi s{display:block;text-decoration:none;font-size:9.5px;letter-spacing:.11em;
+       color:var(--ink-4);text-transform:uppercase;margin-bottom:3px}
+.kpi b{display:block;font-size:23px;font-weight:800;letter-spacing:-.4px;
+       font-variant-numeric:tabular-nums;line-height:1.15}
+.kpi i{font-style:normal;color:var(--ink-3);font-size:12px;font-weight:600;margin-left:5px}
+/* ---- key points ---- */
+.points{background:var(--surface-1);border:1px solid var(--line);border-radius:10px;
+        padding:14px 18px;margin-top:10px}
+.points li{margin:0 0 7px;color:var(--ink-2);font-size:14px}
+.points li:last-child{margin-bottom:0}
+.points li b{color:var(--ink-1)}
+/* ---- driver grid: small multiples, one series per panel ---- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:9px}
+.card{background:var(--surface-1);border:1px solid var(--line);border-radius:10px;
+      padding:10px 11px;transition:border-color .12s,background .12s;cursor:pointer}
+.card:hover,.card.on{border-color:#3a3a46;background:var(--surface-2)}
+.card .hd{display:flex;align-items:center;gap:7px}
+.chip{flex:0 0 3px;height:17px;border-radius:2px}
+td .chip{width:4px;min-width:4px;border-radius:2px}
+td.chipcell{width:10px;padding-right:0}
+.card .cd{font-weight:800;font-size:15px;letter-spacing:.4px}
+.card .ps{margin-left:auto;font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.card .tm{color:var(--ink-4);font-size:10.5px;margin:1px 0 7px;white-space:nowrap;
+          overflow:hidden;text-overflow:ellipsis}
+.card .big{display:flex;align-items:baseline;gap:7px}
+.card .big b{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
+.card .big u{text-decoration:none;font-size:11.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.spark{width:100%;height:34px;display:block;margin:6px 0 5px}
+.meta{display:flex;gap:9px;font-size:10px;color:var(--ink-4);flex-wrap:wrap;align-items:center}
+.meta b{color:var(--ink-2);font-weight:700;font-variant-numeric:tabular-nums}
+.tyres{display:flex;gap:3px}
+.ty{font-size:9px;font-weight:800;width:14px;height:14px;border-radius:3px;
+    display:grid;place-items:center;color:#08080a}
+.ty.S{background:#e8002d;color:#fff}.ty.M{background:#ffd400}.ty.H{background:#e9e9ee}
+.ty.I{background:#22e07a}.ty.W{background:#3671c6;color:#fff}
+/* ---- charts ---- */
+.panel{background:var(--surface-1);border:1px solid var(--line);border-radius:10px;padding:14px 16px;
+        overflow-x:auto}
+/* td/th are nowrap so numbers never wrap mid-value; without containing that here the
+   widest table stretched the whole PAGE past the viewport on a phone and every section
+   inherited the overflow. The table scrolls inside its own panel instead. */
+/* Grid and flex children default to min-width:auto, i.e. they refuse to shrink below
+   their CONTENT. One wide nowrap table therefore widened its grid column, which widened
+   the page, and every other section inherited the overflow. These let the columns shrink
+   so .panel's own overflow-x:auto is what actually scrolls. */
+.two>div,.kpis>*,.grid>*,.panel,.points{min-width:0}
+.two>div>.panel{max-width:100%}
+@media(max-width:560px){
+  body{padding:0 12px 80px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:7px}
+  .kpis{grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:7px}
+  .kpi b{font-size:19px} h1{font-size:20px}
+  .card .big b{font-size:15px}
+}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:900px){.two{grid-template-columns:1fr}}
+table{width:100%;border-collapse:collapse}
+td,th{padding:3px 5px;font-size:12px;text-align:left;white-space:nowrap}
+th{color:var(--ink-4);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:700}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.bar{height:9px;border-radius:0 4px 4px 0;background:var(--series)}
+.bar.on{background:var(--emphasis)}
+.bartrack{background:#16161c;border-radius:0 4px 4px 0;height:9px;position:relative}
+/* dumbbell */
+.db{position:relative;height:15px;background:#16161c;border-radius:4px;overflow:hidden}
+.db i{position:absolute;top:50%;transform:translateY(-50%);height:3px;background:var(--series);border-radius:2px}
+.db u{position:absolute;top:50%;transform:translate(-50%,-50%);width:9px;height:9px;border-radius:50%;
+      text-decoration:none;box-shadow:0 0 0 2px var(--surface-1)}
+.db u.a{background:var(--series)} .db u.b{background:var(--emphasis)}
+/* heatmap */
+.heat td{padding:2px 3px}
+.cell{display:block;height:19px;border-radius:3px;display:grid;place-items:center;
+      font-size:10px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+.legend{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--ink-4);margin-top:9px;flex-wrap:wrap}
+.legend .sw{width:16px;height:9px;border-radius:2px}
+.legend .k{display:flex;align-items:center;gap:4px}
+/* tooltip */
+#tip{position:fixed;z-index:99;pointer-events:none;background:#16161c;border:1px solid #33333d;
+     border-radius:7px;padding:7px 9px;font-size:11.5px;color:var(--ink-1);display:none;
+     box-shadow:0 6px 24px rgba(0,0,0,.6);max-width:250px;line-height:1.45}
+#tip b{color:#fff}#tip s{text-decoration:none;color:var(--ink-3)}
+.foot{color:var(--ink-4);font-size:11px;margin-top:34px;border-top:1px solid var(--line);
+      padding-top:14px;line-height:1.7}
+.toggle{background:#14141a;color:var(--ink-2);border:1px solid var(--line);border-radius:6px;
+        padding:4px 9px;font:600 10.5px var(--mono);cursor:pointer;margin-left:auto}
+.toggle:hover{color:var(--ink-1);border-color:#3a3a46}
+#load{padding:50px 0;color:var(--ink-3)}
+</style>
+<div class="wrap">
+  <div class="top">
+    <div class="mark">F1 INLAP <span>SESSION SUMMARY</span></div>
+    <a href="./index.html">All sessions</a>
+  </div>
+  <h1 id="ttl">Loading…</h1>
+  <div class="sub" id="sub"></div>
+  <div class="sector"></div>
+  <div id="load">Loading session…</div>
+  <div id="body" hidden>
+    <div class="kpis" id="kpis"></div>
+    <h2>What the session said</h2>
+    <div class="points"><ul id="points" style="margin:0;padding-left:18px"></ul></div>
+    <h2>Every driver <em>click a card to highlight it in the charts below</em></h2>
+    <div class="grid" id="grid"></div>
+    <div class="two" style="margin-top:22px">
+      <div>
+        <h2>Team-mates <em>same car, the cleanest comparison there is</em></h2>
+        <div class="panel"><div id="mates"></div></div>
+      </div>
+      <div>
+        <h2>Speed trap <em>where the wing level shows</em>
+          <button class="toggle" id="tblBtn">Table</button></h2>
+        <div class="panel"><div id="trap"></div><div id="trapTable" hidden></div></div>
+      </div>
+    </div>
+    <h2>Sector rank <em>brighter is quicker, each driver's position in the field per sector</em></h2>
+    <div class="panel"><div id="heat"></div></div>
+    <h2>Long runs <em>fuel corrected, by compound</em></h2>
+    <div class="panel"><div id="runs"></div></div>
+    <div class="foot" id="foot"></div>
+  </div>
+</div>
+<div id="tip"></div>
+<script>
+const $=s=>document.querySelector(s), TEAMCOL={};
+let D=null, sel=null;
+const esc=t=>(t==null?'':String(t)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const mmss=t=>{if(t==null)return '-';const m=Math.floor(t/60);return m?`${m}:${(t-60*m).toFixed(3).padStart(6,'0')}`:t.toFixed(3)};
+const SESS={FP1:'Practice 1',FP2:'Practice 2',FP3:'Practice 3',Q:'Qualifying',SQ:'Sprint Qualifying',S:'Sprint'};
+
+/* Team colours are IDENTITY ONLY - a chip beside the name. They are never the
+   encoding of a chart, because 22 drivers cannot be told apart by hue. */
+const TEAM_HEX={'Mercedes':'#27f4d2','Ferrari':'#e8002d','McLaren':'#ff8000','Red Bull Racing':'#3671c6',
+ 'Red Bull':'#3671c6','Racing Bulls':'#6c98ff','RB F1 Team':'#6c98ff','Aston Martin':'#00594f',
+ 'Alpine':'#ff87bc','Alpine F1 Team':'#ff87bc','Williams':'#64c4ff','Audi':'#00e701',
+ 'Haas F1 Team':'#b6babd','Cadillac':'#b39359','Cadillac F1 Team':'#b39359'};
+const teamCol=t=>TEAM_HEX[t]||'#8d8d98';
+
+function tip(html,e){const t=$('#tip');t.innerHTML=html;t.style.display='block';
+  const r=t.getBoundingClientRect();
+  t.style.left=Math.min(e.clientX+13,innerWidth-r.width-8)+'px';
+  t.style.top=Math.max(8,e.clientY-r.height-11)+'px';}
+const hide=()=>{$('#tip').style.display='none'};
+function bind(el,html){el.addEventListener('mousemove',e=>tip(html,e));el.addEventListener('mouseleave',hide);}
+
+/* Sparkline: ONE series per panel, so one hue. No axis - it is a shape, not a
+   measurement; the exact numbers are in the card and the tooltip. */
+function spark(laps,best,worst,highlight){
+  const W=210,H=34,P=3;
+  if(!laps.length)return `<svg class="spark" viewBox="0 0 ${W} ${H}"></svg>`;
+  const n=laps.length, span=Math.max(0.001,worst-best);
+  const x=i=>n<2?W/2:P+i*(W-2*P)/(n-1);
+  const y=t=>P+(t-best)/span*(H-2*P);
+  const pts=laps.map((l,i)=>[x(i),y(l.t)]);
+  const d=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  const col=highlight?'var(--emphasis)':'var(--series)';
+  const bi=laps.reduce((m,l,i)=>l.t<laps[m].t?i:m,0);
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    <path d="${d}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+    <circle cx="${pts[bi][0].toFixed(1)}" cy="${pts[bi][1].toFixed(1)}" r="3.4" fill="${col}" stroke="var(--surface-1)" stroke-width="2"/>
+  </svg>`;
+}
+
+function drawCards(){
+  const all=D.drivers.flatMap(d=>d.laps.map(l=>l.t));
+  const best=Math.min(...all), worst=Math.max(...all);
+  $('#grid').innerHTML=D.drivers.map(d=>{
+    const on=sel===d.code;
+    const tyres=[...new Set(d.stints.map(s=>s.c).filter(Boolean))]
+      .map(c=>`<span class="ty ${c}" title="${c}">${c}</span>`).join('');
+    return `<div class="card${on?' on':''}" data-code="${d.code}">
+      <div class="hd"><span class="chip" style="background:${teamCol(d.team)}"></span>
+        <span class="cd">${esc(d.code)}</span>
+        <span class="ps">P${d.pos??'-'}</span></div>
+      <div class="tm">${esc(d.name||d.team)}</div>
+      <div class="big"><b>${mmss(d.best)}</b><u>${d.gap?'+'+d.gap.toFixed(3):'fastest'}</u></div>
+      ${spark(d.laps,best,worst,on)}
+      <div class="meta"><span><b>${d.cleanLaps}</b> laps</span>
+        <span>trap <b>${d.trap?d.trap.toFixed(0):'-'}</b></span>
+        <span class="tyres">${tyres}</span></div>
+    </div>`}).join('');
+  document.querySelectorAll('.card').forEach(c=>{
+    const d=D.drivers.find(x=>x.code===c.dataset.code);
+    c.onclick=()=>{sel=sel===d.code?null:d.code;render()};
+    bind(c,`<b>${esc(d.name||d.code)}</b><br><s>${esc(d.team)}</s><br>
+      Best <b>${mmss(d.best)}</b> (P${d.pos})<br>
+      ${d.cleanLaps} clean of ${d.runLaps} laps<br>
+      Trap <b>${d.trap?d.trap.toFixed(0)+' km/h':'-'}</b> (P${d.trapPos??'-'})<br>
+      <s>S1 P${d.sectorPos.s1??'-'} · S2 P${d.sectorPos.s2??'-'} · S3 P${d.sectorPos.s3??'-'}</s>`);
+  });
+}
+
+/* Dumbbell: two values per team, one hue in two roles + direct labels. */
+function drawMates(){
+  const P=D.teamMates.filter(t=>t.delta!=null);
+  if(!P.length){$('#mates').innerHTML='<span style="color:var(--ink-4)">No team with two classified drivers.</span>';return}
+  const mx=Math.max(...P.map(t=>t.delta));
+  $('#mates').innerHTML=`<table><tbody>${P.map(t=>{
+    const w=Math.max(4,t.delta/mx*100), hi=[t.fast,t.slow].includes(sel);
+    return `<tr data-team="${esc(t.team)}">
+      <td class="chipcell"><span class="chip" style="background:${teamCol(t.team)};height:13px;display:block"></span></td>
+      <td style="color:var(--ink-2);font-weight:700">${esc(t.fast)}</td>
+      <td style="width:100%"><div class="db">
+        <i style="left:2%;width:${w*0.94}%"></i>
+        <u class="a" style="left:2%"></u><u class="b" style="left:${2+w*0.94}%"></u></div></td>
+      <td style="color:var(--ink-3)">${esc(t.slow)}</td>
+      <td class="num" style="color:${hi?'var(--emphasis)':'var(--ink-1)'};font-weight:700">+${t.delta.toFixed(3)}</td>
+    </tr>`}).join('')}</tbody></table>
+    <div class="legend"><span class="k"><span class="sw" style="background:var(--series)"></span>quicker team-mate</span>
+      <span class="k"><span class="sw" style="background:var(--emphasis)"></span>slower</span>
+      <span>bar length = the gap between them</span></div>`;
+  document.querySelectorAll('#mates tr').forEach(tr=>{
+    const t=P.find(x=>x.team===tr.dataset.team);
+    bind(tr,`<b>${esc(t.team)}</b><br>${esc(t.fast)} <b>${mmss(t.fastTime)}</b><br>
+      ${esc(t.slow)} <b>${mmss(t.slowTime)}</b><br><s>gap ${t.delta.toFixed(3)}s on identical machinery</s>`);
+  });
+}
+
+/* Top speed: drivers are NOMINAL, so every bar is the SAME colour. The selected
+   driver switches to the emphasis hue - highlight, not a value ramp. */
+function drawTrap(){
+  const R=D.drivers.filter(d=>d.trap).sort((a,b)=>b.trap-a.trap);
+  if(!R.length){$('#trap').innerHTML='<span style="color:var(--ink-4)">No speed-trap data.</span>';return}
+  const mx=Math.max(...R.map(d=>d.trap)), mn=Math.min(...R.map(d=>d.trap));
+  const lo=mn-(mx-mn)*0.25;
+  $('#trap').innerHTML=`<table><tbody>${R.map(d=>{
+    const w=Math.max(3,(d.trap-lo)/(mx-lo)*100), on=sel===d.code;
+    return `<tr data-code="${d.code}">
+      <td class="chipcell"><span class="chip" style="background:${teamCol(d.team)};height:12px;display:block"></span></td>
+      <td style="font-weight:700;color:${on?'var(--emphasis)':'var(--ink-2)'}">${esc(d.code)}</td>
+      <td style="width:100%"><div class="bartrack"><div class="bar${on?' on':''}" style="width:${w}%"></div></div></td>
+      <td class="num" style="color:var(--ink-1);font-weight:700">${d.trap.toFixed(0)}</td></tr>`}).join('')}</tbody></table>
+    <div class="legend"><span class="k"><span class="sw" style="background:var(--series)"></span>top speed, km/h</span>
+      <span>axis starts below the slowest car so the spread is readable, so bar length is relative not absolute</span></div>`;
+  $('#trapTable').innerHTML=`<table><thead><tr><th>Driver</th><th>Team</th><th class="num">km/h</th><th class="num">Rank</th></tr></thead>
+    <tbody>${R.map(d=>`<tr><td>${esc(d.code)}</td><td style="color:var(--ink-3)">${esc(d.team)}</td>
+      <td class="num">${d.trap.toFixed(0)}</td><td class="num">${d.trapPos}</td></tr>`).join('')}</tbody></table>`;
+  document.querySelectorAll('#trap tr').forEach(tr=>{
+    const d=R.find(x=>x.code===tr.dataset.code);
+    tr.onclick=()=>{sel=sel===d.code?null:d.code;render()};
+    bind(tr,`<b>${esc(d.code)}</b> <s>${esc(d.team)}</s><br>Trap <b>${d.trap.toFixed(0)} km/h</b><br>
+      P${d.trapPos} of ${R.length}<br><s>${(mx-d.trap).toFixed(0)} km/h off the quickest</s>`);
+  });
+}
+
+/* Heatmap of sector RANK. Rank is ordered, so a single-hue sequential ramp is the
+   correct encoding here - the one place in this page a ramp belongs. */
+function drawHeat(){
+  const n=D.drivers.length;
+  const step=r=>{const q=r/n; return q<=.25?'var(--seq-4)':q<=.5?'var(--seq-3)':q<=.75?'var(--seq-2)':'var(--seq-1)'};
+  $('#heat').innerHTML=`<table class="heat"><thead><tr><th></th><th>Driver</th>
+      <th style="text-align:center">S1</th><th style="text-align:center">S2</th><th style="text-align:center">S3</th>
+      <th class="num">Best lap</th><th class="num">Trap</th></tr></thead><tbody>
+    ${D.drivers.map(d=>{
+      return `<tr data-code="${d.code}">
+        <td class="chipcell"><span class="chip" style="background:${teamCol(d.team)};height:12px;display:block"></span></td>
+        <td style="font-weight:700;color:${sel===d.code?'var(--emphasis)':'var(--ink-2)'}">${esc(d.code)}</td>
+        ${['s1','s2','s3'].map(k=>{const r=d.sectorPos[k];
+          return `<td style="width:52px">${r?`<span class="cell" style="background:${step(r)}">${r}</span>`:'<span class="cell" style="background:#16161c;color:var(--ink-4)">-</span>'}</td>`}).join('')}
+        <td class="num">${mmss(d.best)}</td>
+        <td class="num" style="color:var(--ink-3)">${d.trap?d.trap.toFixed(0):'-'}</td></tr>`}).join('')}
+    </tbody></table>
+    <div class="legend"><span>rank in field:</span>
+      <span class="k"><span class="sw" style="background:var(--seq-4)"></span>top quarter</span>
+      <span class="k"><span class="sw" style="background:var(--seq-3)"></span>2nd</span>
+      <span class="k"><span class="sw" style="background:var(--seq-2)"></span>3rd</span>
+      <span class="k"><span class="sw" style="background:var(--seq-1)"></span>bottom quarter</span>
+      <span>the rank is printed in every cell, so the ramp is never the only cue</span></div>`;
+  document.querySelectorAll('#heat tbody tr').forEach(tr=>{
+    const d=D.drivers.find(x=>x.code===tr.dataset.code);
+    tr.onclick=()=>{sel=sel===d.code?null:d.code;render()};
+    bind(tr,`<b>${esc(d.code)}</b><br>${['s1','s2','s3'].map(k=>
+      `${k.toUpperCase()} <b>${d.sectors[k]?d.sectors[k].toFixed(3):'-'}</b> <s>P${d.sectorPos[k]??'-'}</s>`).join('<br>')}`);
+  });
+}
+
+function drawRuns(){
+  if(!D.compounds.length){$('#runs').innerHTML='<span style="color:var(--ink-4)">No long runs long enough to classify.</span>';return}
+  const all=D.compounds.flatMap(c=>c.runs.map(r=>r.pace));
+  const best=Math.min(...all), worst=Math.max(...all);
+  $('#runs').innerHTML=D.compounds.map(c=>`
+    <div style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">
+        <span class="ty ${c.compound[0]}">${c.compound[0]}</span>
+        <span style="font-size:11px;letter-spacing:.09em;color:var(--ink-3);text-transform:uppercase;font-weight:700">${esc(c.compound)}</span></div>
+      <table><tbody>${c.runs.map(r=>{
+        const w=Math.max(3,100-(r.pace-best)/Math.max(.001,worst-best)*72), on=sel===r.code;
+        return `<tr data-code="${esc(r.code)}" data-comp="${esc(c.compound)}">
+          <td style="font-weight:700;color:${on?'var(--emphasis)':'var(--ink-2)'};width:42px">${esc(r.code)}</td>
+          <td style="width:100%"><div class="bartrack"><div class="bar${on?' on':''}" style="width:${w}%"></div></div></td>
+          <td class="num">${mmss(r.pace)}</td>
+          <td class="num" style="color:var(--ink-4);width:52px">${r.laps} laps</td></tr>`}).join('')}</tbody></table>
+    </div>`).join('')+
+    `<div class="legend"><span>fuel-corrected median of each driver's longest run on that compound. Compare within a compound, never across one.</span></div>`;
+  document.querySelectorAll('#runs tr').forEach(tr=>{
+    const c=D.compounds.find(x=>x.compound===tr.dataset.comp);
+    const r=c.runs.find(x=>x.code===tr.dataset.code);
+    tr.onclick=()=>{sel=sel===r.code?null:r.code;render()};
+    bind(tr,`<b>${esc(r.code)}</b> on the ${esc(c.compound.toLowerCase())}<br>
+      <b>${mmss(r.pace)}</b> over ${r.laps} laps<br><s>fuel corrected</s>`);
+  });
+}
+
+function drawKpis(){
+  const m=D.meta, sb=D.sessionBest;
+  const cards=[];
+  if(sb.lap)cards.push(['Fastest lap',mmss(sb.lap.v),sb.lap.code]);
+  if(sb.combo)cards.push(['Best sector combo',mmss(sb.combo),'across cars']);
+  if(sb.trap)cards.push(['Top speed',sb.trap.v.toFixed(0),'km/h '+sb.trap.code]);
+  if(m.trackTemp!=null)cards.push(['Track temp',m.trackTemp.toFixed(1)+'°','air '+(m.airTemp!=null?m.airTemp.toFixed(1)+'°':'-')]);
+  cards.push(['Drivers',m.totalDrivers,'classified']);
+  if(m.redFlags)cards.push(['Red flags',m.redFlags,'session stopped']);
+  $('#kpis').innerHTML=cards.map(([k,v,s])=>
+    `<div class="kpi"><s>${esc(k)}</s><b>${esc(v)}<i>${esc(s)}</i></b></div>`).join('');
+}
+
+function render(){drawKpis();drawCards();drawMates();drawTrap();drawHeat();drawRuns();}
+
+const params=new URLSearchParams(location.search);
+const file=params.get('f')||'session-2026-15-FP2.json';
+fetch(file).then(r=>{if(!r.ok)throw new Error(r.status+' '+r.statusText);return r.json()})
+  .then(d=>{
+    D=d;
+    const m=d.meta;
+    document.title=`INLAP · ${m.event} ${m.session}`;
+    $('#ttl').textContent=`${m.event} · ${SESS[m.session]||m.session}`;
+    $('#sub').textContent=`Round ${m.round} · ${m.year} · ${m.totalDrivers} drivers`+
+      (m.trackTemp!=null?` · track ${m.trackTemp.toFixed(1)}°C`:'');
+    $('#points').innerHTML=(d.keyPoints||[]).map(p=>`<li>${esc(p)}</li>`).join('');
+    $('#foot').innerHTML='Built from public Formula 1 timing data. Practice and qualifying '+
+      'are shown as data rather than replayed: there is no race to watch back. Long-run pace is '+
+      'fuel corrected; fuel loads and engine modes are hidden in practice, so treat everything '+
+      'here as indicative, not proof.';
+    $('#load').hidden=true; $('#body').hidden=false;
+    render();
+  })
+  .catch(e=>{$('#load').textContent='Could not load this session: '+e.message});
+$('#tblBtn').onclick=()=>{
+  const t=$('#trapTable'), c=$('#trap');
+  const showTable=t.hidden;
+  t.hidden=!showTable; c.hidden=showTable;
+  $('#tblBtn').textContent=showTable?'Chart':'Table';
+};
+</script>
