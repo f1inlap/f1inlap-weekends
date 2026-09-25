@@ -222,6 +222,11 @@ th{color:var(--ink-4);font-size:9.5px;letter-spacing:.09em;text-transform:upperc
   .sideTab{border:0;background:#101016;color:var(--ink-4);font:800 9px var(--mono);
            letter-spacing:.1em;padding:3px 9px;cursor:pointer}
   .sideTab.on{background:var(--series);color:#08080a}
+  .gapTab{border:0;background:#101016;color:var(--ink-4);font:800 8.5px var(--mono);
+          letter-spacing:.09em;padding:3px 8px;cursor:pointer}
+  .gapTab.on{background:var(--series);color:#08080a}
+  .railsort{display:flex;align-items:center;gap:3px;padding:5px 9px;border-bottom:1px solid var(--line);
+            font-size:8.5px;letter-spacing:.09em;color:var(--ink-4);flex:0 0 auto}
   .tm-row{border:1px solid var(--line);border-radius:8px;padding:7px 9px;margin-bottom:6px;
           background:var(--surface-2);cursor:pointer}
   .tm-row.on{border-color:var(--series)}
@@ -262,11 +267,15 @@ th{color:var(--ink-4);font-size:9.5px;letter-spacing:.09em;text-transform:upperc
     <div id="deskOnly">
       <div class="pane" id="rail">
         <h3>Drivers
-          <span style="margin-left:auto;display:flex;gap:2px">
-            <button class="sortbtn on" data-sort="pos">POS</button>
-            <button class="sortbtn" data-sort="trap">TRAP</button>
-            <button class="sortbtn" data-sort="laps">LAPS</button>
+          <span class="seg2" style="margin-left:auto">
+            <button class="gapTab on" data-gap="leader">LEADER</button><button class="gapTab" data-gap="next">NEXT</button>
           </span></h3>
+        <div class="railsort">
+          <span>sort</span>
+          <button class="sortbtn on" data-sort="pos">POS</button>
+          <button class="sortbtn" data-sort="trap">TRAP</button>
+          <button class="sortbtn" data-sort="laps">LAPS</button>
+        </div>
         <div class="inner" id="railList"></div>
       </div>
       <div class="pane" id="detail">
@@ -294,7 +303,10 @@ th{color:var(--ink-4);font-size:9.5px;letter-spacing:.09em;text-transform:upperc
     <div id="mobileOnly">
     <h2>What the session said</h2>
     <div class="points"><ul id="points" style="margin:0;padding-left:18px"></ul></div>
-    <h2>Every driver <em>click a card to highlight it in the charts below</em></h2>
+    <h2>Every driver <em>click a card to highlight it in the charts below</em>
+      <span class="seg2" style="margin-left:auto">
+        <button class="gapTab on" data-gap="leader">GAP TO LEADER</button><button class="gapTab" data-gap="next">GAP TO NEXT</button>
+      </span></h2>
     <div class="grid" id="grid"></div>
     <div class="two" style="margin-top:22px">
       <div>
@@ -368,7 +380,7 @@ function drawCards(){
         <span class="cd">${esc(d.code)}</span>
         <span class="ps">P${d.pos??'-'}</span></div>
       <div class="tm">${esc(d.name||d.team)}</div>
-      <div class="big"><b>${mmss(d.best)}</b><u>${d.gap?'+'+d.gap.toFixed(3):'fastest'}</u></div>
+      <div class="big"><b>${mmss(d.best)}</b><u>${esc(gapText(d))}${gapMode==='next'&&d.gapNext!=null?' to P'+(d.pos-1):''}</u></div>
       ${spark(d.laps,best,worst,on)}
       <div class="meta"><span><b>${d.cleanLaps}</b> laps</span>
         <span>trap <b>${d.trap?d.trap.toFixed(0):'-'}</b></span>
@@ -451,7 +463,7 @@ function drawHeat(target){
   const step=r=>RAMP[Math.min(RAMP.length-1,Math.floor((r-1)/n*RAMP.length))];
   $(TGT).innerHTML=`<table class="heat"><thead><tr><th></th><th>Driver</th>
       <th style="text-align:center">S1</th><th style="text-align:center">S2</th><th style="text-align:center">S3</th>
-      <th class="num">Best lap</th><th class="num">Trap</th></tr></thead><tbody>
+      <th class="num">Best lap</th><th class="num" id="heatGapHd">Gap</th><th class="num">Trap</th></tr></thead><tbody>
     ${D.drivers.map(d=>{
       return `<tr data-code="${d.code}">
         <td class="chipcell"><span class="chip" style="background:${teamCol(d.team)};height:12px;display:block"></span></td>
@@ -459,6 +471,7 @@ function drawHeat(target){
         ${['s1','s2','s3'].map(k=>{const r=d.sectorPos[k];
           return `<td style="width:52px">${r?`<span class="cell" style="background:${step(r)}">${r}</span>`:'<span class="cell" style="background:#16161c;color:var(--ink-4)">-</span>'}</td>`}).join('')}
         <td class="num">${mmss(d.best)}</td>
+        <td class="num" style="color:${gapMode==='next'&&d.gapNext!=null&&d.gapNext<0.1?'var(--series)':'var(--ink-2)'}">${esc(gapText(d))}</td>
         <td class="num" style="color:var(--ink-3)">${d.trap?d.trap.toFixed(0):'-'}</td></tr>`}).join('')}
     </tbody></table>
     <div class="legend"><span>rank in field:</span>
@@ -470,6 +483,8 @@ function drawHeat(target){
       <span class="k"><span class="sw" style="background:var(--seq-2)"></span></span>
       <span class="k"><span class="sw" style="background:var(--seq-1)"></span>slowest</span>
       <span>the rank is printed in every cell, so the ramp is never the only cue</span></div>`;
+  const gh=document.querySelector(TGT+' #heatGapHd')||document.getElementById('heatGapHd');
+  if(gh)gh.textContent = gapMode==='next'?'To next':'To leader';
   document.querySelectorAll(TGT+' tbody tr').forEach(tr=>{
     const d=D.drivers.find(x=>x.code===tr.dataset.code);
     tr.onclick=e=>{ if(isDesk())pick(d.code,e.shiftKey||e.metaKey||e.ctrlKey); else {sel=sel===d.code?null:d.code;} render(); };
@@ -525,6 +540,19 @@ function drawKpis(){
    row in the heatmap all do the same thing and every other pane updates. Colour follows the
    ROLE (A or B), never the rank, so a re-sort never repaints anyone. */
 let selA=null, selB=null, railSort='pos';
+/* GAP MODE. "to leader" is the headline number; "to next" is the one that decides a grid
+   slot - a driver 1.5s off the front can be 0.012s off the car in front of them. Both are
+   in the data, so this is a toggle rather than a choice made for the reader. */
+let gapMode='leader';
+function gapText(d){
+  if(gapMode==='next') return d.gapNext==null?'—':'+'+d.gapNext.toFixed(3);
+  return d.gap?'+'+d.gap.toFixed(3):'fastest';
+}
+function setGapMode(m){
+  gapMode=m;
+  document.querySelectorAll('.gapTab').forEach(b=>b.classList.toggle('on',b.dataset.gap===m));
+  render();
+}
 const isDesk=()=>matchMedia('(min-width:1180px)').matches;
 const drv=c=>D.drivers.find(d=>d.code===c);
 
@@ -564,7 +592,7 @@ function drawRail(){
       <span class="c">${esc(d.code)}</span>
       ${miniSpark(d,best,worst)}
       <span class="t">${railSort==='trap'?(d.trap?d.trap.toFixed(0):'-'):railSort==='laps'?d.cleanLaps:mmss(d.best)}</span>
-      <span class="g">${role?`<span class="pill ${role}">${role.toUpperCase()}</span>`:(d.gap?'+'+d.gap.toFixed(3):'')}</span>
+      <span class="g">${role?`<span class="pill ${role}">${role.toUpperCase()}</span>`:esc(gapText(d)==='fastest'?'':gapText(d))}</span>
     </div>`}).join('');
   document.querySelectorAll('#railList .drow').forEach(r=>{
     const d=drv(r.dataset.code);
@@ -684,7 +712,7 @@ function drawTeams(){
         <span class="chip" style="background:${teamCol(t.team)};height:13px;flex:0 0 3px"></span>
         <span class="nm">${esc(t.team)}</span>
         <span class="bt">${mmss(t.best)}</span>
-        <span class="gp">${t.gap?'+'+t.gap.toFixed(3):'best'}</span>
+        <span class="gp">${gapMode==='next'?(t.gapNext==null?'—':'+'+t.gapNext.toFixed(3)):(t.gap?'+'+t.gap.toFixed(3):'best')}</span>
       </div>
       <div class="tm-bar"><i style="width:${t.gap?Math.max(2,t.gap/mx*100):2}%"></i></div>
       <div class="tm-meta">
@@ -722,6 +750,7 @@ function render(){
   else { drawCards(); drawMates(); drawTrap(); drawHeat(); drawRuns(); }
 }
 document.querySelectorAll('.sideTab').forEach(b=>b.onclick=()=>setSideTab(b.dataset.tab));
+document.querySelectorAll('.gapTab').forEach(b=>b.onclick=()=>setGapMode(b.dataset.gap));
 document.querySelectorAll('.sortbtn[data-sort]').forEach(b=>b.onclick=()=>{
   railSort=b.dataset.sort;
   document.querySelectorAll('.sortbtn[data-sort]').forEach(x=>x.classList.toggle('on',x===b));
