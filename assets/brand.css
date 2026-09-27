@@ -27,8 +27,10 @@
   /* ink: primary, secondary, tertiary, muted */
   --ink-1:#f1f1f3; --ink-2:#c3c3cb; --ink-3:#8f8f99; --ink-4:#5e5e68;
 
-  /* one signal colour; everything else is structure */
-  --signal:#e8201a; --signal-hover:#ff3a33; --on-signal:#fbfbfc;
+  /* one signal colour; everything else is structure. Contrast-checked (WCAG AA):
+     --signal behind the --on-signal label 4.81:1, hover goes DARKER (5.69:1);
+     --signal-ink is the same red lifted for small red TEXT on carbon (5.99:1). */
+  --signal:#dc1c16; --signal-hover:#c8150f; --on-signal:#fbfbfc; --signal-ink:#ff4d45;
 
   /* timing semantics: data only, never decoration */
   --t-overall:#b14bff; --t-personal:#22e07a; --t-neither:#ffd400;

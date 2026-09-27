@@ -24,7 +24,7 @@
 @media (prefers-color-scheme:light){
   :root{--carbon:#f3f3f4;--tarmac:#e9e9ec;--tarmac-up:#e1e1e5;--pit:#fafafb;
         --grid-line:rgb(17 17 20 / .10);--grid-line-strong:rgb(17 17 20 / .18);
-        --ink-1:#111114;--ink-2:#34343b;--ink-3:#5a5a63;--ink-4:#7a7a84;--signal:#cf0f08;--signal-hover:#b00c06}
+        --ink-1:#111114;--ink-2:#34343b;--ink-3:#5a5a63;--ink-4:#7a7a84;--signal:#cf0f08;--signal-hover:#b00c06;--signal-ink:#cf0f08}
 }
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:72px;-webkit-text-size-adjust:100%}
@@ -63,7 +63,7 @@ section{padding:96px 0;scroll-margin-top:64px}
 
 h2{font-size:clamp(28px,3.2vw,42px);line-height:1.08;letter-spacing:-.03em;font-weight:680;margin:0 0 12px;max-width:20ch}
 .lede{color:var(--ink-3);max-width:60ch;margin:0 0 40px}
-.eyebrow{font:500 12.5px/1 var(--font-num);letter-spacing:.14em;text-transform:uppercase;color:var(--signal);margin:0 0 14px}
+.eyebrow{font:500 12.5px/1 var(--font-num);letter-spacing:.14em;text-transform:uppercase;color:var(--signal-ink);margin:0 0 14px}
 
 /* latest weekend: bento sized to the videos that exist */
 .bento{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
@@ -105,7 +105,7 @@ h2{font-size:clamp(28px,3.2vw,42px);line-height:1.08;letter-spacing:-.03em;font-
         position:relative;transition:background-color .15s var(--ease-out),color .15s var(--ease-out)}
 .acts a::after{content:"";position:absolute;inset:-5px}   /* 40px hit area */
 .acts a:hover{background:var(--tarmac-up);color:var(--ink-1)}
-.acts a.vid:hover{color:var(--signal)}
+.acts a.vid:hover{color:var(--signal-ink)}
 .legend{display:flex;flex-wrap:wrap;gap:18px;margin:18px 0 0;padding:0;list-style:none;color:var(--ink-4);font-size:13px}
 .legend li{display:flex;align-items:center;gap:6px}
 
@@ -293,7 +293,7 @@ h2{font-size:clamp(28px,3.2vw,42px);line-height:1.08;letter-spacing:-.03em;font-
       <a href="https://www.instagram.com/f1inlap/"><span class="sr">Instagram</span><svg class="icon" aria-hidden="true"><use href="#i-ig"/></svg></a>
     </div>
     <p style="margin-top:18px">Independent, unofficial fan project built from publicly available timing data (FastF1, Jolpica). No official Formula 1 footage is used. Team radio streams from Formula 1’s own servers and is not hosted here. Circuit outlines &copy; OpenStreetMap contributors (ODbL).</p>
-    <p>F1, FORMULA 1 and related marks are trademarks of Formula One Licensing B.V.; F1 Inlap is not affiliated with or endorsed by them. Updated 27 Sep 2026, 19:15 UTC.</p>
+    <p>F1, FORMULA 1 and related marks are trademarks of Formula One Licensing B.V.; F1 Inlap is not affiliated with or endorsed by them. Updated 27 Sep 2026, 19:17 UTC.</p>
   </div>
 </footer>
 
