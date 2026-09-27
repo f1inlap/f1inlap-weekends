@@ -3,14 +3,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#000000">
-<title>INLAP · Race Replay</title>
+<title>Race replay · F1 Inlap</title>
+<link rel="stylesheet" href="../assets/brand.css">
+<link rel="icon" href="../favicon.png" type="image/png">
+
 <style>
   /* Old-school FOM timing screen: monospace, black, purple = overall best,
      green = personal best, yellow = neither. */
   :root{
     --bg:#000; --card:#0b0b0e; --line:#1e1e26; --fg:#eaeaf0; --muted:#8b8b96; --dim:#5a5a66;
     --accent:#ff6c00; --purple:#b14bff; --green:#22e07a; --yellow:#ffd400; --red:#e8002d;
-    --mono:'SF Mono',ui-monospace,Menlo,Consolas,monospace;
+    --mono:"Geist Mono",'SF Mono',ui-monospace,Menlo,Consolas,monospace;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
@@ -31,8 +34,14 @@
      the header wider than the viewport, and the whole page scrolls horizontally, which
      pushed the flag badge and every panel's right-hand column (gaps!) off screen. */
   #evt{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .brand{font-weight:800;letter-spacing:.06em;font-size:13px;white-space:nowrap}
+  .brand{font-weight:800;letter-spacing:.06em;font-size:13px;white-space:nowrap;color:var(--fg);text-decoration:none;
+         display:inline-flex;flex-direction:column;gap:3px}
+  .brand::after{content:"";height:2px;border-radius:1px;
+         background:linear-gradient(90deg,#ff8000 0 25%,#e10600 25% 50%,#00d2be 50% 75%,#3671c6 75%)}
   .brand em{color:var(--accent);font-style:normal}
+  .home{color:var(--muted);text-decoration:none;font-size:11px;white-space:nowrap}
+  .home:hover{color:var(--fg)}
+  @media (max-width:640px){.home{display:none}}
   .flag{margin-left:auto;padding:3px 10px;border-radius:4px;font-weight:800;letter-spacing:.1em;font-size:11px;
         background:#062b16;color:var(--green);border:1px solid #10502c}
   .flag.YELLOW,.flag.SC,.flag.VSC{background:#2e2905;color:var(--yellow);border-color:#6b5f16}
@@ -209,18 +218,19 @@
 
 <header>
   <div class="top">
-    <div class="brand">INLAP <em>RACE REPLAY</em></div>
+    <a class="brand" href="../" title="F1 Inlap home" translate="no">F1 INLAP <em>RACE REPLAY</em></a>
     <div id="evt" style="color:var(--dim);font-size:10.5px"></div>
+    <a class="home" href="../#data">All weekends</a>
     <div class="flag" id="flag">GREEN</div>
   </div>
   <div class="stats">
-    <div class="st"><s>LAP</s><b id="sLap">–</b></div>
+    <div class="st"><s>LAP</s><b id="sLap">-</b></div>
     <div class="st"><s>TIME</s><b id="sClock">0:00</b></div>
-    <div class="st"><s>LEADER</s><b id="sLead">–</b></div>
-    <div class="st"><s>FASTEST LAP</s><b id="sFast" class="p">–</b></div>
-    <div class="st"><s>BEST S1</s><b id="sS1" class="p">–</b></div>
-    <div class="st"><s>BEST S2</s><b id="sS2" class="p">–</b></div>
-    <div class="st"><s>BEST S3</s><b id="sS3" class="p">–</b></div>
+    <div class="st"><s>LEADER</s><b id="sLead">-</b></div>
+    <div class="st"><s>FASTEST LAP</s><b id="sFast" class="p">-</b></div>
+    <div class="st"><s>BEST S1</s><b id="sS1" class="p">-</b></div>
+    <div class="st"><s>BEST S2</s><b id="sS2" class="p">-</b></div>
+    <div class="st"><s>BEST S3</s><b id="sS3" class="p">-</b></div>
   </div>
 </header>
 
@@ -270,11 +280,11 @@
       </div>
 
       <div id="batv" class="pad" style="display:none">
-        <div class="bhead"><b id="batA">–</b><span>vs</span><select id="rival"></select></div>
+        <div class="bhead"><b id="batA">-</b><span>vs</span><select id="rival"></select></div>
         <div class="bstat">
-          <div><s>GAP NOW</s><b id="bgNow">–</b></div>
-          <div><s>TREND</s><b id="bgTrend">–</b></div>
-          <div><s>CLOSING IN</s><b id="bgCatch">–</b></div>
+          <div><s>GAP NOW</s><b id="bgNow">-</b></div>
+          <div><s>TREND</s><b id="bgTrend">-</b></div>
+          <div><s>CLOSING IN</s><b id="bgCatch">-</b></div>
         </div>
         <div id="batbars"></div>
         <div class="bnote" id="batnote"></div>
@@ -394,7 +404,7 @@ function setView(v){mapView=v;
   document.getElementById('mapTitle').textContent=
     v==='circuit'?'CIRCUIT':(v==='tracker'?'TRACKER':'SPEED DELTA');
   paint()}
-const fmt=s=>s==null?'–':(s>=60?`${Math.floor(s/60)}:${(s%60).toFixed(3).padStart(6,'0')}`:s.toFixed(3));
+const fmt=s=>s==null?'-':(s>=60?`${Math.floor(s/60)}:${(s%60).toFixed(3).padStart(6,'0')}`:s.toFixed(3));
 function now(){return D.meta.t0+F/D.meta.hz}
 function size(){for(const id of['mapc','stc','lcc','tlc','telc']){const c=document.getElementById(id);
   if(!c||!c.clientWidth)continue;c.width=c.clientWidth*dpr;c.height=c.clientHeight*dpr}}
@@ -462,9 +472,9 @@ function paint(force){
   $('#sClock').textContent=`${Math.floor(el/60)}:${String(Math.floor(el%60)).padStart(2,'0')}`;
   $('#flag').textContent={SC:'SAFETY CAR',VSC:'VIRTUAL SC',YELLOW:'YELLOW',RED:'RED FLAG',GREEN:'GREEN'}[st];
   $('#flag').className='flag '+(st==='GREEN'?'':st);
-  $('#sFast').innerHTML=best.lap?`${fmt(best.lap.v)} <i>${best.lap.code}</i>`:'–';
+  $('#sFast').innerHTML=best.lap?`${fmt(best.lap.v)} <i>${best.lap.code}</i>`:'-';
   for(const i of [1,2,3]){const b=best.s[i-1];
-    $('#sS'+i).innerHTML=b?`${b.v.toFixed(3)} <i>${b.code}</i>`:'–'}
+    $('#sS'+i).innerHTML=b?`${b.v.toFixed(3)} <i>${b.code}</i>`:'-'}
   $('#selc').textContent=sel;
 }
 
@@ -669,7 +679,7 @@ function order(t){
    tracker as if it were minutes down. */
 /* The compacted progress array does NOT depend on the current frame, so it is built ONCE
    per car and kept. The old version rebuilt it per (code, upto) and cached a single entry,
-   which was fine while every call shared one frame — but the trend arrows need the gap as
+   which was fine while every call shared one frame - but the trend arrows need the gap as
    it was 30s ago too, and two alternating `upto` values would have thrashed that cache and
    rebuilt an 11.5k-element array on every row of every repaint.
    Searching the whole array rather than a prefix is also more correct: prog is cumulative,
@@ -681,7 +691,7 @@ function compact(code){
   for(let i=0;i<a.length;i++){const v=a[i];if(v!=null){f.push(i);pv.push(v)}}
   return _comp[code]={f,p:pv}}
 /* Seconds between `code` and `ahead`: how long ago was `ahead` at the point `code` has just
-   reached. Measured, not estimated — multiplying a progress difference by a lap time looked
+   reached. Measured, not estimated - multiplying a progress difference by a lap time looked
    tempting and is wrong by up to 5s, because a lap fraction is not linear in time. */
 function gapAt(ahead,code,frame){
   const a=D.prog[code];if(!a)return null;
@@ -791,7 +801,7 @@ function drawTiming(t,best){
     const d=D.drivers[r.code],lp=r.lp,prev=lastCompleted(r.code,t)||{};
     let gs;
     if(i===0)gs='LEADER';
-    else if(red)gs='–';
+    else if(red)gs='-';
     else{const down=(rows[0].pr!=null&&r.pr!=null)?Math.floor(rows[0].pr-r.pr):0;
       if(down>=1)gs='+'+down+'L';
       else{
@@ -799,7 +809,7 @@ function drawTiming(t,best){
         // which is the one that actually decides whether a pass is coming.
         const ref=gapMode==='int'?rows[i-1].code:lead;
         const g=gapAt(ref,r.code,F);
-        if(g==null)gs='–';
+        if(g==null)gs='-';
         else{
           // is that gap closing or stretching? same exact measurement, TREND_W seconds back
           const gp=gapAt(ref,r.code,Math.max(0,F-TREND_W*D.meta.hz));
@@ -908,13 +918,13 @@ function drawBattle(t){
   if(!riv||riv===sel){
     $('#batbars').innerHTML='';
     $('#batnote').textContent='Leading the race - no car ahead to compare against. Pick a rival above.';
-    for(const id of ['bgNow','bgTrend','bgCatch'])$('#'+id).textContent='–';
+    for(const id of ['bgNow','bgTrend','bgCatch'])$('#'+id).textContent='-';
     return}
   // exact, measured gap - and the same measurement TREND_W seconds ago for the trend
   let catchNote='';
   const gNow=gapAt(riv,sel,F),gThen=gapAt(riv,sel,Math.max(0,F-TREND_W*D.meta.hz));
   const lp=lapAt(sel,t),lt=(lp&&lp.time)||median(repLaps(sel,t,5).map(l=>l.time))||95;
-  $('#bgNow').textContent=gNow==null?'–':(gNow>=0?'+':'')+gNow.toFixed(2)+'s';
+  $('#bgNow').textContent=gNow==null?'-':(gNow>=0?'+':'')+gNow.toFixed(2)+'s';
   let perLap=null;
   // A trend only means anything while both cars are actually racing. In qualifying, or
   // across a pit stop, the gap to the car ahead jumps by half a minute and the arithmetic
@@ -935,9 +945,9 @@ function drawBattle(t){
       catchNote=laps<=left
         ? `At this rate the catch comes with <b>${left-laps}</b> lap${left-laps===1?'':'s'} to spare.`
         : `At this rate that takes <b>${laps}</b> laps, and only <b>${left}</b> remain.`;
-    } else $('#bgCatch').innerHTML=closing?'—':'<span style="color:var(--muted)">losing ground</span>';
-  } else {$('#bgTrend').innerHTML='<span style="color:var(--dim)">–</span>';
-          $('#bgCatch').innerHTML='<span style="color:var(--dim)">–</span>'}
+    } else $('#bgCatch').innerHTML=closing?'-':'<span style="color:var(--muted)">losing ground</span>';
+  } else {$('#bgTrend').innerHTML='<span style="color:var(--dim)">-</span>';
+          $('#bgCatch').innerHTML='<span style="color:var(--dim)">-</span>'}
 
   // Where the time actually goes, from the exact sector times. Averaging RACING laps is the
   // right comparison in a Grand Prix, but a qualifying session has none by construction -
@@ -962,10 +972,10 @@ function drawBattle(t){
     const v=d[k-1];
     return `<div class="brow"><s>S${k}</s><div class="btr"><i></i><u id="bb${k}"></u></div>`+
       `<b style="color:${v==null?'var(--dim)':(v<0?'var(--green)':'#ff5a6e')}">`+
-      `${v==null?'–':(v>0?'+':'')+v.toFixed(3)}</b></div>`}).join('')+
+      `${v==null?'-':(v>0?'+':'')+v.toFixed(3)}</b></div>`}).join('')+
     `<div class="brow tot"><s>LAP</s><div class="btr"><i></i><u id="bbT"></u></div>`+
     `<b style="color:${tot==null?'var(--dim)':(tot<0?'var(--green)':'#ff5a6e')}">`+
-    `${tot==null?'–':(tot>0?'+':'')+tot.toFixed(3)}</b></div>`;
+    `${tot==null?'-':(tot>0?'+':'')+tot.toFixed(3)}</b></div>`;
   for(const k of [1,2,3])if(d[k-1]!=null)bar($('#bb'+k),d[k-1],scale);
   if(tot!=null)bar($('#bbT'),tot,scale);
 
@@ -1000,7 +1010,7 @@ function drawTel(){
     const r=(p.rpm[i]??0)*100;
     // full scale = the highest RPM anyone hit all session, floored at 11,000. Compute it with
     // a loop: rpm arrays are ~11.5k long per car and Math.max(...arr) spreads every element
-    // as an argument, which is a stack-overflow risk across 22 cars. Units matter here — the
+    // as an argument, which is a stack-overflow risk across 22 cars. Units matter here - the
     // arrays are RPM/100, so scale to real RPM BEFORE applying the floor.
     if(D._rpmMax==null){
       let mx=0;
@@ -1106,7 +1116,7 @@ function drawMsgs(t){
               .sort((a,b)=>a.t-b.t).slice(-40).reverse();
   const html=items.map(m=>m.k==='radio'
     ? `<div class="msg radio${nowPlaying===m.url?' on':''}" onclick="playRadio('${m.url}','${m.src||''}')"><b>${m.code}</b><span>${nowPlaying===m.url?'❚❚':'▸'} TEAM RADIO</span></div>`
-    : `<div class="msg ${(m.flag||'').replace(/\s+/g,'.')}"><b>L${m.lap??'–'}</b><span>${m.msg}</span></div>`).join('');
+    : `<div class="msg ${(m.flag||'').replace(/\s+/g,'.')}"><b>L${m.lap??'-'}</b><span>${m.msg}</span></div>`).join('');
   if(html!==lastMsgHTML){lastMsgHTML=html;$('#rc').innerHTML=html}}
 function playRadio(u,fb){const a=$('#au');nowPlaying=u;
   a.onerror=()=>{if(fb&&a.src!==fb){a.onerror=null;a.src=fb;a.play().catch(()=>{})}};

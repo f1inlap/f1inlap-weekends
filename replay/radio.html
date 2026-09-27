@@ -1,8 +1,12 @@
 <!doctype html><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
-<title>INLAP · Radio log</title>
+<title>Radio log · F1 Inlap</title>
+<meta name="theme-color" content="#0b0b0d">
+<link rel="stylesheet" href="../assets/brand.css">
+<link rel="icon" href="../favicon.png" type="image/png">
+
 <!--
-  Radio log — every team-radio clip in the race, in order, with what was happening around it.
+  Radio log - every team-radio clip in the race, in order, with what was happening around it.
 
   The replay player answers "what is happening now"; this answers "what was said, and why".
   Context per clip is derived from the same bundle: the driver's lap and running position at
@@ -13,7 +17,9 @@
 <style>
 :root{--bg:#0b0b0d;--card:#131318;--line:#26262c;--fg:#eee;--muted:#9a9aa2;--ok:#27f4d2;--accent:#ff8a3d;--bad:#e8002d;--warn:#ffd24a}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--fg);font-family:-apple-system,Segoe UI,Roboto,sans-serif;margin:0;padding:0 16px 90px}
+body{background:var(--bg);color:var(--fg);font-family:"Geist",-apple-system,Segoe UI,Roboto,sans-serif;margin:0;padding:0 0 90px;-webkit-font-smoothing:antialiased}
+.wrap{padding-left:16px;padding-right:16px}
+.inlap-nav>div{padding:0 16px}
 .wrap{max-width:1000px;margin:0 auto}
 h1{font-weight:800;margin:22px 0 2px;font-size:24px}
 .sub{color:var(--muted);font-size:14px;margin-bottom:12px}
@@ -55,6 +61,16 @@ button.primary{background:#0c3b33;border-color:#12574c;color:var(--ok)}
 .ev-sc{color:#ffb44a;background:#1a140a}.ev-vsc{color:#ffb44a;background:#1a140a}
 .ev-clear{color:var(--ok)}
 </style>
+<header class="inlap-nav">
+  <div>
+    <a class="inlap-mark" href="../" aria-label="F1 Inlap home" translate="no">F1 INLAP</a>
+    <span class="here">Radio log</span>
+    <nav aria-label="Site">
+      <a href="../#data">All weekends</a>
+      <a class="hide-sm" href="https://www.youtube.com/@f1inlap">YouTube</a>
+    </nav>
+  </div>
+</header>
 <div class=wrap>
   <h1 id=title>Radio log</h1>
   <div class=sub id=sub>loading…</div>
@@ -79,7 +95,7 @@ const esc=t=>(t||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"
 const mmss=s=>{const neg=s<0;s=Math.abs(Math.round(s));
   return (neg?'-':'')+Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
 
-// last entry at or before t — the state the race was in when the clip was recorded
+// last entry at or before t - the state the race was in when the clip was recorded
 function at(arr,t,key='t'){let r=null;for(const x of arr){if(x[key]<=t)r=x;else break}return r}
 
 function flagOf(t){
@@ -123,7 +139,7 @@ function events(){
     const c=String(x.code), m=(x.msg||'').toUpperCase();
     let kind=null;
     // VSC MUST be tested before SC: the message "VSCDeployed" CONTAINS "SCDeployed", so a
-    // naive substring test labels every virtual safety car as a full safety car — a
+    // naive substring test labels every virtual safety car as a full safety car - a
     // materially different race.
     if(c==='5'||m.includes('RED')) kind='red';
     else if(c==='6'||m.startsWith('VSC')||m.includes('VIRTUAL')) kind='vsc';

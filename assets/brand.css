@@ -1,0 +1,75 @@
+/* F1 Inlap brand layer: shared by every page on the public site (home, replay player, session
+   summary, radio log). One source of truth for the type, the colour roles and the site chrome.
+
+   Direction: a pit wall timing screen at night. Carbon surfaces, grid lines you feel rather
+   than see, one signal red, and the four-colour sector stripe from the video graphics as the
+   mark. Numbers are set in Geist Mono with tabular figures, because every number here is a
+   time, a gap or a position that gets compared down a column.
+
+   Depth: borders only, low-opacity (a technical tool, not a brochure).
+   Radius: 6px controls, 12px panels, full pill for buttons. Spacing base: 4px. */
+
+@font-face{font-family:"Geist";src:url(fonts/Geist-Variable.woff2) format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Geist Mono";src:url(fonts/GeistMono-Variable.woff2) format("woff2");font-weight:100 900;font-display:swap}
+
+:root{
+  --font-ui:"Geist",-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-num:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;
+
+  /* surfaces, darkest to lightest: each step a few points of lightness, never a new hue */
+  --carbon:#0b0b0d;      /* page */
+  --tarmac:#111115;      /* panels */
+  --tarmac-up:#17171c;   /* raised: hover, popovers */
+  --pit:#08080a;         /* inset: inputs, table heads */
+  --grid-line:rgb(255 255 255 / .08);
+  --grid-line-strong:rgb(255 255 255 / .14);
+
+  /* ink: primary, secondary, tertiary, muted */
+  --ink-1:#f1f1f3; --ink-2:#c3c3cb; --ink-3:#8f8f99; --ink-4:#5e5e68;
+
+  /* one signal colour; everything else is structure */
+  --signal:#e8201a; --signal-hover:#ff3a33; --on-signal:#fbfbfc;
+
+  /* timing semantics: data only, never decoration */
+  --t-overall:#b14bff; --t-personal:#22e07a; --t-neither:#ffd400;
+
+  /* sector stripe: the brand mark */
+  --s1:#ff8000; --s2:#e10600; --s3:#00d2be; --s4:#3671c6;
+
+  --r-control:6px; --r-panel:12px; --r-pill:999px;
+  --ease-out:cubic-bezier(.23,1,.32,1);
+}
+
+/* the wordmark + sector stripe */
+.inlap-mark{display:inline-flex;flex-direction:column;gap:5px;color:var(--ink-1);text-decoration:none;
+  font:750 14px/1 var(--font-ui);letter-spacing:.07em;white-space:nowrap}
+.inlap-mark::after{content:"";display:block;height:3px;border-radius:2px;
+  background:linear-gradient(90deg,var(--s1) 0 25%,var(--s2) 25% 50%,var(--s3) 50% 75%,var(--s4) 75%)}
+.inlap-mark:hover{color:#fff}
+
+/* site nav: one line, 56px, on every document page */
+.inlap-nav{position:sticky;top:0;z-index:20;border-bottom:1px solid var(--grid-line);
+  background:color-mix(in srgb,var(--carbon) 88%,transparent);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.inlap-nav>div{max-width:1240px;margin:0 auto;height:56px;padding:0 20px;display:flex;align-items:center;gap:24px}
+.inlap-nav .here{font:500 13px/1 var(--font-ui);color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.inlap-nav nav{margin-left:auto;display:flex;align-items:center;gap:20px}
+.inlap-nav nav a{font:500 14px/1 var(--font-ui);color:var(--ink-3);text-decoration:none;white-space:nowrap}
+.inlap-nav nav a:hover{color:var(--ink-1)}
+.inlap-nav nav a[aria-current="page"]{color:var(--ink-1)}
+@media (max-width:640px){.inlap-nav .hide-sm{display:none}.inlap-nav>div{gap:14px;padding:0 16px}}
+
+/* footer shared by every page */
+.inlap-foot{border-top:1px solid var(--grid-line);color:var(--ink-4);font:400 12.5px/1.65 var(--font-ui)}
+.inlap-foot>div{max-width:1240px;margin:0 auto;padding:28px 20px 44px}
+.inlap-foot p{margin:0 0 6px;max-width:80ch;text-wrap:pretty}
+.inlap-foot a{color:var(--ink-3)}
+
+/* focus: visible on keyboard, never on click */
+:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+.skip{position:absolute;left:12px;top:-60px;z-index:50;padding:10px 14px;border-radius:var(--r-control);
+  background:var(--signal);color:var(--on-signal);font:600 14px/1 var(--font-ui);text-decoration:none}
+.skip:focus{top:12px}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}

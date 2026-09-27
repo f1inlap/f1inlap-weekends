@@ -1,6 +1,10 @@
 <!doctype html><html lang="en"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>INLAP · Session Summary</title>
+<title>Session summary · F1 Inlap</title>
+<meta name="theme-color" content="#08080a">
+<link rel="stylesheet" href="../assets/brand.css">
+<link rel="icon" href="../favicon.png" type="image/png">
+
 <!--
   SESSION SUMMARY - practice and qualifying, told as data rather than replayed.
 
@@ -41,19 +45,18 @@
   --seq-1:#00556c; --seq-2:#006880; --seq-3:#007c94; --seq-4:#0090a9;
   --seq-5:#24a5be; --seq-6:#42bad4; --seq-7:#5cd0ea;
   --good:#27f4d2; --bad:#ff5a6e;
-  --mono:'SF Mono',ui-monospace,Menlo,Consolas,monospace;
+  --mono:"Geist Mono",'SF Mono',ui-monospace,Menlo,Consolas,monospace;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--surface-0);color:var(--ink-1);
-     font:14px/1.5 -apple-system,"SF Pro Text",Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-     -webkit-font-smoothing:antialiased;padding:0 18px 90px}
-.wrap{max-width:1280px;margin:0 auto}
+     font:14px/1.5 "Geist",-apple-system,"SF Pro Text",Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+     -webkit-font-smoothing:antialiased;padding:0 0 90px}
+/* side padding lives on the content, not the body, so the shared site nav runs full width */
+.wrap{max-width:1280px;margin:0 auto;padding:0 18px}
+.inlap-nav>div{max-width:1280px;padding:0 18px}
+.kpi b,.num,.card .big b,.st2 b,.drow .t,.tm-hd .bt{font-family:var(--mono)}
 a{color:var(--seq-4);text-decoration:none}a:hover{text-decoration:underline}
-.top{display:flex;align-items:baseline;justify-content:space-between;gap:16px;
-     flex-wrap:wrap;padding:20px 0 10px}
-.mark{font-weight:900;letter-spacing:.5px;font-size:14px}
-.mark span{color:var(--ink-3);font-weight:600;margin-left:8px;font-size:12px}
-h1{font-size:26px;margin:4px 0 2px;letter-spacing:-.3px}
+h1{font-size:26px;margin:22px 0 2px;letter-spacing:-.02em;font-weight:680;text-wrap:balance}
 .sub{color:var(--ink-3);font-size:13px;margin-bottom:16px}
 .sector{height:3px;border-radius:2px;margin:0 0 18px;
   background:linear-gradient(90deg,#ff8000 0 25%,#e8002d 25% 50%,#00d2be 50% 75%,#3671c6 75%)}
@@ -112,7 +115,7 @@ td.chipcell{width:10px;padding-right:0}
 .two>div,.kpis>*,.grid>*,.panel,.points{min-width:0}
 .two>div>.panel{max-width:100%}
 @media(max-width:560px){
-  body{padding:0 12px 80px}
+  body{padding:0 0 80px} .wrap{padding:0 12px} .inlap-nav>div{padding:0 12px}
   .grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:7px}
   .kpis{grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:7px}
   .kpi b{font-size:19px} h1{font-size:20px}
@@ -160,10 +163,11 @@ th{color:var(--ink-4);font-size:9.5px;letter-spacing:.09em;text-transform:upperc
    COMPARE MODE is the one place two series share a plot, and it uses exactly the two
    validated hues (#1b9ec0 / #d95926, CVD dE 20.4) plus direct labels - never more. */
 @media(min-width:1180px){
-  body{padding:0 16px 14px;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-  .wrap{max-width:none;flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
-  .top{padding:12px 0 6px}
-  h1{font-size:21px;margin:0}
+  body{padding:0 0 14px;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+  .wrap{max-width:none;flex:1 1 auto;min-height:0;display:flex;flex-direction:column;padding:0 16px;width:100%}
+  .inlap-nav{flex:0 0 auto;position:static}
+  .inlap-nav>div{max-width:none;padding:0 16px;height:48px}
+  h1{font-size:21px;margin:10px 0 0}
   .sub{margin-bottom:9px}
   .sector{margin:0 0 10px}
   #body{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:9px}
@@ -251,11 +255,17 @@ th{color:var(--ink-4);font-size:9.5px;letter-spacing:.09em;text-transform:upperc
 @media(max-width:1179px){ #deskOnly{display:none} }
 
 </style>
-<div class="wrap">
-  <div class="top">
-    <div class="mark">F1 INLAP <span>SESSION SUMMARY</span></div>
-    <a href="./index.html">All sessions</a>
+<header class="inlap-nav">
+  <div>
+    <a class="inlap-mark" href="../" aria-label="F1 Inlap home" translate="no">F1 INLAP</a>
+    <span class="here">Session summary</span>
+    <nav aria-label="Site">
+      <a href="../#data">All weekends</a>
+      <a class="hide-sm" href="https://www.youtube.com/@f1inlap">YouTube</a>
+    </nav>
   </div>
+</header>
+<div class="wrap">
   <h1 id="ttl">Loading…</h1>
   <div class="sub" id="sub"></div>
   <div class="sector"></div>
@@ -555,7 +565,7 @@ let selA=null, selB=null, railSort='pos';
    in the data, so this is a toggle rather than a choice made for the reader. */
 let gapMode='leader';
 function gapText(d){
-  if(gapMode==='next') return d.gapNext==null?'—':'+'+d.gapNext.toFixed(3);
+  if(gapMode==='next') return d.gapNext==null?'-':'+'+d.gapNext.toFixed(3);
   return d.gap?'+'+d.gap.toFixed(3):'fastest';
 }
 function setGapMode(m){
@@ -722,7 +732,7 @@ function drawTeams(){
         <span class="chip" style="background:${teamCol(t.team)};height:13px;flex:0 0 3px"></span>
         <span class="nm">${esc(t.team)}</span>
         <span class="bt">${mmss(t.best)}</span>
-        <span class="gp">${gapMode==='next'?(t.gapNext==null?'—':'+'+t.gapNext.toFixed(3)):(t.gap?'+'+t.gap.toFixed(3):'best')}</span>
+        <span class="gp">${gapMode==='next'?(t.gapNext==null?'-':'+'+t.gapNext.toFixed(3)):(t.gap?'+'+t.gap.toFixed(3):'best')}</span>
       </div>
       <div class="tm-bar"><i style="width:${t.gap?Math.max(2,t.gap/mx*100):2}%"></i></div>
       <div class="tm-meta">
