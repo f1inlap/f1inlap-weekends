@@ -54,8 +54,10 @@
 .inlap-nav>div{max-width:1240px;margin:0 auto;height:56px;padding:0 20px;display:flex;align-items:center;gap:24px}
 .inlap-nav .here{font:500 13px/1 var(--font-ui);color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .inlap-nav nav{margin-left:auto;display:flex;align-items:center;gap:20px}
-.inlap-nav nav a{font:500 14px/1 var(--font-ui);color:var(--ink-3);text-decoration:none;white-space:nowrap}
-.inlap-nav nav a:hover{color:var(--ink-1)}
+/* :not(.btn) so a button placed in the nav keeps its own colours (a plain `nav a` rule once
+   painted the red "Watch on YouTube" pill's label red-on-red) */
+.inlap-nav nav a:not(.btn){font:500 14px/1 var(--font-ui);color:var(--ink-3);text-decoration:none;white-space:nowrap}
+.inlap-nav nav a:not(.btn):hover{color:var(--ink-1)}
 .inlap-nav nav a[aria-current="page"]{color:var(--ink-1)}
 @media (max-width:640px){.inlap-nav .hide-sm{display:none}.inlap-nav>div{gap:14px;padding:0 16px}}
 
