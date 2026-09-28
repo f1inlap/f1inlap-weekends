@@ -26,36 +26,11 @@
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
 <link rel="preload" href="assets/fonts/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/brand.css">
+<script src="assets/theme.js" defer></script>
 <style>
 /* Home. Design read: channel home + data hub for F1 fans who like numbers; dark broadcast
    language, native CSS on the shared brand layer. Dials: VARIANCE 7, MOTION 5, DENSITY 4
    (the hub itself runs denser, 6). Light theme follows the device. */
-/* light theme: the device setting, unless the toggle chose dark; or the toggle chose light.
-   --ink-4 is #66666f (4.69:1 on panels); #7a7a84 was 3.5:1 and failed AA. */
-@media (prefers-color-scheme:light){
-  :root:not([data-theme="dark"]){--carbon:#f3f3f4;--tarmac:#e9e9ec;--tarmac-up:#e1e1e5;--pit:#fafafb;
-        --grid-line:rgb(17 17 20 / .10);--grid-line-strong:rgb(17 17 20 / .18);
-        --ink-1:#111114;--ink-2:#34343b;--ink-3:#5a5a63;--ink-4:#66666f;--signal:#cf0f08;--signal-hover:#b00c06;--signal-ink:#cf0f08}
-}
-:root[data-theme="light"]{--carbon:#f3f3f4;--tarmac:#e9e9ec;--tarmac-up:#e1e1e5;--pit:#fafafb;
-        --grid-line:rgb(17 17 20 / .10);--grid-line-strong:rgb(17 17 20 / .18);
-        --ink-1:#111114;--ink-2:#34343b;--ink-3:#5a5a63;--ink-4:#66666f;--signal:#cf0f08;--signal-hover:#b00c06;--signal-ink:#cf0f08}
-:root[data-theme="light"]{color-scheme:light}
-:root[data-theme="dark"]{color-scheme:dark}
-
-/* theme toggle: icon button, 40px hit area, shows the theme you would switch TO */
-.theme-btn{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:var(--r-pill);
-  border:0;background:none;color:var(--ink-3);cursor:pointer;padding:0;
-  transition:background-color .15s var(--ease-out),color .15s var(--ease-out)}
-.theme-btn:hover{background:var(--tarmac);color:var(--ink-1)}
-.theme-btn:active{transform:scale(.94)}
-.theme-btn .i-sun{display:none}
-:root[data-theme="dark"] .theme-btn .i-sun{display:block}
-:root[data-theme="dark"] .theme-btn .i-moon{display:none}
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]) .theme-btn .i-sun{display:block}
-  :root:not([data-theme="light"]) .theme-btn .i-moon{display:none}
-}
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:72px;-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--carbon);color:var(--ink-1);font:400 16px/1.6 var(--font-ui);
@@ -334,7 +309,7 @@ h2{font-size:clamp(28px,3.2vw,42px);line-height:1.08;letter-spacing:-.03em;font-
       <a href="https://www.instagram.com/f1inlap/"><span class="sr">Instagram</span><svg class="icon" aria-hidden="true"><use href="#i-ig"/></svg></a>
     </div>
     <p style="margin-top:18px">Independent, unofficial fan project built from publicly available timing data (FastF1, Jolpica). No official Formula 1 footage is used. Team radio streams from Formula 1’s own servers and is not hosted here. Circuit outlines &copy; OpenStreetMap contributors (ODbL).</p>
-    <p>F1, FORMULA 1 and related marks are trademarks of Formula One Licensing B.V.; F1 Inlap is not affiliated with or endorsed by them. Updated 28 Sep 2026, 10:15 UTC.</p>
+    <p>F1, FORMULA 1 and related marks are trademarks of Formula One Licensing B.V.; F1 Inlap is not affiliated with or endorsed by them. Updated 28 Sep 2026, 10:29 UTC.</p>
   </div>
 </footer>
 
@@ -350,29 +325,6 @@ h2{font-size:clamp(28px,3.2vw,42px);line-height:1.08;letter-spacing:-.03em;font-
 <symbol id="i-moon" viewBox="0 0 256 256" fill="currentColor"><path d="M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z"/></symbol>
 </svg>
 <script>
-// Theme toggle: flips the theme you are LOOKING AT (device default or saved choice), saves it,
-// and keeps the browser chrome colour and the button's label in step.
-(function () {
-  var root = document.documentElement, btn = document.getElementById("theme-btn");
-  var mq = matchMedia("(prefers-color-scheme: dark)");
-  function current() { return root.getAttribute("data-theme") || (mq.matches ? "dark" : "light"); }
-  function sync() {
-    var t = current();
-    btn.setAttribute("aria-label", t === "dark" ? "Switch to light theme" : "Switch to dark theme");
-    btn.title = btn.getAttribute("aria-label");
-    document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) {
-      m.setAttribute("content", t === "dark" ? "#0b0b0d" : "#f3f3f4"); m.removeAttribute("media");
-    });
-  }
-  btn.addEventListener("click", function () {
-    var next = current() === "dark" ? "light" : "dark";
-    root.setAttribute("data-theme", next);
-    try { localStorage.setItem("inlap-theme", next); } catch (e) {}
-    sync();
-  });
-  if (mq.addEventListener) mq.addEventListener("change", sync);
-  sync();
-})();
 // Reveal on scroll with IntersectionObserver (no scroll listeners); skipped under reduced motion.
 document.documentElement.classList.add("js");
 (function () {

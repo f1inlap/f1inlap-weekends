@@ -3,6 +3,10 @@
 <title>Session summary · F1 Inlap</title>
 <meta name="theme-color" content="#08080a">
 <link rel="stylesheet" href="../assets/brand.css">
+<script>
+(function(){var t=null;try{t=localStorage.getItem("inlap-theme")}catch(e){}if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)})();
+</script>
+<script src="../assets/theme.js" defer></script>
 <link rel="icon" href="../favicon.png" type="image/png">
 
 <!--
@@ -32,8 +36,9 @@
         which is what the method requires for a borderline pair.
 -->
 <style>
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark}}
+:root[data-theme="dark"]{color-scheme:dark}
 :root{
-  color-scheme: dark;
   --surface-0:#08080a; --surface-1:#0f0f13; --surface-2:#16161c; --line:rgba(255,255,255,.08);
   --ink-1:#ececf0; --ink-2:#c3c3cb; --ink-3:#9a9aa6; --ink-4:#80808c;
   --series:#1b9ec0;          /* validated: single-series marks */
@@ -45,7 +50,49 @@
   --seq-1:#00556c; --seq-2:#006880; --seq-3:#007c94; --seq-4:#0090a9;
   --seq-5:#24a5be; --seq-6:#42bad4; --seq-7:#5cd0ea;
   --good:#27f4d2; --bad:#ff5a6e;
+  /* per-step heatmap ink: whichever of light/near-black reads better on that step */
+  --seq-1-ink:#fff; --seq-2-ink:#fff; --seq-3-ink:#fff; --seq-4-ink:#0b0b0d;
+  --seq-5-ink:#0b0b0d; --seq-6-ink:#0b0b0d; --seq-7-ink:#0b0b0d;
+  --track:#16161c; --grid:#1b1b22; --inactive:#4a4a55; --ctl:#14141a; --tab:#101016;
+  --tip-bg:#16161c; --tip-line:#33333d; --on-series:#08080a; --sel-a:#07181d; --sel-b:#1f110a;
+  --ty-S:#e8002d; --ty-M:#ffd400; --ty-H:#e9e9ee; --ty-I:#22e07a; --ty-W:#3671c6;
   --mono:"Geist Mono",'SF Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  /* LIGHT theme. Every value validated with the dataviz method's validator against the
+     light panel (#fafafb): series #006f96 + emphasis #b0400f pass all checks (CVD dE 18.5,
+     normal 25.8) and clear 5.4:1 as text; the 7-step ramp is OKLCH-stepped at hue 222,
+     monotone, adjacent dL >= 0.06, light end 2.08:1. Rank 1 is the DARKEST step here. */
+  --surface-0:#f3f3f4; --surface-1:#fafafb; --surface-2:#eeeef1; --line:rgba(17,17,20,.10);
+  --ink-1:#111114; --ink-2:#34343b; --ink-3:#5a5a63; --ink-4:#66666f;
+  --series:#006f96; --emphasis:#b0400f;
+  --seq-1:#5ac0e1; --seq-2:#45a9c9; --seq-3:#2e93b1; --seq-4:#127e9a;
+  --seq-5:#006984; --seq-6:#00546e; --seq-7:#004159;
+  --seq-1-ink:#0b0b0d; --seq-2-ink:#0b0b0d; --seq-3-ink:#0b0b0d; --seq-4-ink:#fff;
+  --seq-5-ink:#fff; --seq-6-ink:#fff; --seq-7-ink:#fff;
+  --good:#06705c; --bad:#c8001f;
+  --track:#e4e4e9; --grid:#e3e3e8; --inactive:#b5b5bd; --ctl:#ffffff; --tab:#e9e9ec;
+  --tip-bg:#ffffff; --tip-line:rgba(17,17,20,.14); --on-series:#ffffff; --sel-a:#dcecf3; --sel-b:#f8e6dc;
+  --ty-S:#c8001f; --ty-M:#c9a400; --ty-H:#8a8a93; --ty-I:#0a8a45; --ty-W:#2a62b8;
+  color-scheme:light;
+}}
+:root[data-theme="light"]{
+  /* LIGHT theme. Every value validated with the dataviz method's validator against the
+     light panel (#fafafb): series #006f96 + emphasis #b0400f pass all checks (CVD dE 18.5,
+     normal 25.8) and clear 5.4:1 as text; the 7-step ramp is OKLCH-stepped at hue 222,
+     monotone, adjacent dL >= 0.06, light end 2.08:1. Rank 1 is the DARKEST step here. */
+  --surface-0:#f3f3f4; --surface-1:#fafafb; --surface-2:#eeeef1; --line:rgba(17,17,20,.10);
+  --ink-1:#111114; --ink-2:#34343b; --ink-3:#5a5a63; --ink-4:#66666f;
+  --series:#006f96; --emphasis:#b0400f;
+  --seq-1:#5ac0e1; --seq-2:#45a9c9; --seq-3:#2e93b1; --seq-4:#127e9a;
+  --seq-5:#006984; --seq-6:#00546e; --seq-7:#004159;
+  --seq-1-ink:#0b0b0d; --seq-2-ink:#0b0b0d; --seq-3-ink:#0b0b0d; --seq-4-ink:#fff;
+  --seq-5-ink:#fff; --seq-6-ink:#fff; --seq-7-ink:#fff;
+  --good:#06705c; --bad:#c8001f;
+  --track:#e4e4e9; --grid:#e3e3e8; --inactive:#b5b5bd; --ctl:#ffffff; --tab:#e9e9ec;
+  --tip-bg:#ffffff; --tip-line:rgba(17,17,20,.14); --on-series:#ffffff; --sel-a:#dcecf3; --sel-b:#f8e6dc;
+  --ty-S:#c8001f; --ty-M:#c9a400; --ty-H:#8a8a93; --ty-I:#0a8a45; --ty-W:#2a62b8;
+  color-scheme:light;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--surface-0);color:var(--ink-1);
@@ -100,7 +147,7 @@ td.chipcell{width:10px;padding-right:0}
 .tyres{display:flex;gap:3px}
 .ty{font-size:9px;font-weight:800;width:14px;height:14px;border-radius:3px;
     display:grid;place-items:center;color:#08080a}
-.ty.S{background:#e8002d;color:#fff}.ty.M{background:#ffd400}.ty.H{background:#e9e9ee}
+.ty.S{background:var(--ty-S);color:#fff}.ty.M{background:var(--ty-M);color:#0b0b0d}.ty.H{background:var(--ty-H);color:#0b0b0d}
 .ty.I{background:#22e07a}.ty.W{background:#3671c6;color:#fff}
 /* ---- charts ---- */
 .panel{background:var(--surface-1);border:1px solid var(--line);border-radius:10px;padding:14px 16px;
@@ -139,18 +186,18 @@ th{color:var(--ink-4);font-size:9.5px;letter-spacing:.09em;text-transform:upperc
 /* heatmap */
 .heat td{padding:2px 3px}
 .cell{display:block;height:19px;border-radius:3px;display:grid;place-items:center;
-      font-size:10px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+      font-size:10px;font-weight:700;color:var(--seq-7-ink);font-variant-numeric:tabular-nums}
 .legend{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--ink-4);margin-top:9px;flex-wrap:wrap}
 .legend .sw{width:16px;height:9px;border-radius:2px}
 .legend .k{display:flex;align-items:center;gap:4px}
 /* tooltip */
-#tip{position:fixed;z-index:99;pointer-events:none;background:#16161c;border:1px solid #33333d;
+#tip{position:fixed;z-index:99;pointer-events:none;background:var(--tip-bg);border:1px solid var(--tip-line);
      border-radius:7px;padding:7px 9px;font-size:11.5px;color:var(--ink-1);display:none;
      box-shadow:0 6px 24px rgba(0,0,0,.6);max-width:250px;line-height:1.45}
-#tip b{color:#fff}#tip s{text-decoration:none;color:var(--ink-3)}
+#tip b{color:var(--ink-1)}#tip s{text-decoration:none;color:var(--ink-3)}
 .foot{color:var(--ink-4);font-size:11px;margin-top:34px;border-top:1px solid var(--line);
       padding-top:14px;line-height:1.7}
-.toggle{background:#14141a;color:var(--ink-2);border:1px solid var(--line);border-radius:6px;
+.toggle{background:var(--ctl);color:var(--ink-2);border:1px solid var(--line);border-radius:6px;
         padding:4px 9px;font:600 10.5px var(--mono);cursor:pointer;margin-left:auto}
 .toggle:hover{color:var(--ink-1);border-color:#3a3a46}
 #load{padding:50px 0;color:var(--ink-3)}
@@ -187,19 +234,19 @@ th{color:var(--ink-4);font-size:9.5px;letter-spacing:.09em;text-transform:upperc
   #side{flex:0 0 372px}
   .sortbtn{background:none;border:0;color:var(--ink-4);font:700 9px var(--mono);cursor:pointer;
            letter-spacing:.08em;padding:1px 4px;border-radius:3px}
-  .sortbtn:hover{color:var(--ink-1)} .sortbtn.on{color:#08080a;background:var(--series)}
+  .sortbtn:hover{color:var(--ink-1)} .sortbtn.on{color:var(--on-series);background:var(--series)}
   .drow{display:flex;align-items:center;gap:7px;padding:4px 5px;border-radius:6px;cursor:pointer;
         border:1px solid transparent}
   .drow:hover{background:var(--surface-2)}
-  .drow.a{background:#0f2b33;border-color:var(--series)}
-  .drow.b{background:#2e1a10;border-color:var(--emphasis)}
+  .drow.a{background:var(--sel-a);border-color:var(--series)}
+  .drow.b{background:var(--sel-b);border-color:var(--emphasis)}
   .drow .p{width:20px;font-size:10px;color:var(--ink-4);text-align:right;font-variant-numeric:tabular-nums}
   .drow .c{font-weight:800;font-size:12.5px;width:34px;letter-spacing:.3px}
   .drow .t{flex:1 1 auto;font-size:11px;color:var(--ink-1);text-align:right;font-variant-numeric:tabular-nums}
   .drow .g{font-size:10px;color:var(--ink-4);width:48px;text-align:right;font-variant-numeric:tabular-nums}
   .drow .sp{flex:0 0 46px;height:14px}
   .pill{font-size:8.5px;font-weight:800;padding:1px 5px;border-radius:9px;letter-spacing:.06em}
-  .pill.a{background:var(--series);color:#08080a} .pill.b{background:var(--emphasis);color:#08080a}
+  .pill.a{background:var(--series);color:var(--on-series)} .pill.b{background:var(--emphasis);color:var(--on-series)}
   .cmpbar{display:flex;align-items:center;gap:8px;font-size:10.5px;color:var(--ink-3);
           padding:7px 11px;border-bottom:1px solid var(--line);flex:0 0 auto;flex-wrap:wrap}
   .cmpbar b{color:var(--ink-1)}
@@ -212,7 +259,7 @@ th{color:var(--ink-4);font-size:9.5px;letter-spacing:.09em;text-transform:upperc
   #trace{width:100%;height:230px;display:block}
   .secrow{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:10px;color:var(--ink-4)}
   .secrow s{text-decoration:none;flex:0 0 22px}
-  .secrow .tk{flex:1 1 auto;height:12px;background:#16161c;border-radius:3px;position:relative;overflow:hidden}
+  .secrow .tk{flex:1 1 auto;height:12px;background:var(--track);border-radius:3px;position:relative;overflow:hidden}
   .secrow .fl{position:absolute;top:0;height:100%;border-radius:3px}
   .secrow b{flex:0 0 96px;text-align:right;font-size:10.5px;color:var(--ink-1);font-variant-numeric:tabular-nums}
   .stint{display:flex;gap:2px;height:15px;margin-top:3px}
@@ -223,12 +270,12 @@ th{color:var(--ink-4);font-size:9.5px;letter-spacing:.09em;text-transform:upperc
   #side .cell{height:15px;font-size:9px}
   #side .db{height:12px}
   .seg2{display:inline-flex;border:1px solid var(--line);border-radius:5px;overflow:hidden}
-  .sideTab{border:0;background:#101016;color:var(--ink-4);font:800 9px var(--mono);
+  .sideTab{border:0;background:var(--tab);color:var(--ink-4);font:800 9px var(--mono);
            letter-spacing:.1em;padding:3px 9px;cursor:pointer}
-  .sideTab.on{background:var(--series);color:#08080a}
-  .gapTab{border:0;background:#101016;color:var(--ink-4);font:800 8.5px var(--mono);
+  .sideTab.on{background:var(--series);color:var(--on-series)}
+  .gapTab{border:0;background:var(--tab);color:var(--ink-4);font:800 8.5px var(--mono);
           letter-spacing:.09em;padding:3px 8px;cursor:pointer}
-  .gapTab.on{background:var(--series);color:#08080a}
+  .gapTab.on{background:var(--series);color:var(--on-series)}
   .railsort{display:flex;align-items:center;gap:3px;padding:5px 9px;border-bottom:1px solid var(--line);
             font-size:8.5px;letter-spacing:.09em;color:var(--ink-4);flex:0 0 auto}
   .tm-row{border:1px solid var(--line);border-radius:8px;padding:7px 9px;margin-bottom:6px;
@@ -247,7 +294,7 @@ th{color:var(--ink-4);font-size:9.5px;letter-spacing:.09em;text-transform:upperc
   .tm-ins div{margin-bottom:3px}
   .tm-ins s{text-decoration:none;display:inline-block;min-width:44px;color:var(--ink-4);
             font-weight:800;font-size:8.5px;letter-spacing:.09em}
-  .tm-bar{height:5px;border-radius:3px;background:#16161c;margin-top:5px;overflow:hidden}
+  .tm-bar{height:5px;border-radius:3px;background:var(--track);margin-top:5px;overflow:hidden}
   .tm-bar i{display:block;height:100%;background:var(--series);border-radius:3px}
   .pointsD{font-size:11.5px;color:var(--ink-2);line-height:1.5;margin:0;padding-left:15px}
   .pointsD li{margin-bottom:4px}
@@ -262,6 +309,7 @@ th{color:var(--ink-4);font-size:9.5px;letter-spacing:.09em;text-transform:upperc
     <nav aria-label="Site">
       <a href="../#data">All weekends</a>
       <a class="hide-sm" href="https://www.youtube.com/@f1inlap">YouTube</a>
+      <button class="theme-btn" type="button" aria-label="Switch theme"><svg class="i-moon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z"/></svg><svg class="i-sun" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z"/></svg></button>
     </nav>
   </div>
 </header>
@@ -347,6 +395,7 @@ const SESS={FP1:'Practice 1',FP2:'Practice 2',FP3:'Practice 3',Q:'Qualifying',SQ
 
 /* Team colours are IDENTITY ONLY - a chip beside the name. They are never the
    encoding of a chart, because 22 drivers cannot be told apart by hue. */
+const cssv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const TEAM_HEX={'Mercedes':'#27f4d2','Ferrari':'#e8002d','McLaren':'#ff8000','Red Bull Racing':'#3671c6',
  'Red Bull':'#3671c6','Racing Bulls':'#6c98ff','RB F1 Team':'#6c98ff','Aston Martin':'#00594f',
  'Alpine':'#ff87bc','Alpine F1 Team':'#ff87bc','Williams':'#64c4ff','Audi':'#00e701',
@@ -488,7 +537,7 @@ function drawHeat(target){
         <td class="chipcell"><span class="chip" style="background:${teamCol(d.team)};height:12px;display:block"></span></td>
         <td style="font-weight:700;color:${d.code===selA?'var(--series)':d.code===selB?'var(--emphasis)':'var(--ink-2)'}">${esc(d.code)}</td>
         ${['s1','s2','s3'].map(k=>{const r=d.sectorPos[k];
-          return `<td style="width:52px">${r?`<span class="cell" style="background:${step(r)}">${r}</span>`:'<span class="cell" style="background:#16161c;color:var(--ink-4)">-</span>'}</td>`}).join('')}
+          return `<td style="width:52px">${r?`<span class="cell" style="background:${step(r)};color:${step(r).replace(')','-ink)')}">${r}</span>`:'<span class="cell" style="background:var(--track);color:var(--ink-4)">-</span>'}</td>`}).join('')}
         <td class="num">${mmss(d.best)}</td>
         <td class="num" style="color:${gapMode==='next'&&d.gapNext!=null&&d.gapNext<0.1?'var(--series)':'var(--ink-2)'}">${esc(gapText(d))}</td>
         <td class="num" style="color:var(--ink-3)">${d.trap?d.trap.toFixed(0):'-'}</td></tr>`}).join('')}
@@ -596,7 +645,7 @@ function miniSpark(d,best,worst){
   if(!d.laps.length)return '';
   const n=d.laps.length,span=Math.max(.001,worst-best);
   const pts=d.laps.map((l,i)=>[n<2?W/2:i*W/(n-1), 1+(l.t-best)/span*(H-2)]);
-  const col=d.code===selA?'var(--series)':d.code===selB?'var(--emphasis)':'#4a4a55';
+  const col=d.code===selA?'var(--series)':d.code===selB?'var(--emphasis)':'var(--inactive)';
   return `<svg class="sp" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><path d="${
     pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ')
   }" fill="none" stroke="${col}" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>`;
@@ -640,21 +689,21 @@ function drawTrace(){
   let g='';
   for(let i=0;i<=4;i++){
     const t=y0+(y1-y0)*i/4, y=Y(t);
-    g+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="#1b1b22" stroke-width="1"/>
-        <text x="${L-7}" y="${y+3.5}" fill="#80808c" font-size="10" text-anchor="end">${mmss(t)}</text>`;
+    g+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" style="stroke:var(--grid)" stroke-width="1"/>
+        <text x="${L-7}" y="${y+3.5}" style="fill:var(--ink-4)" font-size="10" text-anchor="end">${mmss(t)}</text>`;
   }
   const step=Math.max(1,Math.ceil((n1-n0)/8));
   for(let n=n0;n<=n1;n+=step)
-    g+=`<text x="${X(n)}" y="${H-8}" fill="#80808c" font-size="10" text-anchor="middle">L${n}</text>`;
-  const COMP={S:'#e8002d',M:'#ffd400',H:'#e9e9ee',I:'#22e07a',W:'#3671c6'};
-  const series=[[A,'var(--series)','#1b9ec0'],...(B?[[B,'var(--emphasis)','#d95926']]:[])];
+    g+=`<text x="${X(n)}" y="${H-8}" style="fill:var(--ink-4)" font-size="10" text-anchor="middle">L${n}</text>`;
+  const COMP={S:cssv('--ty-S'),M:cssv('--ty-M'),H:cssv('--ty-H'),I:cssv('--ty-I'),W:cssv('--ty-W')};
+  const series=[[A,'var(--series)',cssv('--series')],...(B?[[B,'var(--emphasis)',cssv('--emphasis')]]:[])];
   for(const [d,cv,hex] of series){
     if(!d||!d.laps.length)continue;
     const pts=d.laps.map(l=>[X(l.n),Y(l.t)]);
     g+=`<path d="${pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ')}"
          fill="none" stroke="${hex}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
     d.laps.forEach((l,i)=>{ g+=`<circle cx="${pts[i][0].toFixed(1)}" cy="${pts[i][1].toFixed(1)}" r="3"
-       fill="${COMP[l.c]||'#8d8d98'}" stroke="#0b0b0e" stroke-width="1.5"/>`; });
+       fill="${COMP[l.c]||cssv('--ink-4')}" stroke="${cssv('--surface-1')}" stroke-width="1.5"/>`; });
     const bi=d.laps.reduce((m,l,i)=>l.t<d.laps[m].t?i:m,0);
     g+=`<circle cx="${pts[bi][0].toFixed(1)}" cy="${pts[bi][1].toFixed(1)}" r="5.5" fill="none" stroke="${hex}" stroke-width="2"/>
         <text x="${Math.min(W-R-4,pts[bi][0]+9)}" y="${pts[bi][1]-8}" fill="${hex}" font-size="10.5" font-weight="700">${esc(d.code)} ${mmss(d.best)}</text>`;
@@ -706,10 +755,10 @@ function drawDetail(){
       <div class="tk"><div class="fl" style="width:${w}%;background:var(--series)"></div>${bm}</div>
       <b>${t?t.toFixed(3):'-'} <span style="color:var(--ink-4)">P${p??'-'}</span></b></div>`}).join('')+
     (B?`<div class="hint" style="margin-top:3px">orange tick = ${esc(B.code)}'s rank in that sector</div>`:'');
-  const COMP={S:'#e8002d',M:'#ffd400',H:'#e9e9ee',I:'#22e07a',W:'#3671c6'};
+  const COMP={S:cssv('--ty-S'),M:cssv('--ty-M'),H:cssv('--ty-H'),I:cssv('--ty-I'),W:cssv('--ty-W')};
   const tot=A.stints.reduce((a,s)=>a+(s.laps||0),0)||1;
   $('#dStints').innerHTML=`<div class="hint">Stints (${A.runLaps} laps run)</div><div class="stint">`+
-    A.stints.map(st=>`<span style="flex:${st.laps||1};background:${COMP[st.c]||'#44444e'};color:${st.c==='S'||st.c==='W'?'#fff':'#08080a'}">${st.laps>1?st.c:''}</span>`).join('')+'</div>';
+    A.stints.map(st=>`<span style="flex:${st.laps||1};background:${COMP[st.c]||cssv('--inactive')};color:${st.c==='S'||st.c==='W'?'#fff':'#08080a'}">${st.laps>1?st.c:''}</span>`).join('')+'</div>';
   drawTrace();
 }
 
@@ -762,6 +811,7 @@ function drawSideD(){
   if(sideTab==='teams')drawTeams();
 }
 
+window.addEventListener('inlap-theme',()=>{ if(typeof D!=='undefined'&&D) render(); });
 function render(){
   if(!selA)selA=(D.drivers[0]||{}).code||null;
   sel=selA;

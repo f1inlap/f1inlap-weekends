@@ -3,6 +3,10 @@
 <title>Radio log · F1 Inlap</title>
 <meta name="theme-color" content="#0b0b0d">
 <link rel="stylesheet" href="../assets/brand.css">
+<script>
+(function(){var t=null;try{t=localStorage.getItem("inlap-theme")}catch(e){}if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)})();
+</script>
+<script src="../assets/theme.js" defer></script>
 <link rel="icon" href="../favicon.png" type="image/png">
 
 <!--
@@ -16,7 +20,22 @@
 -->
 <style>
 /* design layer: carbon surfaces, low-opacity lines, AA-contrast ink, numbers in Geist Mono */
-:root{--bg:#08080a;--card:#0f0f13;--line:rgba(255,255,255,.08);--fg:#ececf0;--muted:#9a9aa6;--ok:#27f4d2;--accent:#ff8a3d;--bad:#e8002d;--warn:#ffd24a}
+:root{--bg:#08080a;--card:#0f0f13;--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.14);--fg:#ececf0;--fg2:#cfcfd6;--muted:#9a9aa6;
+  --ok:#27f4d2;--accent:#ff8a3d;--bad:#e8002d;--warn:#ffd24a;--ctl:#16161c;--ctl-hover:#1d1d25;--chip:#1c1c22;--playing:#161010;
+  --S-bg:#3a1013;--S:#ff6b73;--M-bg:#3a3410;--M:#ffd12e;--H-bg:#24242a;--H:#e8e8ea;--I-bg:#0d2e13;--I:#43b02a;--W-bg:#0b2440;--W:#5aa9e6;
+  --G-bg:#0c3b33;--SC-bg:#3a2a10;--SC:#ffb44a;--red-row:#1a0d0f;--sc-row:#1a140a;
+  /* driver codes wear ink with a team-colour bar in BOTH themes: blue team colours failed
+     as text even on dark (Red Bull 4.13:1) */
+  --team-ink:var(--fg);--team-bar:block}
+/* light: pale tint behind dark text; every pill and label clears 4.5:1 */
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f3f3f4;--card:#fafafb;--line:rgba(17,17,20,.10);--line2:rgba(17,17,20,.2);--fg:#111114;--fg2:#34343b;--muted:#5a5a63;
+  --ok:#06705c;--accent:#b34700;--bad:#c8001f;--warn:#7a5e00;--ctl:#ffffff;--ctl-hover:#ececef;--chip:#e6e6ea;--playing:#fdf1e9;
+  --S-bg:#fde3e5;--S:#b0001a;--M-bg:#fbf0c4;--M:#6f5500;--H-bg:#e4e4e9;--H:#34343b;--I-bg:#dcf2e1;--I:#1d6b12;--W-bg:#dce8f7;--W:#1d5f9e;
+  --G-bg:#d6f2ea;--SC-bg:#fde8cc;--SC:#8a4a00;--red-row:#fdeced;--sc-row:#fdf3e3;--team-ink:var(--fg);--team-bar:block}}
+:root[data-theme="light"]{--bg:#f3f3f4;--card:#fafafb;--line:rgba(17,17,20,.10);--line2:rgba(17,17,20,.2);--fg:#111114;--fg2:#34343b;--muted:#5a5a63;
+  --ok:#06705c;--accent:#b34700;--bad:#c8001f;--warn:#7a5e00;--ctl:#ffffff;--ctl-hover:#ececef;--chip:#e6e6ea;--playing:#fdf1e9;
+  --S-bg:#fde3e5;--S:#b0001a;--M-bg:#fbf0c4;--M:#6f5500;--H-bg:#e4e4e9;--H:#34343b;--I-bg:#dcf2e1;--I:#1d6b12;--W-bg:#dce8f7;--W:#1d5f9e;
+  --G-bg:#d6f2ea;--SC-bg:#fde8cc;--SC:#8a4a00;--red-row:#fdeced;--sc-row:#fdf3e3;--team-ink:var(--fg);--team-bar:block}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:"Geist",-apple-system,Segoe UI,Roboto,sans-serif;margin:0;padding:0 0 90px;-webkit-font-smoothing:antialiased}
 .wrap{padding-left:16px;padding-right:16px}
@@ -26,43 +45,46 @@ h1{font-weight:700;margin:26px 0 4px;font-size:28px;letter-spacing:-.025em;text-
 .sub{color:var(--muted);font-size:14px;margin-bottom:12px}
 .sector{height:4px;background:linear-gradient(90deg,#ff8000 0 25%,#e8002d 25% 50%,#00d2be 50% 75%,#3671c6 75%);border-radius:3px;margin:0 0 18px}
 .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;position:sticky;top:56px;background:var(--bg);padding:10px 0;z-index:5;border-bottom:1px solid var(--line)}
-select,button{background:#16161c;color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:0 13px;min-height:38px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background-color .15s,border-color .15s}
-select:hover,button:hover{background:#1d1d25;border-color:rgba(255,255,255,.14)}
+select,button{background:var(--ctl);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:0 13px;min-height:38px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background-color .15s,border-color .15s}
+select:hover,button:hover{background:var(--ctl-hover);border-color:var(--line2)}
 button:active{transform:scale(.97)}
-button.primary{background:var(--fg);border-color:transparent;color:#0b0b0d;font-weight:700}
-button.primary:hover{background:#fff}
+button.primary{background:var(--fg);border-color:transparent;color:var(--bg);font-weight:700}
+button.primary:hover{opacity:.9}
 .t{color:var(--muted);font-size:12px}
 .clip{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--line)}
-.clip.playing{background:#161010;box-shadow:inset 3px 0 0 var(--accent)}
+.clip.playing{background:var(--playing);box-shadow:inset 3px 0 0 var(--accent)}
 .when{flex:0 0 92px;text-align:right}
-.lap{font:700 17px/1.2 "Geist Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.lap{font:700 17px/1.2 "Geist Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums;color:var(--team-ink,var(--team))}
 .clock{color:var(--muted);font:500 11.5px "Geist Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
 .body{flex:1;min-width:0}
 .who{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
-.code{font:700 16px "Geist Mono",ui-monospace,monospace;letter-spacing:.02em}
-.pos{background:#1c1c22;border-radius:5px;padding:1px 7px;font-size:12px;font-weight:800;color:var(--muted)}
+.code{font:700 16px "Geist Mono",ui-monospace,monospace;letter-spacing:.02em;color:var(--team-ink,var(--team));display:inline-flex;align-items:center;gap:6px}
+/* light: team colours fail as TEXT on a pale surface, so codes wear ink and the team colour
+   moves to a bar beside the code (identity by mark, never by text colour) */
+.code::before{content:"";width:3px;height:15px;border-radius:2px;background:var(--team);display:var(--team-bar,none)}
+.pos{background:var(--chip);border-radius:5px;padding:1px 7px;font-size:12px;font-weight:800;color:var(--muted)}
 .tyre{font-size:11px;font-weight:800;padding:1px 7px;border-radius:5px}
-.S{background:#3a1013;color:#ff6b73}.M{background:#3a3410;color:#ffd12e}.H{background:#24242a;color:#e8e8ea}
-.I{background:#0d2e13;color:#43b02a}.W{background:#0b2440;color:#5aa9e6}
+.S{background:var(--S-bg);color:var(--S)}.M{background:var(--M-bg);color:var(--M)}.H{background:var(--H-bg);color:var(--H)}
+.I{background:var(--I-bg);color:var(--I)}.W{background:var(--W-bg);color:var(--W)}
 .flagpill{font-size:11px;font-weight:800;padding:1px 7px;border-radius:5px}
-.f-green{background:#0c3b33;color:var(--ok)}.f-yellow{background:#3a3410;color:var(--warn)}
-.f-sc{background:#3a2a10;color:#ffb44a}.f-red{background:#3a1013;color:#ff6b73}
+.f-green{background:var(--G-bg);color:var(--ok)}.f-yellow{background:var(--M-bg);color:var(--M)}
+.f-sc{background:var(--SC-bg);color:var(--SC)}.f-red{background:var(--S-bg);color:var(--S)}
 .ctx{color:var(--muted);font-size:12.5px;margin-top:6px;line-height:1.5}
-.ctx b{color:#cfcfd6;font-weight:600}
+.ctx b{color:var(--fg2);font-weight:600}
 .rc{margin-top:6px;font-size:12px;color:var(--muted)}
-.rc span{display:inline-block;background:#16161c;border:1px solid var(--line);border-radius:5px;padding:1px 7px;margin:2px 4px 0 0}
+.rc span{display:inline-block;background:var(--ctl);border:1px solid var(--line);border-radius:5px;padding:1px 7px;margin:2px 4px 0 0}
 .play{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:6px}
 .play button{width:44px;height:44px;border-radius:50%;font-size:15px;padding:0}
 .dl{display:flex;align-items:center;justify-content:center;width:52px;height:24px;
-    border:1px solid var(--line);border-radius:7px;background:#16161c;color:var(--muted);
+    border:1px solid var(--line);border-radius:7px;background:var(--ctl);color:var(--muted);
     text-decoration:none;font-size:10.5px;font-weight:800;letter-spacing:.3px}
-.dl:hover{background:#23232c;color:var(--fg);border-color:#3a3a45}
+.dl:hover{background:var(--ctl-hover);color:var(--fg);border-color:var(--line2)}
 .empty{color:var(--muted);padding:30px 0}
 .ev{display:flex;gap:12px;align-items:center;padding:9px 0;margin:4px 0;font-size:12px;
     font-weight:800;letter-spacing:.6px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .ev .evt{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 92px;text-align:right;font-weight:600}
-.ev-start{color:var(--ok)}.ev-red{color:#ff6b73;background:#1a0d0f}
-.ev-sc{color:#ffb44a;background:#1a140a}.ev-vsc{color:#ffb44a;background:#1a140a}
+.ev-start{color:var(--ok)}.ev-red{color:var(--S);background:var(--red-row)}
+.ev-sc{color:var(--SC);background:var(--sc-row)}.ev-vsc{color:var(--SC);background:var(--sc-row)}
 .ev-clear{color:var(--ok)}
 </style>
 <header class="inlap-nav">
@@ -72,6 +94,7 @@ button.primary:hover{background:#fff}
     <nav aria-label="Site">
       <a href="../#data">All weekends</a>
       <a class="hide-sm" href="https://www.youtube.com/@f1inlap">YouTube</a>
+      <button class="theme-btn" type="button" aria-label="Switch theme"><svg class="i-moon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z"/></svg><svg class="i-sun" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z"/></svg></button>
     </nav>
   </div>
 </header>
@@ -194,7 +217,7 @@ function render(){
     if(c.team) bits.push(esc(c.team));
     return `<div class="clip${playing===i?' playing':''}" id=c${i}>
       <div class=when>
-        <div class=lap style="color:${c.col}">${c.pre?'GRID':'L'+(c.lap||'?')}</div>
+        <div class=lap style="--team:${c.col}">${c.pre?'GRID':'L'+(c.lap||'?')}</div>
         <div class=clock>${mmss(c.t-(D.meta.t0||0))}</div>
       </div>
       <div class=play>
@@ -204,7 +227,7 @@ function render(){
       </div>
       <div class=body>
         <div class=who>
-          <span class=code style="color:${c.col}">${esc(c.code)}</span>
+          <span class=code style="--team:${c.col}">${esc(c.code)}</span>
           ${c.pos?`<span class=pos>P${c.pos}</span>`:''}
           ${tyre}
           <span class="flagpill ${c.flag.cls}">${c.flag.txt}</span>

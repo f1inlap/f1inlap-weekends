@@ -77,3 +77,34 @@
 .skip:focus{top:12px}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+/* ---- light theme ---------------------------------------------------------------------
+   Follows the device unless the toggle picked one (html[data-theme], set by an inline boot
+   script in every page's <head> before first paint, from localStorage "inlap-theme").
+   Contrast-checked: --ink-4 4.69:1 on panels, --signal behind white label 5.45:1. */
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){--carbon:#f3f3f4;--tarmac:#e9e9ec;--tarmac-up:#e1e1e5;--pit:#fafafb;
+    --grid-line:rgb(17 17 20 / .10);--grid-line-strong:rgb(17 17 20 / .18);
+    --ink-1:#111114;--ink-2:#34343b;--ink-3:#5a5a63;--ink-4:#66666f;
+    --signal:#cf0f08;--signal-hover:#b00c06;--signal-ink:#cf0f08;color-scheme:light}
+}
+:root[data-theme="light"]{--carbon:#f3f3f4;--tarmac:#e9e9ec;--tarmac-up:#e1e1e5;--pit:#fafafb;
+    --grid-line:rgb(17 17 20 / .10);--grid-line-strong:rgb(17 17 20 / .18);
+    --ink-1:#111114;--ink-2:#34343b;--ink-3:#5a5a63;--ink-4:#66666f;
+    --signal:#cf0f08;--signal-hover:#b00c06;--signal-ink:#cf0f08;color-scheme:light}
+:root[data-theme="dark"]{color-scheme:dark}
+
+/* theme toggle: 40px icon button showing the theme you would switch TO */
+.theme-btn{display:inline-grid;place-items:center;width:40px;height:40px;flex:none;border-radius:var(--r-pill);
+  border:0;background:none;color:var(--ink-3);cursor:pointer;padding:0;
+  transition:background-color .15s var(--ease-out),color .15s var(--ease-out)}
+.theme-btn:hover{background:var(--tarmac);color:var(--ink-1)}
+.theme-btn:active{transform:scale(.94)}
+.theme-btn svg{width:18px;height:18px}
+.theme-btn .i-sun{display:none}
+:root[data-theme="dark"] .theme-btn .i-sun{display:block}
+:root[data-theme="dark"] .theme-btn .i-moon{display:none}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .theme-btn .i-sun{display:block}
+  :root:not([data-theme="light"]) .theme-btn .i-moon{display:none}
+}

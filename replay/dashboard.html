@@ -2,9 +2,12 @@
 <html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#000000">
 <title>Race replay · F1 Inlap</title>
 <link rel="stylesheet" href="../assets/brand.css">
+<script>
+(function(){var t=null;try{t=localStorage.getItem("inlap-theme")}catch(e){}if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)})();
+</script>
+<script src="../assets/theme.js" defer></script>
 <link rel="icon" href="../favicon.png" type="image/png">
 
 <style>
@@ -19,8 +22,40 @@
     --line:rgba(255,255,255,.07); --line2:rgba(255,255,255,.13);
     --fg:#ececf0; --fg2:#c3c3cb; --muted:#9a9aa6; --dim:#80808c;
     --ui:"Geist",-apple-system,"Segoe UI",Roboto,sans-serif;
+    --hard:#e9e9ee; --neg:#ff5a6e; --screen:#0b0b0e;
+    --row-line:rgba(255,255,255,.04); --row-hover:#121217; --row-on:#16161c; --track:#18181f; --mid:#3a3a45;
+    --ctl-hover:#1d1d25; --ctl-active:#22222b; --radio-on:#241505; --radio-hover:#1a1208; --thumb:#24242c;
+    --flag-g:#062b16; --flag-g-line:#10502c; --flag-y:#2e2905; --flag-y-line:#6b5f16; --flag-r:#2c060f; --flag-r-line:#7a1f2c;
     --accent:#ff6c00; --purple:#b14bff; --green:#22e07a; --yellow:#ffd400; --red:#e8002d;
     --mono:"Geist Mono",'SF Mono',ui-monospace,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
+    /* LIGHT theme: chrome, tower and panels go light; the CANVAS views (map, strategy, lap
+       chart, timeline, telemetry trace) stay dark "screens" (--screen), because every colour
+       drawn on them was chosen against a dark background. Timing colours are re-stepped to
+       clear 4.5:1 as text on the light panel: purple 6.3, green 5.2, amber 5.9, soft 5.8. */
+    --bg:#f3f3f4; --card:#fafafb; --raise:#ffffff; --inset:#eeeef1;
+    --line:rgba(17,17,20,.10); --line2:rgba(17,17,20,.2);
+    --fg:#111114; --fg2:#34343b; --muted:#5a5a63; --dim:#66666f;
+    --accent:#b34700; --purple:#7e2fd1; --green:#087a3d; --yellow:#7a5e00; --red:#c8001f;
+    --hard:#4a4a52; --neg:#c8102e;
+    --row-line:rgba(17,17,20,.06); --row-hover:#f0f0f3; --row-on:#ebebf0; --track:#e4e4e9; --mid:#b5b5bd;
+    --ctl-hover:#ececef; --ctl-active:#e2e2e6; --radio-on:#fde8d7; --radio-hover:#fdf1e9; --thumb:#c9c9d0;
+    --flag-g:#d8f3e4; --flag-g-line:#9ed8b6; --flag-y:#fbf0c4; --flag-y-line:#e0cc7a; --flag-r:#fde3e5; --flag-r-line:#f0a8b0;
+  }}
+  :root[data-theme="light"]{
+    /* LIGHT theme: chrome, tower and panels go light; the CANVAS views (map, strategy, lap
+       chart, timeline, telemetry trace) stay dark "screens" (--screen), because every colour
+       drawn on them was chosen against a dark background. Timing colours are re-stepped to
+       clear 4.5:1 as text on the light panel: purple 6.3, green 5.2, amber 5.9, soft 5.8. */
+    --bg:#f3f3f4; --card:#fafafb; --raise:#ffffff; --inset:#eeeef1;
+    --line:rgba(17,17,20,.10); --line2:rgba(17,17,20,.2);
+    --fg:#111114; --fg2:#34343b; --muted:#5a5a63; --dim:#66666f;
+    --accent:#b34700; --purple:#7e2fd1; --green:#087a3d; --yellow:#7a5e00; --red:#c8001f;
+    --hard:#4a4a52; --neg:#c8102e;
+    --row-line:rgba(17,17,20,.06); --row-hover:#f0f0f3; --row-on:#ebebf0; --track:#e4e4e9; --mid:#b5b5bd;
+    --ctl-hover:#ececef; --ctl-active:#e2e2e6; --radio-on:#fde8d7; --radio-hover:#fdf1e9; --thumb:#c9c9d0;
+    --flag-g:#d8f3e4; --flag-g-line:#9ed8b6; --flag-y:#fbf0c4; --flag-y-line:#e0cc7a; --flag-r:#fde3e5; --flag-r-line:#f0a8b0;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
@@ -50,9 +85,9 @@
   .home:hover{color:var(--fg)}
   @media (max-width:640px){.home{display:none}}
   .flag{margin-left:auto;padding:3px 10px;border-radius:4px;font-weight:800;letter-spacing:.1em;font-size:11px;
-        background:#062b16;color:var(--green);border:1px solid #10502c}
-  .flag.YELLOW,.flag.SC,.flag.VSC{background:#2e2905;color:var(--yellow);border-color:#6b5f16}
-  .flag.RED{background:#2c060f;color:#ff5a6e;border-color:#7a1f2c}
+        background:var(--flag-g);color:var(--green);border:1px solid var(--flag-g-line)}
+  .flag.YELLOW,.flag.SC,.flag.VSC{background:var(--flag-y);color:var(--yellow);border-color:var(--flag-y-line)}
+  .flag.RED{background:var(--flag-r);color:var(--neg);border-color:var(--flag-r-line)}
   .stats{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;background:var(--line);
          border-top:1px solid var(--line)}
   .st{background:#08080b;padding:4px 7px;min-width:0}
@@ -87,7 +122,7 @@
   .gap{text-align:right;color:var(--muted)}
   .sec{text-align:right;font-size:10.5px;width:44px}
   .ty{font-size:9px;font-weight:800}
-  .SOFT{color:var(--red)}.MEDIUM{color:var(--yellow)}.HARD{color:#e9e9ee}
+  .SOFT{color:var(--red)}.MEDIUM{color:var(--yellow)}.HARD{color:var(--hard)}
   .INTERMEDIATE{color:var(--green)}.WET{color:#3671c6}
   .pitf{color:var(--accent);font-weight:800;font-size:9px}
 
@@ -114,17 +149,17 @@
   .row>b{flex:0 0 52px;text-align:right;color:var(--fg);font-size:11px;letter-spacing:0;
          font-variant-numeric:tabular-nums}
   .track{position:relative;flex:1 1 auto;height:7px;border-radius:3px;overflow:hidden;background:#16161c}
-  .track>span{position:absolute;top:0;right:0;height:100%;background:#16161c}
+  .track>span{position:absolute;top:0;right:0;height:100%;background:var(--track)}
   #rpmt{background:linear-gradient(90deg,#2a7d4f 0 55%,#ffd400 55% 82%,#e8002d 82%)}
   .track.thr{background:var(--green)} .track.brk{background:var(--red)}
-  #telc{width:100%;height:54px;display:block;border-radius:5px;background:#08080b}
+  #telc{width:100%;height:54px;display:block;border-radius:5px;background:var(--screen)}
   /* ---- analysis tabs (CAR / SECTORS / BATTLE) ---------------------------------- */
   #anaBody{display:flex;flex-direction:column;min-height:0}
   #anaBody>div{min-height:0}
   .pad{padding:7px 9px}
   .sublabel{font-size:8.5px;letter-spacing:.12em;color:var(--dim);margin:0 0 5px}
   /* SECTORS: one line per sector, fastest first, so the eye reads down the S column */
-  .srow{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #121218}
+  .srow{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--row-line)}
   .srow:last-child{border-bottom:0}
   .sk{flex:0 0 22px;font-size:11px;font-weight:800;color:var(--dim);letter-spacing:.06em}
   .sents{display:flex;gap:6px;flex:1 1 auto;min-width:0}
@@ -153,7 +188,7 @@
   .brow>s{text-decoration:none;flex:0 0 26px}
   .brow>b{flex:0 0 54px;text-align:right;font-size:11px;letter-spacing:0;font-variant-numeric:tabular-nums}
   .btr{position:relative;flex:1 1 auto;height:11px;border-radius:3px;background:#131318;overflow:hidden}
-  .btr i{position:absolute;left:50%;top:0;width:1px;height:100%;background:#3a3a45}
+  .btr i{position:absolute;left:50%;top:0;width:1px;height:100%;background:var(--mid)}
   .btr u{position:absolute;top:0;height:100%;width:0;left:50%;text-decoration:none;border-radius:2px}
   .brow.tot{margin-top:7px;padding-top:6px;border-top:1px solid var(--line)}
   .brow.tot>b{font-size:12px}
@@ -163,9 +198,9 @@
   .dlg{display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:.1em;color:var(--dim)}
   .dlg span{width:40px;height:6px;border-radius:2px}
   .trend{font-size:9px;font-weight:800;margin-left:3px}
-  .trend.up{color:var(--green)} .trend.dn{color:#ff5a6e}
+  .trend.up{color:var(--green)} .trend.dn{color:var(--neg)}
   .gtrack{position:relative;flex:1 1 auto;height:8px;border-radius:3px;overflow:hidden;background:#16161c}
-  .gtrack i{position:absolute;left:50%;top:0;width:1px;height:100%;background:#3a3a45}
+  .gtrack i{position:absolute;left:50%;top:0;width:1px;height:100%;background:var(--mid)}
   .gtrack u{position:absolute;top:0;height:100%;width:0;left:50%;text-decoration:none}
   #wx{color:var(--dim);font-size:10px;line-height:1.45;margin-top:1px;
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -181,7 +216,7 @@
   .msg{font-size:11px;color:var(--muted);padding:2px 9px;border-bottom:1px solid #121218;display:flex;gap:6px}
   .msg b{color:var(--fg);flex:0 0 28px}
   .msg.YELLOW b{color:var(--yellow)} .msg.RED b{color:var(--red)} .msg.GREEN b,.msg.CLEAR b{color:var(--green)}
-  .msg.radio{color:var(--accent);cursor:pointer} .msg.radio.on{background:#241505;color:#fff}
+  .msg.radio{color:var(--accent);cursor:pointer} .msg.radio.on{background:var(--radio-on);color:var(--fg)}
 
   footer{border-top:1px solid var(--line);background:#050507;padding:5px 8px 7px}
   #tlc{width:100%;height:34px;display:block;cursor:pointer}
@@ -238,13 +273,13 @@
   .seg button{border-radius:6px;padding:5px 10px;font:600 10.5px/1 var(--ui);letter-spacing:.08em;
               background:none;color:var(--muted);min-height:0;transition:background-color .15s,color .15s}
   .seg button:hover{color:var(--fg);background:var(--raise)}
-  .seg button.on{background:var(--fg);color:#0b0b0d;font-weight:700}
+  .seg button.on{background:var(--fg);color:var(--bg);font-weight:700}
 
   /* timing tower */
-  td{padding:3px 6px;font-size:12.5px;border-bottom:1px solid rgba(255,255,255,.04);font-variant-numeric:tabular-nums}
+  td{padding:3px 6px;font-size:12.5px;border-bottom:1px solid var(--row-line);font-variant-numeric:tabular-nums}
   tr.row{transition:background-color .12s}
-  tr.row:hover td{background:#14141a}
-  tr.row.on td{background:#1c1c24}
+  tr.row:hover td{background:var(--row-hover)}
+  tr.row.on td{background:var(--row-on)}
   .pos{background:none;color:var(--fg2);font-weight:600}
   .gap{color:var(--fg2)}
 
@@ -258,6 +293,9 @@
   .spd s{font-size:10.5px}
   .gearbox{background:var(--inset);border-color:var(--line);border-radius:8px}
   .gearbox b{color:var(--fg)}
+  /* canvas views are dark screens in BOTH themes: their drawing colours assume dark */
+  .panel.map>.body,#pStint>.body,#pLap>.body{background:var(--screen)}
+  #tlc{background:var(--screen);border-radius:6px}
   .gearbox s{font-size:9px}
   .row>s{font-size:10.5px;letter-spacing:.08em}
   .sublabel{font-size:10.5px;letter-spacing:.09em}
@@ -266,22 +304,22 @@
   .bstat s{font-size:9.5px}
   .bnote,.ideal,#wx{font-family:var(--ui);color:var(--muted)}
   #wx{font-size:11.5px}
-  .track,.gtrack,.btr,.meter{background:#18181f}
+  .track,.gtrack,.btr,.meter{background:var(--track)}
 
   /* race control and radio */
-  .msg{font:12.5px/1.5 var(--ui);color:var(--fg2);padding:5px 12px;border-bottom:1px solid rgba(255,255,255,.04)}
+  .msg{font:12.5px/1.5 var(--ui);color:var(--fg2);padding:5px 12px;border-bottom:1px solid var(--row-line)}
   .msg b{font:700 12px/1.5 var(--mono)}
-  .msg.radio{color:var(--accent)} .msg.radio:hover{background:#1a1208}
+  .msg.radio{color:var(--accent)} .msg.radio:hover{background:var(--radio-hover)}
 
   /* transport */
   footer{background:var(--bg);border-top:1px solid var(--line);padding:8px 12px 10px}
   .ctl{gap:8px;margin-top:7px}
   button{font:600 13px/1 var(--ui);background:var(--raise);color:var(--fg);border:1px solid var(--line);
          border-radius:8px;padding:0 14px;min-height:38px;transition:background-color .15s,border-color .15s,transform .12s}
-  button:hover{background:#1d1d25;border-color:var(--line2)}
-  button:active{transform:scale(.97);background:#22222b}
-  button.pl{background:var(--fg);color:#0b0b0d;border-color:transparent;min-width:100px;font-weight:700}
-  button.pl:hover{background:#fff}
+  button:hover{background:var(--ctl-hover);border-color:var(--line2)}
+  button:active{transform:scale(.97);background:var(--ctl-active)}
+  button.pl{background:var(--fg);color:var(--bg);border-color:transparent;min-width:100px;font-weight:700}
+  button.pl:hover{opacity:.88}
   select{font:500 13px/1 var(--ui);background:var(--raise);color:var(--fg);border:1px solid var(--line);
          border-radius:8px;padding:0 10px;min-height:38px}
   label.cb{font:500 13px/1 var(--ui);color:var(--fg2);gap:6px}
@@ -293,7 +331,7 @@
     #right{grid-column:2;grid-row:1 / span 2}
     #bottom{grid-column:1;grid-row:2;grid-template-columns:repeat(3,minmax(0,1fr))}
   }
-  ::-webkit-scrollbar{width:8px;height:8px} ::-webkit-scrollbar-thumb{background:#24242c;border-radius:8px}
+  ::-webkit-scrollbar{width:8px;height:8px} ::-webkit-scrollbar-thumb{background:var(--thumb);border-radius:8px}
   ::-webkit-scrollbar-track{background:transparent}
 
   @media (max-width:900px){
@@ -325,6 +363,7 @@
     <a class="brand" href="../" title="F1 Inlap home" translate="no">F1 INLAP <em>RACE REPLAY</em></a>
     <div id="evt"></div>
     <a class="home" href="../#data">All weekends</a>
+    <button class="theme-btn" type="button" aria-label="Switch theme"><svg class="i-moon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z"/></svg><svg class="i-sun" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z"/></svg></button>
     <div class="flag" id="flag">GREEN</div>
   </div>
   <div class="stats">
@@ -1013,7 +1052,7 @@ function bar(el,val,scale,invert){
   const w=Math.min(50,Math.abs(val)/scale*50);
   el.style.width=w+'%';
   el.style.left=(val<0?50-w:50)+'%';
-  el.style.background=(val<0)!==!!invert?'var(--green)':'#ff5a6e'}
+  el.style.background=(val<0)!==!!invert?'var(--green)':'var(--neg)'}
 
 function drawBattle(t){
   const riv=rivalOf(t);
@@ -1037,7 +1076,7 @@ function drawBattle(t){
   if(gNow!=null&&gThen!=null&&Math.abs((gNow-gThen)*(lt/TREND_W))<=TREND_MAX){
     perLap=(gNow-gThen)*(lt/TREND_W);           // seconds gained or lost per lap
     const closing=perLap<0;
-    $('#bgTrend').innerHTML=`<span style="color:${closing?'var(--green)':'#ff5a6e'}">`+
+    $('#bgTrend').innerHTML=`<span style="color:${closing?'var(--green)':'var(--neg)'}">`+
       `${closing?'▲':'▼'} ${Math.abs(perLap).toFixed(2)}s<span style="font-size:9px">/lap</span></span>`;
     const lapNow=(lapAt(sel,t)||{}).lap||0, left=Math.max(0,D._maxLap-lapNow);
     if(closing&&gNow>0&&Math.abs(perLap)>0.02){
@@ -1075,10 +1114,10 @@ function drawBattle(t){
   $('#batbars').innerHTML=[1,2,3].map(k=>{
     const v=d[k-1];
     return `<div class="brow"><s>S${k}</s><div class="btr"><i></i><u id="bb${k}"></u></div>`+
-      `<b style="color:${v==null?'var(--dim)':(v<0?'var(--green)':'#ff5a6e')}">`+
+      `<b style="color:${v==null?'var(--dim)':(v<0?'var(--green)':'var(--neg)')}">`+
       `${v==null?'-':(v>0?'+':'')+v.toFixed(3)}</b></div>`}).join('')+
     `<div class="brow tot"><s>LAP</s><div class="btr"><i></i><u id="bbT"></u></div>`+
-    `<b style="color:${tot==null?'var(--dim)':(tot<0?'var(--green)':'#ff5a6e')}">`+
+    `<b style="color:${tot==null?'var(--dim)':(tot<0?'var(--green)':'var(--neg)')}">`+
     `${tot==null?'-':(tot>0?'+':'')+tot.toFixed(3)}</b></div>`;
   for(const k of [1,2,3])if(d[k-1]!=null)bar($('#bb'+k),d[k-1],scale);
   if(tot!=null)bar($('#bbT'),tot,scale);
