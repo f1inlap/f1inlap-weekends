@@ -12,6 +12,16 @@
 <meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#0b0b0d" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f3f4" media="(prefers-color-scheme: light)">
+<script>
+// Theme: follow the device unless the visitor has picked one with the toggle. Runs before
+// the stylesheet paints, so there is no flash of the wrong theme. Storage can be blocked
+// (private mode, strict settings), so every access is guarded and the page still works.
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("inlap-theme"); } catch (e) {}
+  if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+})();
+</script>
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
 <link rel="preload" href="assets/fonts/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin>
@@ -20,15 +30,37 @@
 /* Home. Design read: channel home + data hub for F1 fans who like numbers; dark broadcast
    language, native CSS on the shared brand layer. Dials: VARIANCE 7, MOTION 5, DENSITY 4
    (the hub itself runs denser, 6). Light theme follows the device. */
+/* light theme: the device setting, unless the toggle chose dark; or the toggle chose light.
+   --ink-4 is #66666f (4.69:1 on panels); #7a7a84 was 3.5:1 and failed AA. */
 @media (prefers-color-scheme:light){
-  :root{--carbon:#f3f3f4;--tarmac:#e9e9ec;--tarmac-up:#e1e1e5;--pit:#fafafb;
+  :root:not([data-theme="dark"]){--carbon:#f3f3f4;--tarmac:#e9e9ec;--tarmac-up:#e1e1e5;--pit:#fafafb;
         --grid-line:rgb(17 17 20 / .10);--grid-line-strong:rgb(17 17 20 / .18);
-        --ink-1:#111114;--ink-2:#34343b;--ink-3:#5a5a63;--ink-4:#7a7a84;--signal:#cf0f08;--signal-hover:#b00c06;--signal-ink:#cf0f08}
+        --ink-1:#111114;--ink-2:#34343b;--ink-3:#5a5a63;--ink-4:#66666f;--signal:#cf0f08;--signal-hover:#b00c06;--signal-ink:#cf0f08}
+}
+:root[data-theme="light"]{--carbon:#f3f3f4;--tarmac:#e9e9ec;--tarmac-up:#e1e1e5;--pit:#fafafb;
+        --grid-line:rgb(17 17 20 / .10);--grid-line-strong:rgb(17 17 20 / .18);
+        --ink-1:#111114;--ink-2:#34343b;--ink-3:#5a5a63;--ink-4:#66666f;--signal:#cf0f08;--signal-hover:#b00c06;--signal-ink:#cf0f08}
+:root[data-theme="light"]{color-scheme:light}
+:root[data-theme="dark"]{color-scheme:dark}
+
+/* theme toggle: icon button, 40px hit area, shows the theme you would switch TO */
+.theme-btn{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:var(--r-pill);
+  border:0;background:none;color:var(--ink-3);cursor:pointer;padding:0;
+  transition:background-color .15s var(--ease-out),color .15s var(--ease-out)}
+.theme-btn:hover{background:var(--tarmac);color:var(--ink-1)}
+.theme-btn:active{transform:scale(.94)}
+.theme-btn .i-sun{display:none}
+:root[data-theme="dark"] .theme-btn .i-sun{display:block}
+:root[data-theme="dark"] .theme-btn .i-moon{display:none}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .theme-btn .i-sun{display:block}
+  :root:not([data-theme="light"]) .theme-btn .i-moon{display:none}
 }
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:72px;-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--carbon);color:var(--ink-1);font:400 16px/1.6 var(--font-ui);
-     -webkit-font-smoothing:antialiased;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+     -webkit-font-smoothing:antialiased;touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+     overflow-x:clip}  /* clip, not hidden: keeps the sticky nav working */
 img{display:block;max-width:100%;height:auto}
 a{color:inherit}
 .wrap{max-width:1240px;margin:0 auto;padding:0 20px}
@@ -142,6 +174,7 @@ h2{font-size:clamp(28px,3.2vw,42px);line-height:1.08;letter-spacing:-.03em;font-
   .js .reveal{opacity:0;transform:translateY(20px);transition:opacity .7s var(--ease-out),transform .7s var(--ease-out)}
   .js .reveal.in{opacity:1;transform:none}
   @keyframes rise{to{opacity:1;transform:none}}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
   @keyframes settle{from{opacity:0;transform:rotate(-3deg) translate(24px,10px)}to{opacity:1;transform:rotate(-1.2deg) translateX(6px)}}
 }
 
@@ -151,6 +184,9 @@ h2{font-size:clamp(28px,3.2vw,42px);line-height:1.08;letter-spacing:-.03em;font-
   .hero{padding:32px 0 56px}
   .hero .wrap,#data .intro,.method .wrap{grid-template-columns:1fr;gap:32px;min-height:0}
   .hero .screen{transform:none}
+  /* the desktop slide-in starts 24px to the right and ends tilted: on a phone that pushed the
+     page wider than the screen mid-animation and left the chart skewed. Fade only. */
+  .hero .screen{animation-name:fade}
   .method .side{position:static}
   .bento{grid-template-columns:1fr}
   .t-lead,.t-side,.t-wide{grid-column:auto;grid-row:auto}
@@ -161,6 +197,8 @@ h2{font-size:clamp(28px,3.2vw,42px);line-height:1.08;letter-spacing:-.03em;font-
   section{padding:72px 0}
 }
 @media (max-width:560px){
+  .hide-xs{display:none}
+  .inlap-nav nav{gap:10px}
   /* phone: each cell's links stack as full-width rows, so 3-4 links never overflow a
      ~70px column and every tap target is the cell's width by 34px, none overlapping */
   .cells{gap:4px}
@@ -182,9 +220,13 @@ h2{font-size:clamp(28px,3.2vw,42px);line-height:1.08;letter-spacing:-.03em;font-
     <a class="inlap-mark" href="./" aria-label="F1 Inlap home" translate="no">F1 INLAP</a>
     <nav aria-label="Main">
       <a class="hide-md" href="#latest">Latest</a>
-      <a href="#data">Replays &amp; Data</a>
+      <a href="#data"><span class="hide-xs">Replays &amp; </span>Data</a>
       <a class="hide-md" href="#method">Method</a>
-      <a class="btn btn-primary btn-sm" href="https://www.youtube.com/@f1inlap">Watch on YouTube</a>
+      <button class="theme-btn" id="theme-btn" type="button" aria-label="Switch theme">
+        <svg class="icon i-moon" aria-hidden="true"><use href="#i-moon"/></svg>
+        <svg class="icon i-sun" aria-hidden="true"><use href="#i-sun"/></svg>
+      </button>
+      <a class="btn btn-primary btn-sm" href="https://www.youtube.com/@f1inlap"><span><span class="hide-xs">Watch on </span>YouTube</span></a>
     </nav>
   </div>
 </header>
@@ -292,7 +334,7 @@ h2{font-size:clamp(28px,3.2vw,42px);line-height:1.08;letter-spacing:-.03em;font-
       <a href="https://www.instagram.com/f1inlap/"><span class="sr">Instagram</span><svg class="icon" aria-hidden="true"><use href="#i-ig"/></svg></a>
     </div>
     <p style="margin-top:18px">Independent, unofficial fan project built from publicly available timing data (FastF1, Jolpica). No official Formula 1 footage is used. Team radio streams from Formula 1’s own servers and is not hosted here. Circuit outlines &copy; OpenStreetMap contributors (ODbL).</p>
-    <p>F1, FORMULA 1 and related marks are trademarks of Formula One Licensing B.V.; F1 Inlap is not affiliated with or endorsed by them. Updated 28 Sep 2026, 10:11 UTC.</p>
+    <p>F1, FORMULA 1 and related marks are trademarks of Formula One Licensing B.V.; F1 Inlap is not affiliated with or endorsed by them. Updated 28 Sep 2026, 10:15 UTC.</p>
   </div>
 </footer>
 
@@ -304,8 +346,33 @@ h2{font-size:clamp(28px,3.2vw,42px);line-height:1.08;letter-spacing:-.03em;font-
 <symbol id="i-play" viewBox="0 0 256 256" fill="currentColor"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm48.24-94.78-64-40A8,8,0,0,0,100,88v80a8,8,0,0,0,12.24,6.78l64-40a8,8,0,0,0,0-13.56ZM116,153.57V102.43L156.91,128Z"/></symbol>
 <symbol id="i-chart" viewBox="0 0 256 256" fill="currentColor"><path d="M232,208a8,8,0,0,1-8,8H32a8,8,0,0,1-8-8V48a8,8,0,0,1,16,0v94.37L90.73,98a8,8,0,0,1,10.07-.38l58.81,44.11L218.73,90a8,8,0,1,1,10.54,12l-64,56a8,8,0,0,1-10.07.38L96.39,114.29,40,163.63V200H224A8,8,0,0,1,232,208Z"/></symbol>
 <symbol id="i-radio" viewBox="0 0 256 256" fill="currentColor"><path d="M104,168a8,8,0,0,1-8,8H64a8,8,0,0,1,0-16H96A8,8,0,0,1,104,168Zm-8-40H64a8,8,0,0,0,0,16H96a8,8,0,0,0,0-16Zm0-32H64a8,8,0,0,0,0,16H96a8,8,0,0,0,0-16ZM232,80V192a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V72a8,8,0,0,1,5.7-7.66l160-48a8,8,0,0,1,4.6,15.33L86.51,64H216A16,16,0,0,1,232,80ZM216,192V80H40V192H216Zm-16-56a40,40,0,1,1-40-40A40,40,0,0,1,200,136Zm-16,0a24,24,0,1,0-24,24A24,24,0,0,0,184,136Z"/></symbol>
+<symbol id="i-sun" viewBox="0 0 256 256" fill="currentColor"><path d="M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z"/></symbol>
+<symbol id="i-moon" viewBox="0 0 256 256" fill="currentColor"><path d="M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z"/></symbol>
 </svg>
 <script>
+// Theme toggle: flips the theme you are LOOKING AT (device default or saved choice), saves it,
+// and keeps the browser chrome colour and the button's label in step.
+(function () {
+  var root = document.documentElement, btn = document.getElementById("theme-btn");
+  var mq = matchMedia("(prefers-color-scheme: dark)");
+  function current() { return root.getAttribute("data-theme") || (mq.matches ? "dark" : "light"); }
+  function sync() {
+    var t = current();
+    btn.setAttribute("aria-label", t === "dark" ? "Switch to light theme" : "Switch to dark theme");
+    btn.title = btn.getAttribute("aria-label");
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) {
+      m.setAttribute("content", t === "dark" ? "#0b0b0d" : "#f3f3f4"); m.removeAttribute("media");
+    });
+  }
+  btn.addEventListener("click", function () {
+    var next = current() === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("inlap-theme", next); } catch (e) {}
+    sync();
+  });
+  if (mq.addEventListener) mq.addEventListener("change", sync);
+  sync();
+})();
 // Reveal on scroll with IntersectionObserver (no scroll listeners); skipped under reduced motion.
 document.documentElement.classList.add("js");
 (function () {
