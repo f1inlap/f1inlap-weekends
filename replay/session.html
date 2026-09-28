@@ -850,7 +850,7 @@ fetch(file).then(r=>{if(!r.ok)throw new Error(r.status+' '+r.statusText);return 
     $('#sub').textContent=`Round ${m.round} · ${m.year} · ${m.totalDrivers} drivers`+
       (m.trackTemp!=null?` · track ${m.trackTemp.toFixed(1)}°C`:'');
     $('#points').innerHTML=(d.keyPoints||[]).map(p=>`<li>${esc(p)}</li>`).join('');
-    $('#foot').innerHTML='Built from public Formula 1 timing data. Practice and qualifying '+
+    $('#foot').innerHTML='Practice and qualifying '+
       'are shown as data rather than replayed: there is no race to watch back. Long-run pace is '+
       'fuel corrected; fuel loads and engine modes are hidden in practice, so treat everything '+
       'here as indicative, not proof.';
