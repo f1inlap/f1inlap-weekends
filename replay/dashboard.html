@@ -11,7 +11,14 @@
   /* Old-school FOM timing screen: monospace, black, purple = overall best,
      green = personal best, yellow = neither. */
   :root{
-    --bg:#000; --card:#0b0b0e; --line:#1e1e26; --fg:#eaeaf0; --muted:#8b8b96; --dim:#5a5a66;
+    /* F1 Inlap design layer (28 Sep 2026): carbon surfaces a few points apart, grid lines as
+       low-opacity white, and an ink scale where even the faintest label clears WCAG AA
+       (--dim was #5a5a66 at ~2.9:1). Colour is reserved for DATA: purple/green/yellow timing,
+       tyre compounds, flags, and orange = team radio. Selection UI is neutral, never orange. */
+    --bg:#08080a; --card:#0f0f13; --raise:#16161c; --inset:#0a0a0d;
+    --line:rgba(255,255,255,.07); --line2:rgba(255,255,255,.13);
+    --fg:#ececf0; --fg2:#c3c3cb; --muted:#9a9aa6; --dim:#80808c;
+    --ui:"Geist",-apple-system,"Segoe UI",Roboto,sans-serif;
     --accent:#ff6c00; --purple:#b14bff; --green:#22e07a; --yellow:#ffd400; --red:#e8002d;
     --mono:"Geist Mono",'SF Mono',ui-monospace,Menlo,Consolas,monospace;
   }
@@ -192,6 +199,103 @@
               background:#101016;color:var(--dim)}
   .seg button.on{background:var(--accent);color:#000;font-weight:800}
 
+
+  /* ============ DESIGN LAYER ============================================================
+     Pit wall at night. Chrome (labels, controls, headings) is set in Geist; every number,
+     code and table stays in Geist Mono with tabular figures. Focal point: the lap counter. */
+  #load{background:var(--bg)}
+  .ld{display:flex;flex-direction:column;align-items:center;gap:14px;font:500 13px/1 var(--ui);color:var(--muted)}
+  .ldmark{font:750 15px/1 var(--ui);letter-spacing:.07em;color:var(--fg);display:flex;flex-direction:column;gap:6px}
+  .ldmark::after{content:"";height:3px;border-radius:2px;
+     background:linear-gradient(90deg,#ff8000 0 25%,#e10600 25% 50%,#00d2be 50% 75%,#3671c6 75%)}
+
+  header{background:var(--bg);border-bottom:1px solid var(--line)}
+  .top{padding:8px 14px;gap:16px}
+  .brand{font:750 13px/1 var(--ui);letter-spacing:.07em}
+  .brand em{color:var(--muted);font-weight:600;letter-spacing:.06em}
+  #evt{font:500 12.5px/1.2 var(--ui);color:var(--muted)}
+  .home{font:500 13px/1 var(--ui);color:var(--muted)}
+  .flag{font:700 10.5px/1 var(--ui);letter-spacing:.12em;padding:6px 12px;border-radius:999px}
+  .stats{background:none;gap:0;grid-template-columns:1.25fr repeat(6,minmax(0,1fr))}
+  .st{background:none;padding:7px 14px 8px;border-left:1px solid var(--line)}
+  .st:first-child{border-left:0}
+  .st s{font:600 10px/1 var(--ui);letter-spacing:.09em;color:var(--dim);margin-bottom:5px}
+  .st b{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
+  .st b i{font-size:12px}
+  #sLap{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1}
+  #sLap i{font-size:13px;color:var(--dim)}
+
+  main{gap:10px;padding:10px}
+  #right,#bottom{gap:10px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:10px}
+  .panel>h2{font:600 10.5px/1 var(--ui);letter-spacing:.09em;color:var(--muted);background:none;
+            padding:6px 12px;min-height:36px;border-bottom:1px solid var(--line);gap:10px}
+  .panel>h2::before{color:var(--dim);font-size:10px}
+  .panel>h2 .r{font:500 12px/1 var(--ui);color:var(--dim);letter-spacing:0}
+  .panel>h2:hover{color:var(--fg)}
+  /* segmented controls: neutral selection, so orange keeps meaning "radio" */
+  .seg{border:1px solid var(--line);border-radius:8px;padding:2px;gap:2px;background:var(--inset);margin-left:2px}
+  .seg button{border-radius:6px;padding:5px 10px;font:600 10.5px/1 var(--ui);letter-spacing:.08em;
+              background:none;color:var(--muted);min-height:0;transition:background-color .15s,color .15s}
+  .seg button:hover{color:var(--fg);background:var(--raise)}
+  .seg button.on{background:var(--fg);color:#0b0b0d;font-weight:700}
+
+  /* timing tower */
+  td{padding:3px 6px;font-size:12.5px;border-bottom:1px solid rgba(255,255,255,.04);font-variant-numeric:tabular-nums}
+  tr.row{transition:background-color .12s}
+  tr.row:hover td{background:#14141a}
+  tr.row.on td{background:#1c1c24}
+  .pos{background:none;color:var(--fg2);font-weight:600}
+  .gap{color:var(--fg2)}
+
+  /* car / sectors / battle: kept compact, because every pixel here comes out of the timing
+     tower above it (the most-read panel). Target: 9+ tower rows at 1440x900. */
+  #tel{padding:7px 12px;gap:4px}
+  .spd b{font-size:28px;font-weight:700}
+  .row>s{flex:0 0 50px}
+  #telc{height:48px}
+  .spd s,.gearbox s,.row>s,.sublabel,.bstat s,.brow,.dlg{font-family:var(--ui);color:var(--dim)}
+  .spd s{font-size:10.5px}
+  .gearbox{background:var(--inset);border-color:var(--line);border-radius:8px}
+  .gearbox b{color:var(--fg)}
+  .gearbox s{font-size:9px}
+  .row>s{font-size:10.5px;letter-spacing:.08em}
+  .sublabel{font-size:10.5px;letter-spacing:.09em}
+  .bstat{border-color:var(--line);background:var(--line);border-radius:8px}
+  .bstat div{background:var(--inset);padding:6px 9px}
+  .bstat s{font-size:9.5px}
+  .bnote,.ideal,#wx{font-family:var(--ui);color:var(--muted)}
+  #wx{font-size:11.5px}
+  .track,.gtrack,.btr,.meter{background:#18181f}
+
+  /* race control and radio */
+  .msg{font:12.5px/1.5 var(--ui);color:var(--fg2);padding:5px 12px;border-bottom:1px solid rgba(255,255,255,.04)}
+  .msg b{font:700 12px/1.5 var(--mono)}
+  .msg.radio{color:var(--accent)} .msg.radio:hover{background:#1a1208}
+
+  /* transport */
+  footer{background:var(--bg);border-top:1px solid var(--line);padding:8px 12px 10px}
+  .ctl{gap:8px;margin-top:7px}
+  button{font:600 13px/1 var(--ui);background:var(--raise);color:var(--fg);border:1px solid var(--line);
+         border-radius:8px;padding:0 14px;min-height:38px;transition:background-color .15s,border-color .15s,transform .12s}
+  button:hover{background:#1d1d25;border-color:var(--line2)}
+  button:active{transform:scale(.97);background:#22222b}
+  button.pl{background:var(--fg);color:#0b0b0d;border-color:transparent;min-width:100px;font-weight:700}
+  button.pl:hover{background:#fff}
+  select{font:500 13px/1 var(--ui);background:var(--raise);color:var(--fg);border:1px solid var(--line);
+         border-radius:8px;padding:0 10px;min-height:38px}
+  label.cb{font:500 13px/1 var(--ui);color:var(--fg2);gap:6px}
+  .hint{font:500 12px/1.3 var(--ui);color:var(--dim)}
+  /* Desktop: the timing column runs the FULL height and the strategy / lap chart / race
+     control strip sits under the map only. With the strip full-width the tower got the top
+     row's height alone: 9 visible rows at 1440x900 and just 3 on a 1366x768 laptop. */
+  @media (min-width:901px){
+    #right{grid-column:2;grid-row:1 / span 2}
+    #bottom{grid-column:1;grid-row:2;grid-template-columns:repeat(3,minmax(0,1fr))}
+  }
+  ::-webkit-scrollbar{width:8px;height:8px} ::-webkit-scrollbar-thumb{background:#24242c;border-radius:8px}
+  ::-webkit-scrollbar-track{background:transparent}
+
   @media (max-width:900px){
     body{overflow:auto}
     .stats{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -214,12 +318,12 @@
   }
 </style>
 
-<div id="load">loading telemetry…</div>
+<div id="load"><div class="ld"><span class="ldmark" translate="no">F1 INLAP</span><span>Loading race data…</span></div></div>
 
 <header>
   <div class="top">
     <a class="brand" href="../" title="F1 Inlap home" translate="no">F1 INLAP <em>RACE REPLAY</em></a>
-    <div id="evt" style="color:var(--dim);font-size:10.5px"></div>
+    <div id="evt"></div>
     <a class="home" href="../#data">All weekends</a>
     <div class="flag" id="flag">GREEN</div>
   </div>
@@ -304,14 +408,14 @@
 <footer>
   <canvas id="tlc"></canvas>
   <div class="ctl">
-    <button class="pl" id="play">▶ PLAY</button>
-    <button id="plap">⏮ LAP</button>
-    <button id="nlap">LAP ⏭</button>
-    <select id="rate"><option>1</option><option>2</option><option selected>8</option><option>20</option><option>60</option><option>150</option></select>
-    <select id="focus"><option value="">whole track</option></select>
+    <button class="pl" id="play">▶ Play</button>
+    <button id="plap" aria-label="Previous lap">⏮ Lap</button>
+    <button id="nlap" aria-label="Next lap">Lap ⏭</button>
+    <select id="rate" aria-label="Playback speed"><option>1</option><option>2</option><option selected>8</option><option>20</option><option>60</option><option>150</option></select>
+    <select id="focus" aria-label="Map focus"><option value="">whole track</option></select>
     <label class="cb"><input type="checkbox" id="autoradio" checked> radio</label>
     <audio id="au" controls preload="none"></audio>
-    <span class="hint">tap timeline to scrub · orange ticks = radio · tap a panel title to collapse</span>
+    <span class="hint">Tap the timeline to scrub · orange ticks are team radio · tap a panel title to collapse</span>
   </div>
 </footer>
 
@@ -376,7 +480,7 @@ function init(){
   document.querySelectorAll('.panel>h2').forEach(x=>x.onclick=()=>{
     x.parentElement.classList.toggle('collapsed');requestAnimationFrame(()=>{size();paint()})});
   addEventListener('resize',()=>{size();paint()});
-  $('#play').onclick=()=>{playing=!playing;$('#play').textContent=playing?'❚❚ PAUSE':'▶ PLAY';last=performance.now();if(playing)requestAnimationFrame(tick)};
+  $('#play').onclick=()=>{playing=!playing;$('#play').textContent=playing?'❚❚ Pause':'▶ Play';last=performance.now();if(playing)requestAnimationFrame(tick)};
   $('#plap').onclick=()=>jumpLap(-1);
   $('#nlap').onclick=()=>jumpLap(1);
   $('#focus').onchange=paint;
@@ -421,7 +525,7 @@ function jumpLap(dir){
 }
 function tick(n){if(!playing)return;const dt=(n-last)/1000;last=n;const b=now();
   F+=dt*D.meta.hz*parseFloat($('#rate').value);
-  if(F>=D.meta.frames-1){F=D.meta.frames-1;playing=false;$('#play').textContent='▶ PLAY'}
+  if(F>=D.meta.frames-1){F=D.meta.frames-1;playing=false;$('#play').textContent='▶ Play'}
   autoRadio(b,now());paint();requestAnimationFrame(tick)}
 function at(code,f){const p=D.pos[code],i=Math.floor(f),j=Math.min(i+1,D.meta.frames-1),a=f-i;
   if(p.x[i]==null||p.x[j]==null)return null;return[p.x[i]*(1-a)+p.x[j]*a,p.y[i]*(1-a)+p.y[j]*a]}

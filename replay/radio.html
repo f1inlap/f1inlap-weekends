@@ -15,27 +15,31 @@
   rather than given a lap number, because the lap clock has not begun.
 -->
 <style>
-:root{--bg:#0b0b0d;--card:#131318;--line:#26262c;--fg:#eee;--muted:#9a9aa2;--ok:#27f4d2;--accent:#ff8a3d;--bad:#e8002d;--warn:#ffd24a}
+/* design layer: carbon surfaces, low-opacity lines, AA-contrast ink, numbers in Geist Mono */
+:root{--bg:#08080a;--card:#0f0f13;--line:rgba(255,255,255,.08);--fg:#ececf0;--muted:#9a9aa6;--ok:#27f4d2;--accent:#ff8a3d;--bad:#e8002d;--warn:#ffd24a}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:"Geist",-apple-system,Segoe UI,Roboto,sans-serif;margin:0;padding:0 0 90px;-webkit-font-smoothing:antialiased}
 .wrap{padding-left:16px;padding-right:16px}
 .inlap-nav>div{padding:0 16px}
 .wrap{max-width:1000px;margin:0 auto}
-h1{font-weight:800;margin:22px 0 2px;font-size:24px}
+h1{font-weight:700;margin:26px 0 4px;font-size:28px;letter-spacing:-.025em;text-wrap:balance}
 .sub{color:var(--muted);font-size:14px;margin-bottom:12px}
 .sector{height:4px;background:linear-gradient(90deg,#ff8000 0 25%,#e8002d 25% 50%,#00d2be 50% 75%,#3671c6 75%);border-radius:3px;margin:0 0 18px}
-.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;position:sticky;top:0;background:var(--bg);padding:10px 0;z-index:5;border-bottom:1px solid var(--line)}
-select,button{background:#1f1f27;color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
-button.primary{background:#0c3b33;border-color:#12574c;color:var(--ok)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;position:sticky;top:56px;background:var(--bg);padding:10px 0;z-index:5;border-bottom:1px solid var(--line)}
+select,button{background:#16161c;color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:0 13px;min-height:38px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background-color .15s,border-color .15s}
+select:hover,button:hover{background:#1d1d25;border-color:rgba(255,255,255,.14)}
+button:active{transform:scale(.97)}
+button.primary{background:var(--fg);border-color:transparent;color:#0b0b0d;font-weight:700}
+button.primary:hover{background:#fff}
 .t{color:var(--muted);font-size:12px}
-.clip{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+.clip{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--line)}
 .clip.playing{background:#161010;box-shadow:inset 3px 0 0 var(--accent)}
 .when{flex:0 0 92px;text-align:right}
-.lap{font-weight:800;font-size:17px}
-.clock{color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
+.lap{font:700 17px/1.2 "Geist Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.clock{color:var(--muted);font:500 11.5px "Geist Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
 .body{flex:1;min-width:0}
 .who{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
-.code{font-weight:800;font-size:16px;letter-spacing:.5px}
+.code{font:700 16px "Geist Mono",ui-monospace,monospace;letter-spacing:.02em}
 .pos{background:#1c1c22;border-radius:5px;padding:1px 7px;font-size:12px;font-weight:800;color:var(--muted)}
 .tyre{font-size:11px;font-weight:800;padding:1px 7px;border-radius:5px}
 .S{background:#3a1013;color:#ff6b73}.M{background:#3a3410;color:#ffd12e}.H{background:#24242a;color:#e8e8ea}
@@ -45,7 +49,7 @@ button.primary{background:#0c3b33;border-color:#12574c;color:var(--ok)}
 .f-sc{background:#3a2a10;color:#ffb44a}.f-red{background:#3a1013;color:#ff6b73}
 .ctx{color:var(--muted);font-size:12.5px;margin-top:6px;line-height:1.5}
 .ctx b{color:#cfcfd6;font-weight:600}
-.rc{margin-top:5px;font-size:12px;color:#8f8f98}
+.rc{margin-top:6px;font-size:12px;color:var(--muted)}
 .rc span{display:inline-block;background:#16161c;border:1px solid var(--line);border-radius:5px;padding:1px 7px;margin:2px 4px 0 0}
 .play{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:6px}
 .play button{width:44px;height:44px;border-radius:50%;font-size:15px;padding:0}
