@@ -343,6 +343,9 @@ td .ty{display:inline-grid;vertical-align:middle;margin-left:3px}
 .vhero>b{font:700 30px/1 var(--mono);letter-spacing:-.02em;color:var(--ink-1);font-variant-numeric:tabular-nums}
 .vhero>span{color:var(--ink-3);font-size:13px;line-height:1.45}
 .vhero .ty{display:inline-grid;vertical-align:middle}
+.bartrack.stack{display:flex;gap:2px;background:none}
+.bartrack.stack i{display:block;height:100%;border-radius:2px}
+.legend .sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 .plan{display:flex;flex-direction:column;gap:3px}
 .plan-row,.plan-axis{display:flex;align-items:center;gap:8px;cursor:pointer}
 .plan-axis{cursor:default}
@@ -412,7 +415,7 @@ td .ty{display:inline-grid;vertical-align:middle;margin-left:3px}
           <div class="cbox"><h4>Speed trap</h4><div id="trapC"></div></div>
           <div class="cbox"><h4>Team order</h4><div id="teamOrderC"></div></div>
           <div class="cbox"><h4>Soft vs medium</h4><div id="tyreOffC"></div></div>
-          <div class="cbox"><h4>Time left on the table</h4><div id="idealC"></div></div>
+          <div class="cbox"><h4>Where the gap came from</h4><div id="idealC"></div></div>
           <div class="cbox"><h4>Run plan</h4><div id="planC"></div></div>
         </div>
       </div>
@@ -1040,10 +1043,11 @@ function drawTeamOrder(target){
     bind(tr,`<b>${esc(t.team)}</b><br>best <b>${mmss(t.best)}</b> by ${esc(t.code)}<br><s>${t.best===top?'quickest team':'+'+(t.best-top).toFixed(3)+'s to the quickest team'}</s>`)});
 }
 
+const PUSH_GAP=2.0;  // a best medium 2s+ off the best soft was a long-run lap, not a push lap
 /* 2. SOFT VS MEDIUM: what the softer tyre was worth over one lap, from drivers who ran both */
 function drawTyreOffset(target){
   const R=D.drivers.map(d=>{const S=bestOn(d,'S'),M=bestOn(d,'M');return S&&M?{code:d.code,team:d.team,S,M,delta:M-S}:null})
-    .filter(Boolean).sort((a,b)=>b.delta-a.delta);
+    .filter(r=>r&&r.delta<=PUSH_GAP).sort((a,b)=>b.delta-a.delta);
   if(R.length<3){$(target).innerHTML='<span style="color:var(--ink-4)">Fewer than three drivers set timed laps on both soft and medium, so there is no fair read on the gap.</span>';return}
   const med=median(R.map(r=>r.delta)), mx=Math.max(.001,...R.map(r=>Math.abs(r.delta)));
   $(target).innerHTML=`<div class="vhero"><b>${med>=0?'+':''}${med.toFixed(2)}s</b>
@@ -1056,32 +1060,35 @@ function drawTyreOffset(target){
         <td style="width:100%"><div class="bartrack"><div class="bar${on?' on':''}" style="width:${w}%;${r.delta<0?'background:var(--inactive)':''}"></div></div></td>
         <td class="num" style="color:var(--ink-1);font-weight:700">${r.delta>=0?'+':''}${r.delta.toFixed(3)}</td></tr>`}).join('')}</tbody></table>
     <div class="legend"><span>bar = how much slower the medium was than the soft for that driver; grey = the
-      medium was quicker (track evolution or fuel). Fuel and run timing differ, so read the median, not one driver.</span></div>`;
+      medium was quicker (track evolution or fuel). Drivers whose best medium was 2s+ off their best soft only did long runs on it and are left out. Fuel differs, so read the median, not one driver.</span></div>`;
   document.querySelectorAll(target+' tr').forEach(tr=>{const r=R.find(x=>x.code===tr.dataset.code);
     tr.onclick=e=>{pick(r.code,e.shiftKey||e.metaKey||e.ctrlKey)};
     bind(tr,`<b>${esc(r.code)}</b><br>best soft <b>${mmss(r.S)}</b><br>best medium <b>${mmss(r.M)}</b><br>
       <s>${r.delta>=0?'medium '+r.delta.toFixed(3)+'s slower':'medium '+(-r.delta).toFixed(3)+'s quicker'}</s>`)});
 }
 
-/* 3. TIME LEFT ON THE TABLE: best lap vs the driver's own ideal lap (best three sectors) */
+/* 3. WHERE THE GAP CAME FROM: each driver's best lap, split by sector, against the session's
+   best time in that sector (from any car). The three parts add up to the gap to the best sector
+   combo. Sector times are those of each driver's fastest lap, so this is where THAT lap lost time. */
 function drawIdeal(target){
-  const R=D.drivers.filter(d=>d.best&&d.sectors&&d.sectors.s1&&d.sectors.s2&&d.sectors.s3)
-    .map(d=>{const ideal=d.sectors.s1+d.sectors.s2+d.sectors.s3;return {code:d.code,team:d.team,best:d.best,ideal,lost:Math.max(0,d.best-ideal)}})
-    .sort((a,b)=>b.lost-a.lost);
+  const SB={s1:D.sessionBest.s1.v,s2:D.sessionBest.s2.v,s3:D.sessionBest.s3.v}, K=['s1','s2','s3'];
+  const R=D.drivers.filter(d=>d.best&&d.sectors&&K.every(k=>d.sectors[k]))
+    .map(d=>{const L=K.map(k=>Math.max(0,d.sectors[k]-SB[k]));return {code:d.code,team:d.team,L,tot:L[0]+L[1]+L[2]}})
+    .sort((a,b)=>a.tot-b.tot);
   if(!R.length){$(target).innerHTML='<span style="color:var(--ink-4)">No sector data.</span>';return}
-  const mx=Math.max(.001,...R.map(r=>r.lost));
-  $(target).innerHTML=`<table><tbody>${R.map(r=>{const on=isSel(r.code), w=Math.max(2,r.lost/mx*100);
+  const mx=Math.max(.001,...R.map(r=>r.tot)), col=['var(--seq-2)','var(--seq-4)','var(--seq-6)'];
+  $(target).innerHTML=`<table><tbody>${R.map(r=>{const on=isSel(r.code);
       return `<tr data-code="${r.code}">
         <td class="chipcell"><span class="chip" style="background:${teamCol(r.team)};height:12px;display:block"></span></td>
         <td style="font-weight:700;color:${on?'var(--emphasis)':'var(--ink-2)'};width:42px">${esc(r.code)}</td>
-        <td style="width:100%"><div class="bartrack"><div class="bar${on?' on':''}" style="width:${r.lost?w:0}%"></div></div></td>
-        <td class="num" style="color:var(--ink-1);font-weight:700">${r.lost<0.0005?'perfect':'+'+r.lost.toFixed(3)}</td></tr>`}).join('')}</tbody></table>
-    <div class="legend"><span>gap from each driver's best lap to their ideal lap (their three best sectors added
-      together). Long bars = pace they had but never strung together.</span></div>`;
-  document.querySelectorAll(target+' tr').forEach(tr=>{const r=R.find(x=>x.code===tr.dataset.code);
+        <td style="width:100%"><div class="bartrack stack${on?' on':''}">${r.L.map((v,i)=>v>0?`<i style="width:${v/mx*100}%;background:${col[i]}"></i>`:'').join('')}</div></td>
+        <td class="num" style="color:var(--ink-1);font-weight:700">+${r.tot.toFixed(3)}</td></tr>`}).join('')}</tbody></table>
+    <div class="legend">${K.map((k,i)=>`<span class="k"><span class="sw" style="background:${col[i]}"></span>${k.toUpperCase()}</span>`).join('')}
+      <span>each driver's best lap against the session's best time in each sector (any car);
+      the total is the gap to the best sector combo, ${mmss(D.sessionBest.combo)}</span></div>`;
+  document.querySelectorAll(target+' tr').forEach(tr=>{const r=R.find(x=>x.code===tr.dataset.code), d=drv(r.code);
     tr.onclick=e=>{pick(r.code,e.shiftKey||e.metaKey||e.ctrlKey)};
-    bind(tr,`<b>${esc(r.code)}</b><br>best lap <b>${mmss(r.best)}</b><br>ideal lap <b>${mmss(r.ideal)}</b><br>
-      <s>${r.lost<0.0005?'best lap used all three best sectors':(r.lost.toFixed(3)+'s left on the table')}</s>`)});
+    bind(tr,`<b>${esc(r.code)}</b> best lap, by sector<br>${K.map((k,i)=>`${k.toUpperCase()} <b>${d.sectors[k].toFixed(3)}</b> <s>${r.L[i]<0.0005?'session best':'+'+r.L[i].toFixed(3)+' to '+esc(D.sessionBest[k].code)}</s>`).join('<br>')}`)});
 }
 
 /* 4. RUN PLAN: every stint across the session, in tyre colours with letters; best lap marked */
