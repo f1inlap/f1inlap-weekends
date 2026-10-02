@@ -337,6 +337,27 @@ th{color:var(--ink-4);font-size:10.5px;letter-spacing:.09em;text-transform:upper
 .tyx{font:600 10.5px var(--mono);color:var(--ink-3);border:1px solid var(--line);border-radius:4px;padding:0 4px;margin-left:4px}
 /* tyre chips inside table cells sit inline with the driver code */
 td .ty{display:inline-grid;vertical-align:middle;margin-left:3px}
+
+/* centre-pane analysis visuals */
+.vhero{display:flex;align-items:baseline;gap:12px;margin:0 0 10px}
+.vhero>b{font:700 30px/1 var(--mono);letter-spacing:-.02em;color:var(--ink-1);font-variant-numeric:tabular-nums}
+.vhero>span{color:var(--ink-3);font-size:13px;line-height:1.45}
+.vhero .ty{display:inline-grid;vertical-align:middle}
+.plan{display:flex;flex-direction:column;gap:3px}
+.plan-row,.plan-axis{display:flex;align-items:center;gap:8px;cursor:pointer}
+.plan-axis{cursor:default}
+.plan-c,.plan-axis>span{flex:0 0 38px;font:700 12px var(--mono)}
+.plan-track{position:relative;flex:1 1 auto;height:16px}
+.plan-axis .plan-track{height:14px}
+.plan-axis i{position:absolute;transform:translateX(-50%);font:500 10.5px var(--mono);font-style:normal;color:var(--ink-4)}
+.plan-row:hover .plan-track{background:var(--surface-2);border-radius:4px}
+.plan .seg{position:absolute;top:2px;height:12px;border-radius:4px;display:grid;place-items:center;
+  font:800 9px/1 var(--mono);color:#0b0b0d;background:var(--ty-M)}
+.plan .seg.S{background:var(--ty-S);color:#fff} .plan .seg.M{background:var(--ty-M)} .plan .seg.H{background:var(--ty-H)}
+.plan .seg.I{background:var(--ty-I)} .plan .seg.W{background:var(--ty-W);color:#fff}
+.plan-best{position:absolute;top:0;width:8px;height:8px;margin-left:-4px;background:var(--ink-1);
+  transform:rotate(45deg);box-shadow:0 0 0 1.5px var(--surface-1);pointer-events:none}
+.plan-best-key{position:relative;display:inline-block;top:auto;margin:0 4px 0 2px}
 </style>
 <header class="inlap-nav">
   <div>
@@ -389,6 +410,10 @@ td .ty{display:inline-grid;vertical-align:middle;margin-left:3px}
           <div id="dStints" style="margin-top:10px"></div>
           <div class="cbox"><h4>Team-mates</h4><div id="matesC"></div></div>
           <div class="cbox"><h4>Speed trap</h4><div id="trapC"></div></div>
+          <div class="cbox"><h4>Team order</h4><div id="teamOrderC"></div></div>
+          <div class="cbox"><h4>Soft vs medium</h4><div id="tyreOffC"></div></div>
+          <div class="cbox"><h4>Time left on the table</h4><div id="idealC"></div></div>
+          <div class="cbox"><h4>Run plan</h4><div id="planC"></div></div>
         </div>
       </div>
       <div class="pane" id="side">
@@ -902,6 +927,7 @@ function setSideTab(t){
 function drawSideD(){
   $('#pointsD').innerHTML=(D.keyPoints||[]).map(p=>`<li>${esc(p)}</li>`).join('');
   drawMates('#matesC'); drawTrap('#trapC'); drawRuns('#runsD');
+  drawTeamOrder('#teamOrderC'); drawTyreOffset('#tyreOffC'); drawIdeal('#idealC'); drawRunPlan('#planC');
   if(sideTab==='teams')drawTeams();
 }
 
@@ -983,4 +1009,104 @@ $('#tblBtn').onclick=()=>{
       if(t)location.href='session.html?f='+encodeURIComponent(t.file)});
   }).catch(()=>{});
 })();
+
+/* ============ centre-pane analysis visuals ===================================================
+   Built to the data-viz method: one job per chart; single-series bars in the validated
+   --series hue with the selected driver in --emphasis; tyre compounds always carry their
+   letter (F1's own colours are semantic constants, never the only cue); values in ink, never
+   in the series colour; one axis; every mark hoverable. Colours resolve at draw time, so all
+   of this redraws on the theme toggle. */
+const isSel=c=>c===selA||c===selB;
+const bestOn=(d,c)=>{const L=(d.laps||[]).filter(l=>l.c===c);return L.length?Math.min(...L.map(l=>l.t)):null};
+const median=a=>{const b=a.slice().sort((x,y)=>x-y),m=b.length>>1;return b.length%2?b[m]:(b[m-1]+b[m])/2};
+
+/* 1. TEAM ORDER: each team's quickest car, as a gap to the quickest team */
+function drawTeamOrder(target){
+  const T={};
+  D.drivers.forEach(d=>{if(d.best&&(!T[d.team]||d.best<T[d.team].best))T[d.team]={team:d.team,best:d.best,code:d.code}});
+  const R=Object.values(T).sort((a,b)=>a.best-b.best);
+  if(!R.length){$(target).innerHTML='<span style="color:var(--ink-4)">No timed laps.</span>';return}
+  const top=R[0].best, mx=Math.max(.001,...R.map(t=>t.best-top));
+  $(target).innerHTML=`<table><tbody>${R.map((t,i)=>{
+    const g=t.best-top, w=Math.max(2,g/mx*100), on=D.drivers.some(d=>d.team===t.team&&isSel(d.code));
+    return `<tr data-team="${esc(t.team)}">
+      <td class="num" style="color:var(--ink-4);width:22px">${i+1}</td>
+      <td class="chipcell"><span class="chip" style="background:${teamCol(t.team)};height:12px;display:block"></span></td>
+      <td style="color:${on?'var(--emphasis)':'var(--ink-2)'};font-weight:700;white-space:nowrap">${esc(t.team)}</td>
+      <td style="width:100%"><div class="bartrack"><div class="bar${on?' on':''}" style="width:${i?w:0}%"></div></div></td>
+      <td class="num" style="color:var(--ink-1);font-weight:700">${i?'+'+g.toFixed(3):mmss(t.best)}</td></tr>`}).join('')}</tbody></table>
+    <div class="legend"><span>each team's quickest lap; bar = gap to the quickest team</span></div>`;
+  document.querySelectorAll(target+' tr').forEach(tr=>{const t=T[tr.dataset.team];
+    bind(tr,`<b>${esc(t.team)}</b><br>best <b>${mmss(t.best)}</b> by ${esc(t.code)}<br><s>${t.best===top?'quickest team':'+'+(t.best-top).toFixed(3)+'s to the quickest team'}</s>`)});
+}
+
+/* 2. SOFT VS MEDIUM: what the softer tyre was worth over one lap, from drivers who ran both */
+function drawTyreOffset(target){
+  const R=D.drivers.map(d=>{const S=bestOn(d,'S'),M=bestOn(d,'M');return S&&M?{code:d.code,team:d.team,S,M,delta:M-S}:null})
+    .filter(Boolean).sort((a,b)=>b.delta-a.delta);
+  if(R.length<3){$(target).innerHTML='<span style="color:var(--ink-4)">Fewer than three drivers set timed laps on both soft and medium, so there is no fair read on the gap.</span>';return}
+  const med=median(R.map(r=>r.delta)), mx=Math.max(.001,...R.map(r=>Math.abs(r.delta)));
+  $(target).innerHTML=`<div class="vhero"><b>${med>=0?'+':''}${med.toFixed(2)}s</b>
+      <span>median gap from each driver's best <span class="ty S">S</span> lap to their best
+      <span class="ty M">M</span> lap (${R.length} drivers ran both)</span></div>
+    <table><tbody>${R.map(r=>{const on=isSel(r.code), w=Math.max(2,Math.abs(r.delta)/mx*100);
+      return `<tr data-code="${r.code}">
+        <td class="chipcell"><span class="chip" style="background:${teamCol(r.team)};height:12px;display:block"></span></td>
+        <td style="font-weight:700;color:${on?'var(--emphasis)':'var(--ink-2)'};width:42px">${esc(r.code)}</td>
+        <td style="width:100%"><div class="bartrack"><div class="bar${on?' on':''}" style="width:${w}%;${r.delta<0?'background:var(--inactive)':''}"></div></div></td>
+        <td class="num" style="color:var(--ink-1);font-weight:700">${r.delta>=0?'+':''}${r.delta.toFixed(3)}</td></tr>`}).join('')}</tbody></table>
+    <div class="legend"><span>bar = how much slower the medium was than the soft for that driver; grey = the
+      medium was quicker (track evolution or fuel). Fuel and run timing differ, so read the median, not one driver.</span></div>`;
+  document.querySelectorAll(target+' tr').forEach(tr=>{const r=R.find(x=>x.code===tr.dataset.code);
+    tr.onclick=e=>{pick(r.code,e.shiftKey||e.metaKey||e.ctrlKey)};
+    bind(tr,`<b>${esc(r.code)}</b><br>best soft <b>${mmss(r.S)}</b><br>best medium <b>${mmss(r.M)}</b><br>
+      <s>${r.delta>=0?'medium '+r.delta.toFixed(3)+'s slower':'medium '+(-r.delta).toFixed(3)+'s quicker'}</s>`)});
+}
+
+/* 3. TIME LEFT ON THE TABLE: best lap vs the driver's own ideal lap (best three sectors) */
+function drawIdeal(target){
+  const R=D.drivers.filter(d=>d.best&&d.sectors&&d.sectors.s1&&d.sectors.s2&&d.sectors.s3)
+    .map(d=>{const ideal=d.sectors.s1+d.sectors.s2+d.sectors.s3;return {code:d.code,team:d.team,best:d.best,ideal,lost:Math.max(0,d.best-ideal)}})
+    .sort((a,b)=>b.lost-a.lost);
+  if(!R.length){$(target).innerHTML='<span style="color:var(--ink-4)">No sector data.</span>';return}
+  const mx=Math.max(.001,...R.map(r=>r.lost));
+  $(target).innerHTML=`<table><tbody>${R.map(r=>{const on=isSel(r.code), w=Math.max(2,r.lost/mx*100);
+      return `<tr data-code="${r.code}">
+        <td class="chipcell"><span class="chip" style="background:${teamCol(r.team)};height:12px;display:block"></span></td>
+        <td style="font-weight:700;color:${on?'var(--emphasis)':'var(--ink-2)'};width:42px">${esc(r.code)}</td>
+        <td style="width:100%"><div class="bartrack"><div class="bar${on?' on':''}" style="width:${r.lost?w:0}%"></div></div></td>
+        <td class="num" style="color:var(--ink-1);font-weight:700">${r.lost<0.0005?'perfect':'+'+r.lost.toFixed(3)}</td></tr>`}).join('')}</tbody></table>
+    <div class="legend"><span>gap from each driver's best lap to their ideal lap (their three best sectors added
+      together). Long bars = pace they had but never strung together.</span></div>`;
+  document.querySelectorAll(target+' tr').forEach(tr=>{const r=R.find(x=>x.code===tr.dataset.code);
+    tr.onclick=e=>{pick(r.code,e.shiftKey||e.metaKey||e.ctrlKey)};
+    bind(tr,`<b>${esc(r.code)}</b><br>best lap <b>${mmss(r.best)}</b><br>ideal lap <b>${mmss(r.ideal)}</b><br>
+      <s>${r.lost<0.0005?'best lap used all three best sectors':(r.lost.toFixed(3)+'s left on the table')}</s>`)});
+}
+
+/* 4. RUN PLAN: every stint across the session, in tyre colours with letters; best lap marked */
+function drawRunPlan(target){
+  const rows=D.drivers.slice().sort((a,b)=>(a.pos||99)-(b.pos||99)).map(d=>({d,L:stintList(d)})).filter(r=>r.L.length);
+  if(!rows.length){$(target).innerHTML='<span style="color:var(--ink-4)">No stint data.</span>';return}
+  const maxN=Math.max(...rows.map(r=>r.L[r.L.length-1].to));
+  const ticks=[];for(let n=5;n<=maxN;n+=5)ticks.push(n);
+  const used=[...new Set(rows.flatMap(r=>r.L.map(x=>x.c)))].filter(Boolean);
+  $(target).innerHTML=`<div class="plan">
+    <div class="plan-axis"><span></span><div class="plan-track">${ticks.map(n=>`<i style="left:${(n-0.5)/maxN*100}%">L${n}</i>`).join('')}</div></div>
+    ${rows.map(({d,L})=>{const best=(d.laps||[]).length?d.laps.reduce((m,l)=>l.t<m.t?l:m,d.laps[0]):null;
+      return `<div class="plan-row" data-code="${d.code}">
+        <span class="plan-c" style="color:${isSel(d.code)?'var(--emphasis)':'var(--ink-2)'}">${esc(d.code)}</span>
+        <div class="plan-track">${L.map(x=>`<span class="seg ${x.c}" data-i="${x.i}" style="left:calc(${(x.from-1)/maxN*100}% + 1px);width:calc(${(x.to-x.from+1)/maxN*100}% - 2px)">${x.laps>=3?x.c:''}</span>`).join('')}
+          ${best?`<b class="plan-best" style="left:${(best.n-0.5)/maxN*100}%" title="best lap, L${best.n}"></b>`:''}</div></div>`}).join('')}
+  </div>
+  <div class="legend">${used.map(c=>`<span class="k"><span class="ty ${c}">${c}</span>${TYNAME[c]||c}</span>`).join('')}
+    <span class="k"><b class="plan-best plan-best-key"></b>best lap</span><span>laps run per stint, out and in laps included</span></div>`;
+  document.querySelectorAll(target+' .seg').forEach(el=>{const d=drv(el.closest('.plan-row').dataset.code);
+    const x=stintList(d)[+el.dataset.i-1];
+    el.addEventListener('mousemove',e=>{e.stopPropagation();tip(`<b>${esc(d.code)}</b> stint ${x.i}<br><b>${TYNAME[x.c]||x.c}</b> ${x.laps} laps <s>(L${x.from}-${x.to})</s>${x.best?'<br><b>best lap came on this set</b>':''}`,e)});
+    el.addEventListener('mouseleave',hide)});
+  document.querySelectorAll(target+' .plan-row').forEach(r=>{const d=drv(r.dataset.code);
+    r.onclick=e=>pick(d.code,e.shiftKey||e.metaKey||e.ctrlKey);
+    bind(r,tyreTip(d))});
+}
 </script>
