@@ -230,7 +230,18 @@ th{color:var(--ink-4);font-size:10.5px;letter-spacing:.09em;text-transform:upper
            color:var(--ink-3);font-weight:800;border-bottom:1px solid var(--line);
            display:flex;align-items:center;gap:8px;flex:0 0 auto}
   .pane>.inner{flex:1 1 auto;min-height:0;overflow:auto;padding:9px 11px}
-  #rail{flex:0 0 268px}
+  #rail{flex:0 0 420px}
+  #side{flex-basis:330px!important}
+  .rks{display:flex;gap:3px;flex:0 0 auto}
+  .rk{width:26px;height:19px;border-radius:4px;display:grid;place-items:center;font:700 11.5px var(--mono);
+      font-variant-numeric:tabular-nums}
+  .railhead{display:flex;align-items:center;gap:7px;padding:5px 15px 4px;font:700 10px var(--mono);
+      letter-spacing:.08em;text-transform:uppercase;color:var(--ink-4);border-bottom:1px solid var(--line)}
+  .railhead .hp{width:20px;text-align:right} .railhead .hc{width:40px;margin-left:10px}
+  .railhead .ht{flex:1 1 auto;text-align:right} .railhead .hg{width:48px;text-align:right}
+  .railhead .hr{display:flex;gap:3px} .railhead .hr span{width:26px;text-align:center}
+  .cbox{margin-top:18px;padding-top:12px;border-top:1px solid var(--line)}
+  .cbox h4{margin:0 0 8px;font-size:11px;letter-spacing:.9px;text-transform:uppercase;color:var(--ink-3);font-weight:800}
   #detail{flex:1 1 auto}
   #side{flex:0 0 372px}
   .sortbtn{background:none;border:0;color:var(--ink-4);font:700 10px var(--mono);cursor:pointer;
@@ -315,6 +326,7 @@ th{color:var(--ink-4);font-size:10.5px;letter-spacing:.09em;text-transform:upper
 @media (max-width:640px){.snav-l{display:none}.snav-a{width:36px;justify-content:center;padding:0}}
 /* smallest phones: the arrows + theme toggle fill the bar; the mark already links home */
 @media (max-width:400px){.inlap-nav nav a[href="../#data"]{display:none}.inlap-nav .here{display:none}}
+.tyx{font:600 10.5px var(--mono);color:var(--ink-3);border:1px solid var(--line);border-radius:4px;padding:0 4px;margin-left:4px}
 </style>
 <header class="inlap-nav">
   <div>
@@ -352,6 +364,9 @@ th{color:var(--ink-4);font-size:10.5px;letter-spacing:.09em;text-transform:upper
           <button class="sortbtn" data-sort="trap">TRAP</button>
           <button class="sortbtn" data-sort="laps">LAPS</button>
         </div>
+        <div class="railhead" aria-hidden="true"><span class="hp">P</span><span class="hc">Driver</span>
+          <span class="ht" id="railHeadT">Best</span><span class="hg">Gap</span>
+          <span class="hr"><span>S1</span><span>S2</span><span>S3</span></span></div>
         <div class="inner" id="railList"></div>
       </div>
       <div class="pane" id="detail">
@@ -362,15 +377,15 @@ th{color:var(--ink-4);font-size:10.5px;letter-spacing:.09em;text-transform:upper
           <svg id="trace"></svg>
           <div id="dSectors" style="margin-top:6px"></div>
           <div id="dStints" style="margin-top:10px"></div>
+          <div class="cbox"><h4>Team-mates</h4><div id="matesC"></div></div>
+          <div class="cbox"><h4>Speed trap</h4><div id="trapC"></div></div>
         </div>
       </div>
       <div class="pane" id="side">
         <h3><span class="seg2"><button class="sideTab on" data-tab="session">SESSION</button><button class="sideTab" data-tab="teams">TEAMS</button></span></h3>
         <div class="inner" id="sideSession">
           <div class="panelbox"><h4>What the session said</h4><ul class="pointsD" id="pointsD"></ul></div>
-          <div class="panelbox"><h4>Team-mates</h4><div id="matesD"></div></div>
-          <div class="panelbox"><h4>Speed trap</h4><div id="trapD"></div></div>
-          <div class="panelbox"><h4>Sector rank</h4><div id="heatD"></div></div>
+          <div class="panelbox"><h4>Long runs by tyre</h4><div id="runsD"></div></div>
         </div>
         <div class="inner" id="sideTeams" hidden></div>
       </div>
@@ -475,6 +490,11 @@ function drawCards(){
 }
 
 /* Dumbbell: two values per team, one hue in two roles + direct labels. */
+/* compound of a driver's fastest lap, from the bundle's own lap list */
+function bestTyre(code){
+  const d=drv(code); if(!d||!d.laps||!d.laps.length)return '';
+  return d.laps.reduce((m,l)=>l.t<m.t?l:m,d.laps[0]).c||'';
+}
 function drawMates(target){
   const TGT=target||'#mates';
   const P=D.teamMates.filter(t=>t.delta!=null);
@@ -484,20 +504,22 @@ function drawMates(target){
     const w=Math.max(4,t.delta/mx*100), hi=[t.fast,t.slow].includes(sel);
     return `<tr data-team="${esc(t.team)}">
       <td class="chipcell"><span class="chip" style="background:${teamCol(t.team)};height:13px;display:block"></span></td>
-      <td style="color:var(--ink-2);font-weight:700">${esc(t.fast)}</td>
+      <td style="color:var(--ink-2);font-weight:700;white-space:nowrap">${esc(t.fast)} ${bestTyre(t.fast)?`<span class="ty ${bestTyre(t.fast)}">${bestTyre(t.fast)}</span>`:''}</td>
       <td style="width:100%"><div class="db">
         <i style="left:2%;width:${w*0.94}%"></i>
         <u class="a" style="left:2%"></u><u class="b" style="left:${2+w*0.94}%"></u></div></td>
-      <td style="color:var(--ink-3)">${esc(t.slow)}</td>
+      <td style="color:var(--ink-3);white-space:nowrap">${esc(t.slow)} ${bestTyre(t.slow)?`<span class="ty ${bestTyre(t.slow)}">${bestTyre(t.slow)}</span>`:''}${bestTyre(t.fast)&&bestTyre(t.slow)&&bestTyre(t.fast)!==bestTyre(t.slow)?' <span class="tyx" title="Best laps on different tyres, so not like-for-like">different tyres</span>':''}</td>
       <td class="num" style="color:${hi?'var(--emphasis)':'var(--ink-1)'};font-weight:700">+${t.delta.toFixed(3)}</td>
     </tr>`}).join('')}</tbody></table>
-    <div class="legend"><span class="k"><span class="sw" style="background:var(--series)"></span>quicker team-mate</span>
+    <div class="legend"><span>tyre = compound of each driver's best lap</span><span class="k"><span class="sw" style="background:var(--series)"></span>quicker team-mate</span>
       <span class="k"><span class="sw" style="background:var(--emphasis)"></span>slower</span>
       <span>bar length = the gap between them</span></div>`;
   document.querySelectorAll(TGT+' tr').forEach(tr=>{
     const t=P.find(x=>x.team===tr.dataset.team);
     bind(tr,`<b>${esc(t.team)}</b><br>${esc(t.fast)} <b>${mmss(t.fastTime)}</b><br>
-      ${esc(t.slow)} <b>${mmss(t.slowTime)}</b><br><s>gap ${t.delta.toFixed(3)}s on identical machinery</s>`);
+      ${esc(t.slow)} <b>${mmss(t.slowTime)}</b><br><s>${bestTyre(t.fast)&&bestTyre(t.slow)&&bestTyre(t.fast)!==bestTyre(t.slow)
+        ?`best laps on different tyres (${bestTyre(t.fast)} vs ${bestTyre(t.slow)}), so not like-for-like`
+        :`gap ${t.delta.toFixed(3)}s on identical machinery`}</s>`);
   });
 }
 
@@ -531,6 +553,17 @@ function drawTrap(target){
 
 /* Heatmap of sector RANK. Rank is ordered, so a single-hue sequential ramp is the
    correct encoding here - the one place in this page a ramp belongs. */
+/* rank -> one of seven ramp steps; shared by the sector heatmap and the driver rail so the
+   same rank is always the same shade (see drawHeat for why the curve is not linear) */
+function rankStep(r){
+  const RAMP=['var(--seq-7)','var(--seq-6)','var(--seq-5)','var(--seq-4)','var(--seq-3)','var(--seq-2)','var(--seq-1)'];
+  const n=D.drivers.length, q=n>1?Math.pow((r-1)/(n-1),0.45):0;
+  return RAMP[Math.min(RAMP.length-1,Math.floor(q*RAMP.length))];
+}
+function rankCell(r,k,cls){
+  return r?`<span class="${cls}" style="background:${rankStep(r)};color:${rankStep(r).replace(')','-ink)')}" title="${k.toUpperCase()} rank ${r}">${r}</span>`
+          :`<span class="${cls}" style="background:var(--track);color:var(--ink-4)">-</span>`;
+}
 function drawHeat(target){
   const TGT=target||'#heat';
   const n=D.drivers.length;
@@ -580,11 +613,12 @@ function drawHeat(target){
   });
 }
 
-function drawRuns(){
-  if(!D.compounds.length){$('#runs').innerHTML='<span style="color:var(--ink-4)">No long runs long enough to classify.</span>';return}
+function drawRuns(target){
+  const TGT=target||'#runs';
+  if(!D.compounds.length){$(TGT).innerHTML='<span style="color:var(--ink-4)">No long runs long enough to classify.</span>';return}
   const all=D.compounds.flatMap(c=>c.runs.map(r=>r.pace));
   const best=Math.min(...all), worst=Math.max(...all);
-  $('#runs').innerHTML=D.compounds.map(c=>`
+  $(TGT).innerHTML=D.compounds.map(c=>`
     <div style="margin-bottom:14px">
       <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">
         <span class="ty ${c.compound[0]}">${c.compound[0]}</span>
@@ -598,7 +632,7 @@ function drawRuns(){
           <td class="num" style="color:var(--ink-4);width:52px">${r.laps} laps</td></tr>`}).join('')}</tbody></table>
     </div>`).join('')+
     `<div class="legend"><span>fuel-corrected median of each driver's longest run on that compound. Compare within a compound, never across one.</span></div>`;
-  document.querySelectorAll('#runs tr').forEach(tr=>{
+  document.querySelectorAll(TGT+' tr').forEach(tr=>{
     const c=D.compounds.find(x=>x.compound===tr.dataset.comp);
     const r=c.runs.find(x=>x.code===tr.dataset.code);
     tr.onclick=e=>{ if(isDesk())pick(r.code,e.shiftKey||e.metaKey||e.ctrlKey); else {sel=sel===r.code?null:r.code;} render(); };
@@ -669,6 +703,8 @@ function miniSpark(d,best,worst){
   }" fill="none" stroke="${col}" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>`;
 }
 function drawRail(){
+  const ht=document.getElementById('railHeadT');
+  if(ht)ht.textContent=railSort==='trap'?'Trap':railSort==='laps'?'Laps':'Best';
   const all=D.drivers.flatMap(d=>d.laps.map(l=>l.t));
   const best=Math.min(...all),worst=Math.max(...all);
   $('#railList').innerHTML=railRows().map(d=>{
@@ -680,12 +716,14 @@ function drawRail(){
       ${miniSpark(d,best,worst)}
       <span class="t">${railSort==='trap'?(d.trap?d.trap.toFixed(0):'-'):railSort==='laps'?d.cleanLaps:mmss(d.best)}</span>
       <span class="g">${role?`<span class="pill ${role}">${role.toUpperCase()}</span>`:esc(gapText(d)==='fastest'?'':gapText(d))}</span>
+      <span class="rks">${['s1','s2','s3'].map(k=>rankCell(d.sectorPos[k],k,'rk')).join('')}</span>
     </div>`}).join('');
   document.querySelectorAll('#railList .drow').forEach(r=>{
     const d=drv(r.dataset.code);
     r.onclick=e=>pick(d.code, e.shiftKey||e.metaKey||e.ctrlKey);
     bind(r,`<b>${esc(d.name||d.code)}</b><br><s>${esc(d.team)}</s><br>Best <b>${mmss(d.best)}</b> (P${d.pos})<br>
       ${d.cleanLaps} clean laps · trap ${d.trap?d.trap.toFixed(0):'-'}<br>
+      Sector ranks: S1 P${d.sectorPos.s1??'-'}, S2 P${d.sectorPos.s2??'-'}, S3 P${d.sectorPos.s3??'-'}<br>
       <s>click to focus · shift-click to compare</s>`);
   });
 }
@@ -825,7 +863,7 @@ function setSideTab(t){
 }
 function drawSideD(){
   $('#pointsD').innerHTML=(D.keyPoints||[]).map(p=>`<li>${esc(p)}</li>`).join('');
-  drawMates('#matesD'); drawTrap('#trapD'); drawHeat('#heatD');
+  drawMates('#matesC'); drawTrap('#trapC'); drawRuns('#runsD');
   if(sideTab==='teams')drawTeams();
 }
 
