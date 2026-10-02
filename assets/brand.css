@@ -109,13 +109,13 @@
   :root:not([data-theme="light"]) .theme-btn .i-moon{display:none}
 }
 
-/* ---- scrollbars: thin, semi-transparent, tuned to the theme so they recede into the page.
+/* ---- scrollbars: thin, near-invisible until hovered (Ian: 'darker, blend into the page'), tuned to the theme so they recede into the page.
    Two mechanisms on purpose: scrollbar-color/-width (Chrome, Edge, Firefox) and the
    ::-webkit-scrollbar pseudo-elements (Safari). Chrome ignores the pseudo-elements once
    scrollbar-color is set, so the two never fight. */
-:root{--sb-thumb:rgb(255 255 255 / .13);--sb-thumb-hover:rgb(255 255 255 / .26)}
-@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--sb-thumb:rgb(17 17 20 / .18);--sb-thumb-hover:rgb(17 17 20 / .34)}}
-:root[data-theme="light"]{--sb-thumb:rgb(17 17 20 / .18);--sb-thumb-hover:rgb(17 17 20 / .34)}
+:root{--sb-thumb:rgb(255 255 255 / .065);--sb-thumb-hover:rgb(255 255 255 / .16)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--sb-thumb:rgb(17 17 20 / .10);--sb-thumb-hover:rgb(17 17 20 / .24)}}
+:root[data-theme="light"]{--sb-thumb:rgb(17 17 20 / .10);--sb-thumb-hover:rgb(17 17 20 / .24)}
 *{scrollbar-width:thin;scrollbar-color:var(--sb-thumb) transparent}
 ::-webkit-scrollbar{width:8px;height:8px;background:transparent}
 ::-webkit-scrollbar-track{background:transparent}
