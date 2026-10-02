@@ -230,14 +230,22 @@ th{color:var(--ink-4);font-size:10.5px;letter-spacing:.09em;text-transform:upper
            color:var(--ink-3);font-weight:800;border-bottom:1px solid var(--line);
            display:flex;align-items:center;gap:8px;flex:0 0 auto}
   .pane>.inner{flex:1 1 auto;min-height:0;overflow:auto;padding:9px 11px}
-  #rail{flex:0 0 420px}
+  #rail{flex:0 0 470px}
+  .tys{display:flex;align-items:center;gap:2px;flex:0 0 70px;cursor:help}
+  .tyi{width:16px;height:16px;border-radius:50%;box-sizing:border-box;border:2.5px solid var(--ty-M);
+       display:grid;place-items:center;font:800 8.5px/1 var(--mono);font-style:normal;color:var(--ink-1)}
+  .tyi.S{border-color:var(--ty-S)} .tyi.M{border-color:var(--ty-M)} .tyi.H{border-color:var(--ty-H)}
+  .tyi.I{border-color:var(--ty-I)} .tyi.W{border-color:var(--ty-W)}
+  .tyi.b{background:var(--surface-2);box-shadow:0 0 0 1.5px var(--ink-2)}
+  .tymore{font:700 10px var(--mono);font-style:normal;color:var(--ink-4);margin-left:1px}
+  .railhead .hty{width:70px}
   #side{flex-basis:330px!important}
   .rks{display:flex;gap:3px;flex:0 0 auto}
   .rk{width:26px;height:19px;border-radius:4px;display:grid;place-items:center;font:700 11.5px var(--mono);
       font-variant-numeric:tabular-nums}
   .railhead{display:flex;align-items:center;gap:7px;padding:5px 15px 4px;font:700 10px var(--mono);
       letter-spacing:.08em;text-transform:uppercase;color:var(--ink-4);border-bottom:1px solid var(--line)}
-  .railhead .hp{width:20px;text-align:right} .railhead .hc{width:40px;margin-left:10px}
+  .railhead .hp{width:20px;text-align:right} .railhead .hc{width:44px;margin-left:10px}
   .railhead .ht{flex:1 1 auto;text-align:right} .railhead .hg{width:48px;text-align:right}
   .railhead .hr{display:flex;gap:3px} .railhead .hr span{width:26px;text-align:center}
   .cbox{margin-top:18px;padding-top:12px;border-top:1px solid var(--line)}
@@ -364,7 +372,7 @@ th{color:var(--ink-4);font-size:10.5px;letter-spacing:.09em;text-transform:upper
           <button class="sortbtn" data-sort="trap">TRAP</button>
           <button class="sortbtn" data-sort="laps">LAPS</button>
         </div>
-        <div class="railhead" aria-hidden="true"><span class="hp">P</span><span class="hc">Driver</span>
+        <div class="railhead" aria-hidden="true"><span class="hp">P</span><span class="hc">Driver</span><span class="hty">Tyres</span>
           <span class="ht" id="railHeadT">Best</span><span class="hg">Gap</span>
           <span class="hr"><span>S1</span><span>S2</span><span>S3</span></span></div>
         <div class="inner" id="railList"></div>
@@ -702,6 +710,27 @@ function miniSpark(d,best,worst){
     pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ')
   }" fill="none" stroke="${col}" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>`;
 }
+/* Tyre sets used in the session, as F1-style icons (ring in the compound colour + letter).
+   The set the driver's best lap came on is filled. Hover lists every stint with its laps. */
+const TYNAME={S:'Soft',M:'Medium',H:'Hard',I:'Intermediate',W:'Wet'};
+function stintList(d){
+  const best=d.laps&&d.laps.length?d.laps.reduce((m,l)=>l.t<m.t?l:m,d.laps[0]):null;
+  let from=1; return (d.stints||[]).map((st,i)=>{
+    const n=st.laps||0, to=from+Math.max(n,1)-1;
+    const o={i:i+1,c:st.c||'',laps:n,from,to,best:!!(best&&best.n>=from&&best.n<=to)};
+    from=to+1; return o});
+}
+function tyreIcons(d){
+  const L=stintList(d); if(!L.length)return '<span class="tys"></span>';
+  const show=L.slice(0,4), more=L.length-show.length;
+  return `<span class="tys" data-code="${esc(d.code)}">${show.map(x=>
+    `<i class="tyi ${x.c}${x.best?' b':''}">${x.c}</i>`).join('')}${more>0?`<i class="tymore">+${more}</i>`:''}</span>`;
+}
+function tyreTip(d){
+  const L=stintList(d);
+  return `<b>${esc(d.code)}</b> <s>tyres this session</s><br>`+L.map(x=>
+    `${x.i}. <b>${TYNAME[x.c]||x.c||'?'}</b> ${x.laps} lap${x.laps===1?'':'s'} <s>(L${x.from}-${x.to})</s>${x.best?' <b>best lap</b>':''}`).join('<br>');
+}
 function drawRail(){
   const ht=document.getElementById('railHeadT');
   if(ht)ht.textContent=railSort==='trap'?'Trap':railSort==='laps'?'Laps':'Best';
@@ -713,11 +742,18 @@ function drawRail(){
       <span class="p">${d.pos??'-'}</span>
       <span class="chip" style="background:${teamCol(d.team)};height:14px;flex:0 0 3px"></span>
       <span class="c">${esc(d.code)}</span>
+      ${tyreIcons(d)}
       ${miniSpark(d,best,worst)}
       <span class="t">${railSort==='trap'?(d.trap?d.trap.toFixed(0):'-'):railSort==='laps'?d.cleanLaps:mmss(d.best)}</span>
       <span class="g">${role?`<span class="pill ${role}">${role.toUpperCase()}</span>`:esc(gapText(d)==='fastest'?'':gapText(d))}</span>
       <span class="rks">${['s1','s2','s3'].map(k=>rankCell(d.sectorPos[k],k,'rk')).join('')}</span>
     </div>`}).join('');
+  document.querySelectorAll('#railList .tys').forEach(el=>{
+    const d=drv(el.dataset.code); if(!d)return;
+    // own tooltip: stop the event so the row's tooltip does not overwrite it
+    el.addEventListener('mousemove',e=>{e.stopPropagation();tip(tyreTip(d),e)});
+    el.addEventListener('mouseleave',hide);
+  });
   document.querySelectorAll('#railList .drow').forEach(r=>{
     const d=drv(r.dataset.code);
     r.onclick=e=>pick(d.code, e.shiftKey||e.metaKey||e.ctrlKey);
