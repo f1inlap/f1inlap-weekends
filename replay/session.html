@@ -177,9 +177,9 @@ th{color:var(--ink-4);font-size:10.5px;letter-spacing:.09em;text-transform:upper
 .num{text-align:right;font-variant-numeric:tabular-nums}
 .bar{height:9px;border-radius:0 4px 4px 0;background:var(--series)}
 .bar.on{background:var(--emphasis)}
-.bartrack{background:#16161c;border-radius:0 4px 4px 0;height:9px;position:relative}
+.bartrack{background:var(--track);border-radius:0 4px 4px 0;height:9px;position:relative}
 /* dumbbell */
-.db{position:relative;height:15px;background:#16161c;border-radius:4px;overflow:hidden}
+.db{position:relative;height:15px;background:var(--track);border-radius:4px;overflow:hidden}
 .db i{position:absolute;top:50%;transform:translateY(-50%);height:3px;background:var(--series);border-radius:2px}
 .db u{position:absolute;top:50%;transform:translate(-50%,-50%);width:9px;height:9px;border-radius:50%;
       text-decoration:none;box-shadow:0 0 0 2px var(--surface-1)}
@@ -335,6 +335,8 @@ th{color:var(--ink-4);font-size:10.5px;letter-spacing:.09em;text-transform:upper
 /* smallest phones: the arrows + theme toggle fill the bar; the mark already links home */
 @media (max-width:400px){.inlap-nav nav a[href="../#data"]{display:none}.inlap-nav .here{display:none}}
 .tyx{font:600 10.5px var(--mono);color:var(--ink-3);border:1px solid var(--line);border-radius:4px;padding:0 4px;margin-left:4px}
+/* tyre chips inside table cells sit inline with the driver code */
+td .ty{display:inline-grid;vertical-align:middle;margin-left:3px}
 </style>
 <header class="inlap-nav">
   <div>
