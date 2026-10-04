@@ -55,7 +55,7 @@
   --seq-5-ink:#0b0b0d; --seq-6-ink:#0b0b0d; --seq-7-ink:#0b0b0d;
   --track:#16161c; --grid:#1b1b22; --inactive:#4a4a55; --ctl:#14141a; --tab:#101016;
   --tip-bg:#16161c; --tip-line:#33333d; --on-series:#08080a; --sel-a:#07181d; --sel-b:#1f110a;
-  --ty-S:#e8002d; --ty-M:#ffd400; --ty-H:#e9e9ee; --ty-I:#22e07a; --ty-W:#3671c6;
+  --ty-S:#e8002d; --ty-M:#ffd400; --ty-H:#e9e9ee; --ty-I:#22e07a; --ty-I-ink:#0b0b0d; --ty-W:#3671c6;
   --mono:"Geist Mono",'SF Mono',ui-monospace,Menlo,Consolas,monospace;
 }
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
@@ -73,7 +73,7 @@
   --good:#06705c; --bad:#c8001f;
   --track:#e4e4e9; --grid:#e3e3e8; --inactive:#b5b5bd; --ctl:#ffffff; --tab:#e9e9ec;
   --tip-bg:#ffffff; --tip-line:rgba(17,17,20,.14); --on-series:#ffffff; --sel-a:#dcecf3; --sel-b:#f8e6dc;
-  --ty-S:#c8001f; --ty-M:#c9a400; --ty-H:#8a8a93; --ty-I:#0a8a45; --ty-W:#2a62b8;
+  --ty-S:#c8001f; --ty-M:#c9a400; --ty-H:#8a8a93; --ty-I:#077a3c; --ty-I-ink:#fff; --ty-W:#2a62b8;
   color-scheme:light;
 }}
 :root[data-theme="light"]{
@@ -91,7 +91,7 @@
   --good:#06705c; --bad:#c8001f;
   --track:#e4e4e9; --grid:#e3e3e8; --inactive:#b5b5bd; --ctl:#ffffff; --tab:#e9e9ec;
   --tip-bg:#ffffff; --tip-line:rgba(17,17,20,.14); --on-series:#ffffff; --sel-a:#dcecf3; --sel-b:#f8e6dc;
-  --ty-S:#c8001f; --ty-M:#c9a400; --ty-H:#8a8a93; --ty-I:#0a8a45; --ty-W:#2a62b8;
+  --ty-S:#c8001f; --ty-M:#c9a400; --ty-H:#8a8a93; --ty-I:#077a3c; --ty-I-ink:#fff; --ty-W:#2a62b8;
   color-scheme:light;
 }
 *{box-sizing:border-box}
@@ -357,7 +357,7 @@ td .ty{display:inline-grid;vertical-align:middle;margin-left:3px}
 .plan .seg{position:absolute;top:2px;height:12px;border-radius:4px;display:grid;place-items:center;
   font:800 9px/1 var(--mono);color:#0b0b0d;background:var(--ty-M)}
 .plan .seg.S{background:var(--ty-S);color:#fff} .plan .seg.M{background:var(--ty-M)} .plan .seg.H{background:var(--ty-H)}
-.plan .seg.I{background:var(--ty-I)} .plan .seg.W{background:var(--ty-W);color:#fff}
+.plan .seg.U{background:var(--inactive);color:var(--ink-1)} .plan .seg.I{background:var(--ty-I);color:var(--ty-I-ink)} .plan .seg.W{background:var(--ty-W);color:#fff}
 .plan-best{position:absolute;top:0;width:8px;height:8px;margin-left:-4px;background:var(--ink-1);
   transform:rotate(45deg);box-shadow:0 0 0 1.5px var(--surface-1);pointer-events:none}
 .plan-best-key{position:relative;display:inline-block;top:auto;margin:0 4px 0 2px}
@@ -384,6 +384,19 @@ td .ty{display:inline-grid;vertical-align:middle;margin-left:3px}
 .devbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:0 0 8px}
 .devteam{margin-left:auto;display:flex;align-items:center;gap:6px;font-weight:700;color:var(--ink-1)}
 .devteam .chip{display:inline-block;width:3px;height:12px}
+
+/* race mode */
+:root{--sc-band:rgb(255 212 0 / .07)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--sc-band:rgb(180 140 0 / .10)}}
+:root[data-theme="light"]{--sc-band:rgb(180 140 0 / .10)}
+.h4note{font-style:normal;text-transform:none;letter-spacing:0;color:var(--ink-4);font-weight:500;margin-left:6px}
+.legend .lg.sc{width:14px;height:10px;background:var(--sc-band);outline:1px solid var(--line)}
+.dbar{position:relative;height:9px}
+.dbar .mid{position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--line)}
+.dbar .b{position:absolute;top:0;height:100%;border-radius:2px}
+.dbar .b.up{background:var(--series)} .dbar .b.dn{background:var(--inactive)}
+
+.tyi.U{border-color:var(--inactive)!important;color:var(--ink-3)!important;background:none!important}
 </style>
 <header class="inlap-nav">
   <div>
@@ -394,6 +407,7 @@ td .ty{display:inline-grid;vertical-align:middle;margin-left:3px}
         <a id="prevS" class="snav-a" href="#"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"/></svg><span class="snav-l" id="prevL"></span></a>
         <a id="nextS" class="snav-a" href="#"><span class="snav-l" id="nextL"></span><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></svg></a>
       </span>
+      <a id="toReplay" href="#" hidden>Watch the replay</a>
       <a href="../#data">All weekends</a>
       <a class="hide-sm" href="https://www.youtube.com/@f1inlap">YouTube</a>
       <button class="theme-btn" type="button" aria-label="Switch theme"><svg class="i-moon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z"/></svg><svg class="i-sun" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z"/></svg></button>
@@ -434,12 +448,15 @@ td .ty{display:inline-grid;vertical-align:middle;margin-left:3px}
           <svg id="trace"></svg>
           <div id="dSectors" style="margin-top:6px"></div>
           <div id="dStints" style="margin-top:10px"></div>
+          <div class="cbox raceOnly" hidden><h4>Race story <em class="h4note">position every lap</em></h4><div id="storyC"></div></div>
+          <div class="cbox raceOnly" hidden><h4>Positions gained</h4><div id="gainC"></div></div>
+          <div class="cbox raceOnly" hidden><h4>Race pace</h4><div id="paceC"></div></div>
           <div class="cbox"><h4>Team-mates</h4><div id="matesC"></div></div>
           <div class="cbox"><h4>Speed trap</h4><div id="trapC"></div></div>
           <div class="cbox"><h4>Team order</h4><div id="teamOrderC"></div></div>
           <div class="cbox" id="seasonBox" hidden><h4>Against their season</h4><div id="seasonC"></div></div>
           <div class="cbox" id="devBox" hidden><h4>Development curve</h4><div id="devC"></div></div>
-          <div class="cbox"><h4>Soft vs medium</h4><div id="tyreOffC"></div></div>
+          <div class="cbox notRace"><h4>Soft vs medium</h4><div id="tyreOffC"></div></div>
           <div class="cbox"><h4>Where the gap came from</h4><div id="idealC"></div></div>
           <div class="cbox"><h4>Run plan</h4><div id="planC"></div></div>
         </div>
@@ -487,7 +504,8 @@ const $=s=>document.querySelector(s), TEAMCOL={};
 let D=null, sel=null;
 const esc=t=>(t==null?'':String(t)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const mmss=t=>{if(t==null)return '-';const m=Math.floor(t/60);return m?`${m}:${(t-60*m).toFixed(3).padStart(6,'0')}`:t.toFixed(3)};
-const SESS={FP1:'Practice 1',FP2:'Practice 2',FP3:'Practice 3',Q:'Qualifying',SQ:'Sprint Qualifying',S:'Sprint'};
+const SESS={FP1:'Practice 1',FP2:'Practice 2',FP3:'Practice 3',Q:'Qualifying',SQ:'Sprint Qualifying',S:'Sprint',R:'Race'};
+const isRace=()=>!!(D&&D.meta&&D.meta.kind==='race');
 
 /* Team colours are IDENTITY ONLY - a chip beside the name. They are never the
    encoding of a chart, because 22 drivers cannot be told apart by hue. */
@@ -707,6 +725,19 @@ function drawRuns(target){
 function drawKpis(){
   const m=D.meta, sb=D.sessionBest;
   const cards=[];
+  if(isRace()){
+    const w=D.drivers[0], R=D.race, sc=R.cautions.filter(c=>c.type==='SC').length, v=R.cautions.filter(c=>c.type==='VSC').length;
+    const fin=D.drivers.filter(d=>d.race.status==='Finished'||/^\+/.test(d.race.status)).length;
+    cards.push(['Winner',w.code,w.race.start?'from P'+w.race.start:'']);
+    if(sb.lap)cards.push(['Fastest lap',mmss(sb.lap.v),sb.lap.code]);
+    cards.push(['Safety cars',sc+(v?' + '+v+' VSC':''),R.cautions.map(c=>'L'+c.startLap+'-'+c.endLap).join(' ')]);
+    if(sb.trap)cards.push(['Top speed',sb.trap.v.toFixed(0),'km/h '+sb.trap.code]);
+    if(m.trackTemp!=null)cards.push(['Track temp',m.trackTemp.toFixed(1)+'°','air '+(m.airTemp!=null?m.airTemp.toFixed(1)+'°':'-')]);
+    cards.push(['Finishers',fin,'of '+m.totalDrivers+(R.classification==='provisional'?' (provisional)':'')]);
+    $('#kpis').innerHTML=cards.map(([k,v,s])=>
+      `<div class="kpi"><s>${esc(k)}</s><b>${esc(String(v))}<i>${esc(s)}</i></b></div>`).join('');
+    return;
+  }
   if(sb.lap)cards.push(['Fastest lap',mmss(sb.lap.v),sb.lap.code]);
   if(sb.combo)cards.push(['Best sector combo',mmss(sb.combo),'across cars']);
   if(sb.trap)cards.push(['Top speed',sb.trap.v.toFixed(0),'km/h '+sb.trap.code]);
@@ -729,6 +760,9 @@ let selA=null, selB=null, railSort='pos';
    in the data, so this is a toggle rather than a choice made for the reader. */
 let gapMode='leader';
 function gapText(d){
+  if(isRace()){const r=d.race||{};
+    if(r.status&&r.status!=='Finished')return /^\+/.test(r.status)?r.status.replace(' Laps','L').replace(' Lap','L'):'DNF';
+    return r.gained==null?'':r.gained>0?'▲'+r.gained:r.gained<0?'▼'+(-r.gained):'=';}
   if(gapMode==='next') return d.gapNext==null?'-':'+'+d.gapNext.toFixed(3);
   return d.gap?'+'+d.gap.toFixed(3):'fastest';
 }
@@ -768,9 +802,12 @@ function miniSpark(d,best,worst){
 }
 /* Tyre sets used in the session, as F1-style icons (ring in the compound colour + letter).
    The set the driver's best lap came on is filled. Hover lists every stint with its laps. */
-const TYNAME={S:'Soft',M:'Medium',H:'Hard',I:'Intermediate',W:'Wet'};
+const TYNAME={S:'Soft',M:'Medium',H:'Hard',I:'Intermediate',W:'Wet',U:'Unknown (not in the feed)'};
 function stintList(d){
   const best=d.laps&&d.laps.length?d.laps.reduce((m,l)=>l.t<m.t?l:m,d.laps[0]):null;
+  if(d.race&&d.race.stints&&d.race.stints.length)
+    return d.race.stints.map((st,i)=>({i:i+1,c:st.c||'',laps:st.laps||0,from:st.from,to:st.to,
+      best:!!(best&&best.n>=st.from&&best.n<=st.to)}));
   let from=1; return (d.stints||[]).map((st,i)=>{
     const n=st.laps||0, to=from+Math.max(n,1)-1;
     const o={i:i+1,c:st.c||'',laps:n,from,to,best:!!(best&&best.n>=from&&best.n<=to)};
@@ -780,7 +817,7 @@ function tyreIcons(d){
   const L=stintList(d); if(!L.length)return '<span class="tys"></span>';
   const show=L.slice(0,4), more=L.length-show.length;
   return `<span class="tys" data-code="${esc(d.code)}">${show.map(x=>
-    `<i class="tyi ${x.c}${x.best?' b':''}">${x.c}</i>`).join('')}${more>0?`<i class="tymore">+${more}</i>`:''}</span>`;
+    `<i class="tyi ${x.c||'U'}${x.best?' b':''}">${x.c||'?'}</i>`).join('')}${more>0?`<i class="tymore">+${more}</i>`:''}</span>`;
 }
 function tyreTip(d){
   const L=stintList(d);
@@ -813,6 +850,12 @@ function drawRail(){
   document.querySelectorAll('#railList .drow').forEach(r=>{
     const d=drv(r.dataset.code);
     r.onclick=e=>pick(d.code, e.shiftKey||e.metaKey||e.ctrlKey);
+    if(isRace()){const x=d.race;
+      bind(r,`<b>${esc(d.name||d.code)}</b><br><s>${esc(d.team)}</s><br>Finished <b>P${x.finish??'-'}</b> <s>${esc(x.status)}</s><br>
+        Started P${x.start??'-'}${D.race.startKind==='qualifying'?' <s>(qualifying)</s>':''}${x.gained!=null?` · ${x.gained>0?'+':''}${x.gained} places`:''}<br>
+        Race pace <b>${x.pace?mmss(x.pace):'-'}</b>${x.paceGap?` <s>+${x.paceGap.toFixed(3)}</s>`:''} · fastest ${mmss(d.best)}<br>
+        ${x.pits.length} stop${x.pits.length===1?'':'s'}${x.pits.length?' (L'+x.pits.join(', L')+')':''}<br><s>click to focus · shift-click to compare</s>`);
+      return;}
     bind(r,`<b>${esc(d.name||d.code)}</b><br><s>${esc(d.team)}</s><br>Best <b>${mmss(d.best)}</b> (P${d.pos})<br>
       ${d.cleanLaps} clean laps · trap ${d.trap?d.trap.toFixed(0):'-'}<br>
       Sector ranks: S1 P${d.sectorPos.s1??'-'}, S2 P${d.sectorPos.s2??'-'}, S3 P${d.sectorPos.s3??'-'}<br>
@@ -840,6 +883,9 @@ function drawTrace(){
     g+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" style="stroke:var(--grid)" stroke-width="1"/>
         <text x="${L-7}" y="${y+3.5}" style="fill:var(--ink-4)" font-size="11" text-anchor="end">${mmss(t)}</text>`;
   }
+  if(isRace())(D.race.cautions||[]).forEach(c=>{const a=Math.max(n0,c.startLap)-.5,b=Math.min(n1,c.endLap)+.5;
+    if(b>a)g+=`<rect x="${X(a)}" y="${T}" width="${Math.max(0,X(b)-X(a))}" height="${H-T-Bm}" style="fill:var(--sc-band)"/>
+      <text x="${X(a)+4}" y="${T+11}" style="fill:var(--ink-3)" font-size="10" font-weight="700">${c.type}</text>`});
   const step=Math.max(1,Math.ceil((n1-n0)/8));
   for(let n=n0;n<=n1;n+=step)
     g+=`<text x="${X(n)}" y="${H-8}" style="fill:var(--ink-4)" font-size="11" text-anchor="middle">L${n}</text>`;
@@ -956,6 +1002,11 @@ function setSideTab(t){
 function drawSideD(){
   $('#pointsD').innerHTML=(D.keyPoints||[]).map(p=>`<li>${esc(p)}</li>`).join('');
   drawMates('#matesC'); drawTrap('#trapC'); drawRuns('#runsD');
+  document.querySelectorAll('.raceOnly').forEach(e=>e.hidden=!isRace());
+  document.querySelectorAll('.notRace').forEach(e=>e.hidden=isRace());
+  document.querySelectorAll('#rail .seg2').forEach(e=>e.style.display=isRace()?'none':'');
+  const hg=document.querySelector('#rail .hg'); if(hg)hg.textContent=isRace()?'+/-':'Gap';
+  if(isRace()){drawStory('#storyC');drawGain('#gainC');drawPace('#paceC');}
   drawTeamOrder('#teamOrderC'); drawSeason('#seasonC'); drawDev('#devC'); drawTyreOffset('#tyreOffC'); drawIdeal('#idealC'); drawRunPlan('#planC');
   if(sideTab==='teams')drawTeams();
 }
@@ -999,12 +1050,17 @@ fetch(file).then(r=>{if(!r.ok)throw new Error(r.status+' '+r.statusText);return 
     $('#sub').textContent=`Round ${m.round} · ${m.year} · ${m.totalDrivers} drivers`+
       (m.trackTemp!=null?` · track ${m.trackTemp.toFixed(1)}°C`:'');
     $('#points').innerHTML=(d.keyPoints||[]).map(p=>`<li>${esc(p)}</li>`).join('');
-    $('#foot').innerHTML='Practice and qualifying '+
+    if(m.kind==='race') $('#foot').innerHTML='Positions and lap times come from the official timing feed. '+
+      (d.race.classification==='provisional'?'The official classification was not published when this was built, so the finishing order is provisional. ':'')+
+      'Race pace is each driver\'s median clean lap (no pit, out or safety-car laps); fuel burn and traffic are not removed.';
+    else $('#foot').innerHTML='Practice and qualifying '+
       'are shown as data rather than replayed: there is no race to watch back. Long-run pace is '+
       'fuel corrected; fuel loads and engine modes are hidden in practice, so treat everything '+
       'here as indicative, not proof.';
     $('#load').hidden=true; $('#body').hidden=false;
     render();
+    if(m.kind==='race'){const rf=file.replace(/^session-/,'replay-');
+      fetch(rf,{method:'HEAD'}).then(r=>{if(r.ok){const a=$('#toReplay');a.href='dashboard.html?f='+encodeURIComponent(rf);a.hidden=false}}).catch(()=>{});}
     fetch(`teamform-${m.year}.json`,{cache:'no-cache'}).then(r=>r.ok?r.json():null)
       .then(t=>{TF=t; if(TF&&isDesk())drawSideD()}).catch(()=>{});
   })
@@ -1020,7 +1076,7 @@ $('#tblBtn').onclick=()=>{
 // written by the exporter; without it (e.g. the local dashboard) the arrows stay hidden.
 (function(){
   const here=new URLSearchParams(location.search).get('f');
-  const NAME={FP1:'FP1',FP2:'FP2',FP3:'FP3',SQ:'Sprint Quali',Q:'Quali'};
+  const NAME={FP1:'FP1',FP2:'FP2',FP3:'FP3',SQ:'Sprint Quali',Q:'Quali',S:'Sprint',R:'Race'};
   fetch('sessions.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(list=>{
     if(!list||!list.length)return;
     const i=list.findIndex(x=>x.file===here); if(i<0)return;
@@ -1054,7 +1110,8 @@ const median=a=>{const b=a.slice().sort((x,y)=>x-y),m=b.length>>1;return b.lengt
 /* 1. TEAM ORDER: each team's quickest car, as a gap to the quickest team */
 function drawTeamOrder(target){
   const T={};
-  D.drivers.forEach(d=>{if(d.best&&(!T[d.team]||d.best<T[d.team].best))T[d.team]={team:d.team,best:d.best,code:d.code}});
+  const val=d=>isRace()?(d.race&&d.race.pace):d.best;
+  D.drivers.forEach(d=>{const v=val(d);if(v&&(!T[d.team]||v<T[d.team].best))T[d.team]={team:d.team,best:v,code:d.code}});
   const R=Object.values(T).sort((a,b)=>a.best-b.best);
   if(!R.length){$(target).innerHTML='<span style="color:var(--ink-4)">No timed laps.</span>';return}
   const top=R[0].best, mx=Math.max(.001,...R.map(t=>t.best-top));
@@ -1066,9 +1123,9 @@ function drawTeamOrder(target){
       <td style="color:${on?'var(--emphasis)':'var(--ink-2)'};font-weight:700;white-space:nowrap">${esc(t.team)}</td>
       <td style="width:100%"><div class="bartrack"><div class="bar${on?' on':''}" style="width:${i?w:0}%"></div></div></td>
       <td class="num" style="color:var(--ink-1);font-weight:700">${i?'+'+g.toFixed(3):mmss(t.best)}</td></tr>`}).join('')}</tbody></table>
-    <div class="legend"><span>each team's quickest lap; bar = gap to the quickest team</span></div>`;
+    <div class="legend"><span>${isRace()?"each team's faster car by race pace (median clean lap)":"each team's quickest lap"}; bar = gap to the quickest team</span></div>`;
   document.querySelectorAll(target+' tr').forEach(tr=>{const t=T[tr.dataset.team];
-    bind(tr,`<b>${esc(t.team)}</b><br>best <b>${mmss(t.best)}</b> by ${esc(t.code)}<br><s>${t.best===top?'quickest team':'+'+(t.best-top).toFixed(3)+'s to the quickest team'}</s>`)});
+    bind(tr,`<b>${esc(t.team)}</b><br>${isRace()?'race pace':'best'} <b>${mmss(t.best)}</b> by ${esc(t.code)}<br><s>${t.best===top?'quickest team':'+'+(t.best-top).toFixed(3)+'s to the quickest team'}</s>`)});
 }
 
 const PUSH_GAP=2.0;  // a best medium 2s+ off the best soft was a long-run lap, not a push lap
@@ -1099,7 +1156,9 @@ function drawTyreOffset(target){
    best time in that sector (from any car). The three parts add up to the gap to the best sector
    combo. Sector times are those of each driver's fastest lap, so this is where THAT lap lost time. */
 function drawIdeal(target){
-  const SB={s1:D.sessionBest.s1.v,s2:D.sessionBest.s2.v,s3:D.sessionBest.s3.v}, K=['s1','s2','s3'];
+  const sb=D.sessionBest||{};
+  if(!(sb.s1&&sb.s2&&sb.s3)){$(target).innerHTML='<span style="color:var(--ink-4)">No sector times in the timing data for this session.</span>';return}
+  const SB={s1:sb.s1.v,s2:sb.s2.v,s3:sb.s3.v}, K=['s1','s2','s3'];
   const R=D.drivers.filter(d=>d.best&&d.sectors&&K.every(k=>d.sectors[k]))
     .map(d=>{const L=K.map(k=>Math.max(0,d.sectors[k]-SB[k]));return {code:d.code,team:d.team,L,tot:L[0]+L[1]+L[2]}})
     .sort((a,b)=>a.tot-b.tot);
@@ -1131,7 +1190,7 @@ function drawRunPlan(target){
     ${rows.map(({d,L})=>{const best=(d.laps||[]).length?d.laps.reduce((m,l)=>l.t<m.t?l:m,d.laps[0]):null;
       return `<div class="plan-row" data-code="${d.code}">
         <span class="plan-c" style="color:${isSel(d.code)?'var(--emphasis)':'var(--ink-2)'}">${esc(d.code)}</span>
-        <div class="plan-track">${L.map(x=>`<span class="seg ${x.c}" data-i="${x.i}" style="left:calc(${(x.from-1)/maxN*100}% + 1px);width:calc(${(x.to-x.from+1)/maxN*100}% - 2px)">${x.laps>=3?x.c:''}</span>`).join('')}
+        <div class="plan-track">${L.map(x=>`<span class="seg ${x.c||'U'}" data-i="${x.i}" style="left:calc(${(x.from-1)/maxN*100}% + 1px);width:calc(${(x.to-x.from+1)/maxN*100}% - 2px)">${x.laps>=3?(x.c||'?'):''}</span>`).join('')}
           ${best?`<b class="plan-best" style="left:${(best.n-0.5)/maxN*100}%" title="best lap, L${best.n}"></b>`:''}</div></div>`}).join('')}
   </div>
   <div class="legend">${used.map(c=>`<span class="k"><span class="ty ${c}">${c}</span>${TYNAME[c]||c}</span>`).join('')}
@@ -1252,5 +1311,94 @@ function drawDev(target){
     const up=hiS.flatMap(([t])=>((TF.upgrades||{})[t]||[]).filter(u=>u.round===rr).map(u=>`<br><s>${esc(t)}: ${esc(u.label)}</s>`)).join('');
     tip(`R${rr} ${esc(ev.replace(' Grand Prix',''))} · ${esc(FORM_NAME[devSes])}<br>${lines.join('<br>')}${up}`,e)};
   svg.onmouseleave=hide;
+}
+
+/* ============ race mode: the race as data ==================================================
+   For a race the summary is a deep dive alongside the replay: who ran where on every lap, who
+   gained, and who actually had the pace. Same rules as every other chart: one emphasis colour
+   for the driver in focus (series A / emphasis B when comparing), the field in grey, ink text,
+   safety cars as a neutral band, every mark hoverable. */
+/* RACE STORY: position by lap for the whole field, the focus drivers drawn over the top */
+function drawStory(target){
+  const R=D.race, N=R.totalLaps||Math.max(...D.drivers.map(d=>d.race.lapsDone||0)), n=D.drivers.length;
+  const W=Math.max(320,$(target).clientWidth||700), H=Math.max(260,n*13+40), L=34, Rm=46, T=10, Bm=24;
+  const X=l=>L+l/N*(W-L-Rm), Y=p=>T+(p-1)/(n-1)*(H-T-Bm);
+  const line=d=>{const P=[];if(d.race.start)P.push([0,d.race.start]);d.race.posByLap.forEach(x=>P.push(x));return P};
+  const path=P=>P.map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)).join(' ');
+  // a stretch the timing feed got wrong (lost lap, see ingest/session_summary.py) is drawn dashed
+  const parts=d=>{const P=line(d), f=d.race.feedFrom; if(!f)return [P,null];
+    const k=P.findIndex(x=>x[0]>=f); return k<1?[P,null]:[P.slice(0,k),[P[k-1],P[P.length-1]]]};
+  let g='';
+  (R.cautions||[]).forEach(c=>{g+=`<rect x="${X(c.startLap-1)}" y="${T-4}" width="${X(c.endLap)-X(c.startLap-1)}" height="${H-T-Bm+8}" style="fill:var(--sc-band)"/>
+    <text x="${X(c.startLap-1)+4}" y="${H-Bm-6}" style="fill:var(--ink-3)" font-size="10" font-weight="700">${c.type}</text>`});
+  [1,5,10,15,20].filter(p=>p<=n).forEach(p=>{g+=`<line x1="${L}" x2="${W-Rm}" y1="${Y(p)}" y2="${Y(p)}" style="stroke:var(--grid)"/>
+    <text x="${L-7}" y="${Y(p)+3.5}" style="fill:var(--ink-4)" font-size="11" text-anchor="end">P${p}</text>`});
+  for(let l=10;l<=N;l+=10)g+=`<text x="${X(l)}" y="${H-7}" style="fill:var(--ink-4)" font-size="11" text-anchor="middle">L${l}</text>`;
+  g+=`<text x="${X(0)}" y="${H-7}" style="fill:var(--ink-4)" font-size="11" text-anchor="middle">${R.startKind==='grid'?'grid':'quali'}</text>`;
+  const A=drv(selA), B=selB?drv(selB):null, hi=[[A,cssv(B?'--series':'--emphasis')],...(B?[[B,cssv('--emphasis')]]:[])].filter(x=>x[0]);
+  D.drivers.filter(d=>!hi.some(h=>h[0]===d)).forEach(d=>{const [a,b]=parts(d);
+    g+=`<path d="${path(a)}" fill="none" stroke="${cssv('--inactive')}" stroke-opacity=".4" stroke-width="1.2" stroke-linejoin="round"/>`;
+    if(b)g+=`<path d="${path(b)}" fill="none" stroke="${cssv('--inactive')}" stroke-opacity=".4" stroke-width="1.2" stroke-dasharray="3 3"/>`});
+  hi.forEach(([d,hex])=>{const P=line(d), [pa,pb]=parts(d);
+    g+=`<path d="${path(pa)}" fill="none" stroke="${hex}" stroke-width="2.5" stroke-linejoin="round"/>`;
+    if(pb)g+=`<path d="${path(pb)}" fill="none" stroke="${hex}" stroke-width="2" stroke-dasharray="4 4"/>`;
+    d.race.pits.forEach(pl=>{const q=P.find(x=>x[0]===pl);if(q)g+=`<circle cx="${X(q[0])}" cy="${Y(q[1])}" r="3.5" fill="${cssv('--surface-1')}" stroke="${hex}" stroke-width="2"/>`});
+    const e=P[P.length-1]; if(e)g+=`<text x="${X(e[0])+6}" y="${Y(e[1])+4}" style="fill:var(--ink-1)" font-size="11.5" font-weight="700">${esc(d.code)} ${d.race.status==='Finished'?'P'+d.race.finish:esc(d.race.status==='Retired'?'DNF':d.race.status)}</text>`});
+  $(target).innerHTML=`<svg id="storySvg" viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;display:block">${g}</svg>
+    <div class="legend">${hi.map(([d],i)=>`<span class="k"><i class="lg line" style="background:var(${hi.length>1&&i===0?'--series':'--emphasis'})"></i>${esc(d.code)}</span>`).join('')}
+      <span class="k"><i class="lg line" style="background:var(--inactive)"></i>rest of the field</span>
+      <span class="k"><i class="lg ring"></i>pit stop</span><span class="k"><i class="lg sc"></i>safety car</span>
+      ${D.drivers.some(d=>d.race.feedFrom)?`<span class="k"><i class="lg dash" style="border-color:var(--ink-3)"></i>timing feed unreliable (${D.drivers.filter(d=>d.race.feedFrom).map(d=>esc(d.code)+' from L'+d.race.feedFrom).join(', ')}); line ends at the official result</span>`:''}
+      <span>start = ${R.startKind==='grid'?'official grid':'qualifying position (grid not yet published)'}. Click a driver on the left, shift-click to compare.</span></div>`;
+  const svg=$('#storySvg');
+  svg.onmousemove=e=>{const r=svg.getBoundingClientRect(), mx=(e.clientX-r.left)*(W/r.width);
+    const lap=Math.max(0,Math.min(N,Math.round((mx-L)/(W-L-Rm)*N)));
+    const rows=hi.map(([d])=>{if(d.race.feedFrom&&lap>=d.race.feedFrom)
+        return `<b>${esc(d.code)}</b> <s>timing feed lost this car from L${d.race.feedFrom}; classified P${d.race.finish}</s>`;
+      const q=line(d).find(x=>x[0]===lap);const st=stintList(d).find(x=>lap>=x.from&&lap<=x.to);
+      return `<b>${esc(d.code)}</b> ${q?'P'+q[1]:'out'}${st?' <s>'+(TYNAME[st.c]||st.c)+'</s>':''}${d.race.pits.includes(lap)?' <b>pits</b>':''}`});
+    const c=(R.cautions||[]).find(c=>lap>=c.startLap&&lap<=c.endLap);
+    tip(`${lap?'Lap '+lap:'Start'}${c?' · '+c.type:''}<br>${rows.join('<br>')}`,e)};
+  svg.onmouseleave=hide;
+}
+
+/* POSITIONS GAINED: start to flag, a diverging bar per finisher */
+function drawGain(target){
+  const R=D.drivers.filter(d=>d.race.start&&d.race.finish);
+  if(!R.length){$(target).innerHTML='<span style="color:var(--ink-4)">No start positions yet.</span>';return}
+  const mx=Math.max(1,...R.map(d=>Math.abs(d.race.gained||0)));
+  $(target).innerHTML=`<table class="gaint"><tbody>${R.map(d=>{const g=d.race.gained||0,on=isSel(d.code),w=Math.abs(g)/mx*50,
+      fin=d.race.status==='Finished'||/^\+/.test(d.race.status);
+      return `<tr data-code="${d.code}">
+        <td class="num" style="color:var(--ink-4);width:28px">P${d.race.finish}</td>
+        <td class="chipcell"><span class="chip" style="background:${teamCol(d.team)};height:12px;display:block"></span></td>
+        <td style="font-weight:700;width:42px;color:${on?'var(--emphasis)':'var(--ink-2)'}">${esc(d.code)}</td>
+        <td style="width:100%"><div class="dbar"><i class="mid"></i>${g&&fin?`<i class="b ${g>0?'up':'dn'}" style="${g>0?'left:50%':'right:50%'};width:${w}%"></i>`:''}</div></td>
+        <td class="num" style="color:var(--ink-1);font-weight:700;white-space:nowrap">${fin?(g>0?'▲'+g:g<0?'▼'+(-g):'='):(d.race.status==='Retired'?'DNF':esc(d.race.status))}</td></tr>`}).join('')}</tbody></table>
+    <div class="legend"><span class="k"><i class="lg line" style="background:var(--series)"></i>places gained</span>
+      <span class="k"><i class="lg line" style="background:var(--inactive)"></i>places lost</span>
+      <span>from the ${D.race.startKind==='grid'?'official grid':'qualifying order (grid not yet published)'} to the flag, in finishing order</span></div>`;
+  document.querySelectorAll(target+' tr').forEach(tr=>{const d=drv(tr.dataset.code);
+    tr.onclick=e=>pick(d.code,e.shiftKey||e.metaKey||e.ctrlKey);
+    bind(tr,`<b>${esc(d.code)}</b><br>P${d.race.start} → P${d.race.finish} <s>${esc(d.race.status)}</s><br>${d.race.pits.length} stop${d.race.pits.length===1?'':'s'}`)});
+}
+
+/* RACE PACE: median clean lap, the honest single number for who was quick on Sunday */
+function drawPace(target){
+  const R=D.drivers.filter(d=>d.race.pace).sort((a,b)=>a.race.pace-b.race.pace);
+  if(!R.length){$(target).innerHTML='<span style="color:var(--ink-4)">Not enough clean laps.</span>';return}
+  const mx=Math.max(.001,...R.map(d=>d.race.paceGap||0));
+  $(target).innerHTML=`<table><tbody>${R.map((d,i)=>{const on=isSel(d.code),w=Math.max(2,(d.race.paceGap||0)/mx*100);
+      return `<tr data-code="${d.code}">
+        <td class="num" style="color:var(--ink-4);width:22px">${i+1}</td>
+        <td class="chipcell"><span class="chip" style="background:${teamCol(d.team)};height:12px;display:block"></span></td>
+        <td style="font-weight:700;width:42px;color:${on?'var(--emphasis)':'var(--ink-2)'}">${esc(d.code)}</td>
+        <td style="width:100%"><div class="bartrack"><div class="bar${on?' on':''}" style="width:${i?w:0}%"></div></div></td>
+        <td class="num" style="color:var(--ink-1);font-weight:700">${i?'+'+d.race.paceGap.toFixed(3):mmss(d.race.pace)}</td>
+        <td class="num" style="color:var(--ink-4);white-space:nowrap">P${d.race.finish??'-'}</td></tr>`}).join('')}</tbody></table>
+    <div class="legend"><span>median of each driver's clean laps (no pit, out or safety-car laps); right column = where they finished. Pace well above the finishing place points to strategy, traffic or incidents.</span></div>`;
+  document.querySelectorAll(target+' tr').forEach(tr=>{const d=drv(tr.dataset.code);
+    tr.onclick=e=>pick(d.code,e.shiftKey||e.metaKey||e.ctrlKey);
+    bind(tr,`<b>${esc(d.code)}</b><br>race pace <b>${mmss(d.race.pace)}</b> over ${d.cleanLaps} clean laps<br>fastest lap ${mmss(d.best)}<br><s>finished P${d.race.finish??'-'} ${esc(d.race.status)}</s>`)});
 }
 </script>
