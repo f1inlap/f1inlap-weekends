@@ -1,8 +1,10 @@
-<!doctype html><meta charset=utf-8>
+<!doctype html>
+<html lang="en-GB">
+<meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
 <title>Radio log · F1 Inlap</title>
 <meta name="theme-color" content="#0b0b0d">
-<link rel="stylesheet" href="../assets/brand.css?v=9e5b0e5f">
+<link rel="stylesheet" href="../assets/brand.css?v=eb7bdc3d">
 <script>
 (function(){var t=null;try{t=localStorage.getItem("inlap-theme")}catch(e){}if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)})();
 </script>
@@ -20,7 +22,9 @@
 -->
 <style>
 /* design layer: carbon surfaces, low-opacity lines, AA-contrast ink, numbers in Geist Mono */
-:root{--bg:#08080a;--card:#0f0f13;--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.14);--fg:#ececf0;--fg2:#cfcfd6;--muted:#9a9aa6;
+/* neutrals alias the shared brand.css tokens (one palette, both themes); only the semantic
+   colours (tyres, flags, rows) are local */
+:root{--bg:var(--carbon);--card:var(--tarmac);--line:var(--grid-line);--line2:var(--grid-line-strong);--fg:var(--ink-1);--fg2:var(--ink-2);--muted:var(--ink-3);--dim:var(--ink-4);
   --ok:#27f4d2;--accent:#ff8a3d;--bad:#e8002d;--warn:#ffd24a;--ctl:#16161c;--ctl-hover:#1d1d25;--chip:#1c1c22;--playing:#161010;
   --S-bg:#3a1013;--S:#ff6b73;--M-bg:#3a3410;--M:#ffd12e;--H-bg:#24242a;--H:#e8e8ea;--I-bg:#0d2e13;--I:#43b02a;--W-bg:#0b2440;--W:#5aa9e6;
   --G-bg:#0c3b33;--SC-bg:#3a2a10;--SC:#ffb44a;--red-row:#1a0d0f;--sc-row:#1a140a;
@@ -28,12 +32,10 @@
      as text even on dark (Red Bull 4.13:1) */
   --team-ink:var(--fg);--team-bar:block}
 /* light: pale tint behind dark text; every pill and label clears 4.5:1 */
-@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f3f3f4;--card:#fafafb;--line:rgba(17,17,20,.10);--line2:rgba(17,17,20,.2);--fg:#111114;--fg2:#34343b;--muted:#5a5a63;
-  --ok:#06705c;--accent:#b34700;--bad:#c8001f;--warn:#7a5e00;--ctl:#ffffff;--ctl-hover:#ececef;--chip:#e6e6ea;--playing:#fdf1e9;
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){  --ok:#06705c;--accent:#b34700;--bad:#c8001f;--warn:#7a5e00;--ctl:#ffffff;--ctl-hover:#ececef;--chip:#e6e6ea;--playing:#fdf1e9;
   --S-bg:#fde3e5;--S:#b0001a;--M-bg:#fbf0c4;--M:#6f5500;--H-bg:#e4e4e9;--H:#34343b;--I-bg:#dcf2e1;--I:#1d6b12;--W-bg:#dce8f7;--W:#1d5f9e;
   --G-bg:#d6f2ea;--SC-bg:#fde8cc;--SC:#8a4a00;--red-row:#fdeced;--sc-row:#fdf3e3;--team-ink:var(--fg);--team-bar:block}}
-:root[data-theme="light"]{--bg:#f3f3f4;--card:#fafafb;--line:rgba(17,17,20,.10);--line2:rgba(17,17,20,.2);--fg:#111114;--fg2:#34343b;--muted:#5a5a63;
-  --ok:#06705c;--accent:#b34700;--bad:#c8001f;--warn:#7a5e00;--ctl:#ffffff;--ctl-hover:#ececef;--chip:#e6e6ea;--playing:#fdf1e9;
+:root[data-theme="light"]{  --ok:#06705c;--accent:#b34700;--bad:#c8001f;--warn:#7a5e00;--ctl:#ffffff;--ctl-hover:#ececef;--chip:#e6e6ea;--playing:#fdf1e9;
   --S-bg:#fde3e5;--S:#b0001a;--M-bg:#fbf0c4;--M:#6f5500;--H-bg:#e4e4e9;--H:#34343b;--I-bg:#dcf2e1;--I:#1d6b12;--W-bg:#dce8f7;--W:#1d5f9e;
   --G-bg:#d6f2ea;--SC-bg:#fde8cc;--SC:#8a4a00;--red-row:#fdeced;--sc-row:#fdf3e3;--team-ink:var(--fg);--team-bar:block}
 *{box-sizing:border-box}
@@ -45,7 +47,7 @@ h1{font-weight:700;margin:26px 0 4px;font-size:28px;letter-spacing:-.025em;text-
 .sub{color:var(--muted);font-size:14px;margin-bottom:12px}
 .sector{height:4px;background:linear-gradient(90deg,#ff8000 0 25%,#e8002d 25% 50%,#00d2be 50% 75%,#3671c6 75%);border-radius:3px;margin:0 0 18px}
 .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;position:sticky;top:56px;background:var(--bg);padding:10px 0;z-index:5;border-bottom:1px solid var(--line)}
-select,button{background:var(--ctl);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:0 13px;min-height:38px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background-color .15s,border-color .15s}
+select,button{background:var(--ctl);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:0 13px;min-height:44px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background-color .15s,border-color .15s}
 select:hover,button:hover{background:var(--ctl-hover);border-color:var(--line2)}
 button:active{transform:scale(.97)}
 button.primary{background:var(--fg);border-color:transparent;color:var(--bg);font-weight:700}
@@ -55,7 +57,7 @@ button.primary:hover{opacity:.9}
 .clip.playing{background:var(--playing);box-shadow:inset 3px 0 0 var(--accent)}
 .when{flex:0 0 92px;text-align:right}
 .lap{font:700 17px/1.2 "Geist Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums;color:var(--team-ink,var(--team))}
-.clock{color:var(--muted);font:500 11.5px "Geist Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.clock{color:var(--muted);font:500 12px "Geist Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
 .body{flex:1;min-width:0}
 .who{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 .code{font:700 16px "Geist Mono",ui-monospace,monospace;letter-spacing:.02em;color:var(--team-ink,var(--team));display:inline-flex;align-items:center;gap:6px}
@@ -75,9 +77,13 @@ button.primary:hover{opacity:.9}
 .rc span{display:inline-block;background:var(--ctl);border:1px solid var(--line);border-radius:5px;padding:1px 7px;margin:2px 4px 0 0}
 .play{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:6px}
 .play button{width:44px;height:44px;border-radius:50%;font-size:15px;padding:0}
-.dl{display:flex;align-items:center;justify-content:center;width:52px;height:24px;
+.dl{display:flex;align-items:center;justify-content:center;width:52px;height:24px;position:relative;
     border:1px solid var(--line);border-radius:7px;background:var(--ctl);color:var(--muted);
-    text-decoration:none;font-size:10.5px;font-weight:800;letter-spacing:.3px}
+    text-decoration:none;font-size:11px;font-weight:800;letter-spacing:.02em}
+/* invisible 44px-tall hit area, extended downwards so it never covers the play button above */
+.dl::before{content:"";position:absolute;inset:-4px -4px -16px}
+.note{color:var(--muted);font-size:13px;margin:-6px 0 14px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .dl:hover{background:var(--ctl-hover);color:var(--fg);border-color:var(--line2)}
 .empty{color:var(--muted);padding:30px 0}
 .ev{display:flex;gap:12px;align-items:center;padding:9px 0;margin:4px 0;font-size:12px;
@@ -92,25 +98,26 @@ button.primary:hover{opacity:.9}
     <a class="inlap-mark" href="../" aria-label="F1 Inlap home" translate="no">F1 INLAP</a>
     <span class="here">Radio log</span>
     <nav aria-label="Site">
-      <a href="../#data">All weekends</a>
-      <a class="hide-sm" href="https://www.youtube.com/@f1inlap">YouTube</a>
+      <a class="nav-back" href="../#data">All weekends</a>
+      <a class="nav-yt" href="https://www.youtube.com/@f1inlap"><svg class="yt-i" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M164.44,121.34l-48-32A8,8,0,0,0,104,96v64a8,8,0,0,0,12.44,6.66l48-32a8,8,0,0,0,0-13.32ZM120,145.05V111l25.58,17ZM234.33,69.52a24,24,0,0,0-14.49-16.4C185.56,39.88,131,40,128,40s-57.56-.12-91.84,13.12a24,24,0,0,0-14.49,16.4C19.08,79.5,16,97.74,16,128s3.08,48.5,5.67,58.48a24,24,0,0,0,14.49,16.41C69,215.56,120.4,216,127.34,216h1.32c6.94,0,58.37-.44,91.18-13.11a24,24,0,0,0,14.49-16.41c2.59-10,5.67-28.22,5.67-58.48S236.92,79.5,234.33,69.52Zm-15.49,113a8,8,0,0,1-4.77,5.49c-31.65,12.22-85.48,12-86,12H128c-.54,0-54.33.2-86-12a8,8,0,0,1-4.77-5.49C34.8,173.39,32,156.57,32,128s2.8-45.39,5.16-54.47A8,8,0,0,1,41.93,68c30.52-11.79,81.66-12,85.85-12h.27c.54,0,54.38-.18,86,12a8,8,0,0,1,4.77,5.49C221.2,82.61,224,99.43,224,128S221.2,173.39,218.84,182.47Z"/></svg><span class="yt-t">YouTube</span></a>
       <button class="theme-btn" type="button" aria-label="Switch theme"><svg class="i-moon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z"/></svg><svg class="i-sun" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z"/></svg></button>
     </nav>
   </div>
 </header>
-<div class=wrap>
+<main class=wrap>
   <h1 id=title>Radio log</h1>
   <div class=sub id=sub>loading…</div>
   <div class=sector></div>
+  <p class=note id=note>Audio only: Formula 1 publishes these clips without transcripts, so each one is listed with what was happening on track when it was sent.</p>
   <div class=bar>
-    <select id=drv onchange=render()><option value="">All drivers</option></select>
-    <button class=primary id=playall onclick=toggleAll()>▶ Play all</button>
+    <select id=drv aria-label="Filter by driver" onchange=render()><option value="">All drivers</option></select>
+    <button type=button class=primary id=playall onclick=toggleAll()>▶ Play all</button>
     <span class=t id=count></span>
     <span style="flex:1"></span>
     <a id=replaylink class=t href="#" target=_blank>open replay →</a>
   </div>
   <div id=list></div>
-</div>
+</main>
 <audio id=au></audio>
 <script>
 const $=s=>document.querySelector(s);
@@ -191,6 +198,9 @@ function dlName(c){
   return `${ev}-${m.year||''}-${when}-${c.code}.mp3`;
 }
 
+// accessible name for a clip's play toggle; aria-pressed carries the playing state
+const clipName=c=>`Play ${c.code} radio, ${c.pre?'on the grid':'lap '+(c.lap||'?')}`;
+
 function render(){
   const f=$('#drv').value;
   const rows=CLIPS.filter(c=>!f||c.code===f);
@@ -221,9 +231,9 @@ function render(){
         <div class=clock>${mmss(c.t-(D.meta.t0||0))}</div>
       </div>
       <div class=play>
-        <button onclick="play(${i})">${playing===i?'❚❚':'▶'}</button>
+        <button type=button id=pb${i} onclick="play(${i})" aria-pressed="${playing===i}" aria-label="${esc(clipName(c))}">${playing===i?'❚❚':'▶'}</button>
         <a class=dl href="${esc(c.url)}" download="${esc(dlName(c))}"
-           title="Download ${esc(dlName(c))}" onclick="event.stopPropagation()">↓ MP3</a>
+           title="Download ${esc(dlName(c))}" onclick="event.stopPropagation()"><span aria-hidden=true>↓&nbsp;</span>MP3<span class=sr-only>, download ${esc(clipName(c).replace(/^Play /,''))}</span></a>
       </div>
       <div class=body>
         <div class=who>
@@ -233,24 +243,37 @@ function render(){
           <span class="flagpill ${c.flag.cls}">${c.flag.txt}</span>
         </div>
         <div class=ctx>${bits.join(' · ')}</div>
+        ${(c.summary||c.text)?`<div class=ctx>${esc(c.summary||c.text)}</div>`:''}
         ${c.rc.length?`<div class=rc>${c.rc.map(m=>`<span>${esc(m.msg)}</span>`).join('')}</div>`:''}
       </div></div>`;
   }).join('');
 }
 
+// Toggle the playing state on the affected rows only. Re-rendering the whole list (as this
+// once did) replaced the focused button and dropped keyboard focus to <body>.
+function setPlaying(i){
+  const prev=playing; playing=i;
+  for(const k of [prev,i]){
+    if(k<0) continue;
+    const row=document.getElementById('c'+k), b=document.getElementById('pb'+k);
+    if(row) row.classList.toggle('playing',playing===k);
+    if(b){b.textContent=playing===k?'❚❚':'▶'; b.setAttribute('aria-pressed',String(playing===k))}
+  }
+}
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
 function play(i){
   const a=$('#au'), c=CLIPS[i];
-  if(playing===i && !a.paused){a.pause();playing=-1;render();return}
-  playing=i;
+  if(playing===i && !a.paused){a.pause();setPlaying(-1);return}
+  setPlaying(i);
   a.onerror=()=>{if(c.src&&a.src!==c.src){a.onerror=null;a.src=c.src;a.play().catch(()=>{})}};
   a.src=c.url; a.play().catch(()=>{});
-  render();
-  const el=document.getElementById('c'+i); if(el) el.scrollIntoView({block:'center',behavior:'smooth'});
+  const el=document.getElementById('c'+i);
+  if(el) el.scrollIntoView({block:'center',behavior:reduceMotion.matches?'auto':'smooth'});
 }
 function toggleAll(){
   chain=!chain; $('#playall').textContent=chain?'■ Stop':'▶ Play all';
   if(chain) play(nextIdx(-1));
-  else{$('#au').pause();playing=-1;render()}
+  else{$('#au').pause();setPlaying(-1)}
 }
 function nextIdx(from){
   const f=$('#drv').value;
@@ -258,9 +281,9 @@ function nextIdx(from){
   return -1;
 }
 $('#au').addEventListener('ended',()=>{
-  if(!chain){playing=-1;render();return}
+  if(!chain){setPlaying(-1);return}
   const n=nextIdx(playing);
-  if(n<0){chain=false;$('#playall').textContent='▶ Play all';playing=-1;render()}
+  if(n<0){chain=false;$('#playall').textContent='▶ Play all';setPlaying(-1)}
   else play(n);
 });
 

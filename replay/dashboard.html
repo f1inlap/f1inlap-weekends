@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-GB">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Race replay · F1 Inlap</title>
-<link rel="stylesheet" href="../assets/brand.css?v=9e5b0e5f">
+<link rel="stylesheet" href="../assets/brand.css?v=eb7bdc3d">
 <script>
 (function(){var t=null;try{t=localStorage.getItem("inlap-theme")}catch(e){}if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)})();
 </script>
@@ -18,25 +18,25 @@
        low-opacity white, and an ink scale where even the faintest label clears WCAG AA
        (--dim was #5a5a66 at ~2.9:1). Colour is reserved for DATA: purple/green/yellow timing,
        tyre compounds, flags, and orange = team radio. Selection UI is neutral, never orange. */
-    --bg:#08080a; --card:#0f0f13; --raise:#16161c; --inset:#0a0a0d;
-    --line:rgba(255,255,255,.07); --line2:rgba(255,255,255,.13);
-    --fg:#ececf0; --fg2:#c3c3cb; --muted:#9a9aa6; --dim:#80808c;
-    --ui:"Geist",-apple-system,"Segoe UI",Roboto,sans-serif;
+    /* neutrals ALIAS the shared brand.css tokens (one palette for the whole site, both
+       themes); only the surfaces the replay needs beyond the brand scale stay local */
+    --bg:var(--pit); --card:#0f0f13; --raise:#16161c; --inset:#0a0a0d;
+    --line:var(--grid-line); --line2:var(--grid-line-strong);
+    --fg:var(--ink-1); --fg2:var(--ink-2); --muted:var(--ink-3); --dim:var(--ink-4);
+    --ui:var(--font-ui);
     --hard:#e9e9ee; --neg:#ff5a6e; --screen:#0b0b0e;
     --row-line:rgba(255,255,255,.04); --row-hover:#121217; --row-on:#16161c; --track:#18181f; --mid:#3a3a45;
     --ctl-hover:#1d1d25; --ctl-active:#22222b; --radio-on:#241505; --radio-hover:#1a1208; --thumb:#24242c;
     --flag-g:#062b16; --flag-g-line:#10502c; --flag-y:#2e2905; --flag-y-line:#6b5f16; --flag-r:#2c060f; --flag-r-line:#7a1f2c;
     --accent:#ff6c00; --purple:#b14bff; --green:#22e07a; --yellow:#ffd400; --red:#e8002d;
-    --mono:"Geist Mono",'SF Mono',ui-monospace,Menlo,Consolas,monospace;
+    --mono:var(--font-num);
   }
   @media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
     /* LIGHT theme: chrome, tower and panels go light; the CANVAS views (map, strategy, lap
        chart, timeline, telemetry trace) stay dark "screens" (--screen), because every colour
        drawn on them was chosen against a dark background. Timing colours are re-stepped to
        clear 4.5:1 as text on the light panel: purple 6.3, green 5.2, amber 5.9, soft 5.8. */
-    --bg:#f3f3f4; --card:#fafafb; --raise:#ffffff; --inset:#eeeef1;
-    --line:rgba(17,17,20,.10); --line2:rgba(17,17,20,.2);
-    --fg:#111114; --fg2:#34343b; --muted:#5a5a63; --dim:#66666f;
+    --bg:var(--carbon); --card:#fafafb; --raise:#ffffff; --inset:#eeeef1;
     --accent:#b34700; --purple:#7e2fd1; --green:#087a3d; --yellow:#7a5e00; --red:#c8001f;
     --hard:#4a4a52; --neg:#c8102e;
     --row-line:rgba(17,17,20,.06); --row-hover:#f0f0f3; --row-on:#ebebf0; --track:#e4e4e9; --mid:#b5b5bd;
@@ -48,9 +48,7 @@
        chart, timeline, telemetry trace) stay dark "screens" (--screen), because every colour
        drawn on them was chosen against a dark background. Timing colours are re-stepped to
        clear 4.5:1 as text on the light panel: purple 6.3, green 5.2, amber 5.9, soft 5.8. */
-    --bg:#f3f3f4; --card:#fafafb; --raise:#ffffff; --inset:#eeeef1;
-    --line:rgba(17,17,20,.10); --line2:rgba(17,17,20,.2);
-    --fg:#111114; --fg2:#34343b; --muted:#5a5a63; --dim:#66666f;
+    --bg:var(--carbon); --card:#fafafb; --raise:#ffffff; --inset:#eeeef1;
     --accent:#b34700; --purple:#7e2fd1; --green:#087a3d; --yellow:#7a5e00; --red:#c8001f;
     --hard:#4a4a52; --neg:#c8102e;
     --row-line:rgba(17,17,20,.06); --row-hover:#f0f0f3; --row-on:#ebebf0; --track:#e4e4e9; --mid:#b5b5bd;
@@ -81,9 +79,23 @@
   .brand::after{content:"";height:2px;border-radius:1px;
          background:linear-gradient(90deg,#ff8000 0 25%,#e10600 25% 50%,#00d2be 50% 75%,#3671c6 75%)}
   .brand em{color:var(--accent);font-style:normal}
-  .home{color:var(--muted);text-decoration:none;font-size:11px;white-space:nowrap}
+  .home{color:var(--muted);text-decoration:none;font-size:11px;white-space:nowrap;
+        display:inline-flex;align-items:center;gap:8px;min-height:44px}
+  .home[hidden]{display:none}
   .home:hover{color:var(--fg)}
-  @media (max-width:640px){.home{display:none}}
+  .home svg{width:18px;height:18px;flex:none}
+  .nav-yt svg.yt-i{display:none}
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  /* phones: "All weekends" stays, YouTube collapses to a 44px icon button, the breakdown
+     link and the brand's subtitle give way */
+  @media (max-width:640px){
+    #toBreak,.brand em{display:none}
+    .top{gap:8px!important;padding:6px 10px!important}
+    .nav-yt{justify-content:center;min-width:44px}
+    .nav-yt svg.yt-i{display:block}
+    .nav-yt .yt-t{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+    .flag{padding:6px 9px!important}
+  }
   .flag{margin-left:auto;padding:3px 10px;border-radius:4px;font-weight:800;letter-spacing:.1em;font-size:11px;
         background:var(--flag-g);color:var(--green);border:1px solid var(--flag-g-line)}
   .flag.YELLOW,.flag.SC,.flag.VSC{background:var(--flag-y);color:var(--yellow);border-color:var(--flag-y-line)}
@@ -250,11 +262,11 @@
   .brand em{color:var(--muted);font-weight:600;letter-spacing:.06em}
   #evt{font:500 12.5px/1.2 var(--ui);color:var(--muted)}
   .home{font:500 13px/1 var(--ui);color:var(--muted)}
-  .flag{font:700 10.5px/1 var(--ui);letter-spacing:.12em;padding:6px 12px;border-radius:999px}
+  .flag{font:700 11px/1 var(--ui);letter-spacing:.06em;padding:6px 12px;border-radius:999px}
   .stats{background:none;gap:0;grid-template-columns:1.25fr repeat(6,minmax(0,1fr))}
   .st{background:none;padding:7px 14px 8px;border-left:1px solid var(--line)}
   .st:first-child{border-left:0}
-  .st s{font:600 10px/1 var(--ui);letter-spacing:.09em;color:var(--dim);margin-bottom:5px}
+  .st s{font:600 11px/1 var(--ui);letter-spacing:.06em;color:var(--dim);margin-bottom:5px}
   .st b{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
   .st b i{font-size:12px}
   #sLap{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1}
@@ -263,15 +275,17 @@
   main{gap:10px;padding:10px}
   #right,#bottom{gap:10px}
   .panel{background:var(--card);border:1px solid var(--line);border-radius:10px}
-  .panel>h2{font:600 10.5px/1 var(--ui);letter-spacing:.09em;color:var(--muted);background:none;
-            padding:6px 12px;min-height:36px;border-bottom:1px solid var(--line);gap:10px}
+  .panel>h2{font:600 11px/1 var(--ui);letter-spacing:.06em;color:var(--muted);background:none;
+            padding:0 12px;min-height:44px;border-bottom:1px solid var(--line);gap:10px}
   .panel>h2::before{color:var(--dim);font-size:10px}
   .panel>h2 .r{font:500 12px/1 var(--ui);color:var(--dim);letter-spacing:0}
   .panel>h2:hover{color:var(--fg)}
   /* segmented controls: neutral selection, so orange keeps meaning "radio" */
-  .seg{border:1px solid var(--line);border-radius:8px;padding:2px;gap:2px;background:var(--inset);margin-left:2px}
-  .seg button{border-radius:6px;padding:5px 10px;font:600 10.5px/1 var(--ui);letter-spacing:.08em;
-              background:none;color:var(--muted);min-height:0;transition:background-color .15s,color .15s}
+  .seg{border:1px solid var(--line);border-radius:8px;padding:2px;gap:2px;background:var(--inset);margin-left:2px;overflow:visible}
+  .seg button{border-radius:6px;padding:6px 10px;font:600 11px/1 var(--ui);letter-spacing:.06em;
+              background:none;color:var(--muted);min-height:0;transition:background-color .15s,color .15s;position:relative}
+  /* invisible 44px-tall hit area: the visual button is ~25px, the panel title bar is 44px */
+  .seg button::before{content:"";position:absolute;left:0;right:0;top:-10px;bottom:-10px}
   .seg button:hover{color:var(--fg);background:var(--raise)}
   .seg button.on{background:var(--fg);color:var(--bg);font-weight:700}
 
@@ -290,18 +304,25 @@
   .row>s{flex:0 0 50px}
   #telc{height:48px}
   .spd s,.gearbox s,.row>s,.sublabel,.bstat s,.brow,.dlg{font-family:var(--ui);color:var(--dim)}
-  .spd s{font-size:10.5px}
+  .spd s{font-size:11px}
   .gearbox{background:var(--inset);border-color:var(--line);border-radius:8px}
   .gearbox b{color:var(--fg)}
   /* canvas views are dark screens in BOTH themes: their drawing colours assume dark */
   .panel.map>.body,#pStint>.body,#pLap>.body{background:var(--screen)}
   #tlc{background:var(--screen);border-radius:6px}
-  .gearbox s{font-size:9px}
-  .row>s{font-size:10.5px;letter-spacing:.08em}
-  .sublabel{font-size:10.5px;letter-spacing:.09em}
+  .gearbox s{font-size:11px;letter-spacing:.06em}
+  .row>s{font-size:11px;letter-spacing:.06em}
+  .sublabel{font-size:11px;letter-spacing:.06em}
   .bstat{border-color:var(--line);background:var(--line);border-radius:8px}
   .bstat div{background:var(--inset);padding:6px 9px}
-  .bstat s{font-size:9.5px}
+  .bstat s{font-size:11px;letter-spacing:.06em}
+  /* 11px floor for functional labels; small uppercase tracked at .06em at most */
+  .spd s{font-size:11px;letter-spacing:.06em}
+  .brow{font-size:11px;letter-spacing:.06em}
+  .dlg,.trend,.ty,.pitf{font-size:11px;letter-spacing:.04em}
+  .sec{font-size:11px}
+  .se u{font-size:11px}
+  .bnote,.ideal,.bhead span{font-size:11px}
   .bnote,.ideal,#wx{font-family:var(--ui);color:var(--muted)}
   #wx{font-size:11.5px}
   .track,.gtrack,.btr,.meter{background:var(--track)}
@@ -363,6 +384,7 @@
     <div id="evt"></div>
     <a class="home" id="toBreak" href="#" hidden>Race breakdown</a>
     <a class="home" href="../#data">All weekends</a>
+    <a class="home nav-yt" href="https://www.youtube.com/@f1inlap"><svg class="yt-i" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M164.44,121.34l-48-32A8,8,0,0,0,104,96v64a8,8,0,0,0,12.44,6.66l48-32a8,8,0,0,0,0-13.32ZM120,145.05V111l25.58,17ZM234.33,69.52a24,24,0,0,0-14.49-16.4C185.56,39.88,131,40,128,40s-57.56-.12-91.84,13.12a24,24,0,0,0-14.49,16.4C19.08,79.5,16,97.74,16,128s3.08,48.5,5.67,58.48a24,24,0,0,0,14.49,16.41C69,215.56,120.4,216,127.34,216h1.32c6.94,0,58.37-.44,91.18-13.11a24,24,0,0,0,14.49-16.41c2.59-10,5.67-28.22,5.67-58.48S236.92,79.5,234.33,69.52Zm-15.49,113a8,8,0,0,1-4.77,5.49c-31.65,12.22-85.48,12-86,12H128c-.54,0-54.33.2-86-12a8,8,0,0,1-4.77-5.49C34.8,173.39,32,156.57,32,128s2.8-45.39,5.16-54.47A8,8,0,0,1,41.93,68c30.52-11.79,81.66-12,85.85-12h.27c.54,0,54.38-.18,86,12a8,8,0,0,1,4.77,5.49C221.2,82.61,224,99.43,224,128S221.2,173.39,218.84,182.47Z"/></svg><span class="yt-t">YouTube</span></a>
     <button class="theme-btn" type="button" aria-label="Switch theme"><svg class="i-moon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z"/></svg><svg class="i-sun" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z"/></svg></button>
     <div class="flag" id="flag">GREEN</div>
   </div>
@@ -377,7 +399,8 @@
   </div>
 </header>
 
-<main>
+<main id="main">
+  <h1 class="sr-only" id="pageH">Race replay</h1>
   <div class="panel map" id="pMap">
     <h2><span id="mapTitle">CIRCUIT</span>
       <span class="seg" onclick="event.stopPropagation()">
@@ -392,7 +415,7 @@
         <button id="gmLead" class="on" onclick="setGapMode('lead')">LEADER</button><button id="gmInt" onclick="setGapMode('int')">INTERVAL</button>
       </span>
       <span class="r" id="clsr"></span></h2>
-      <div class="body" id="clswrap"><table id="cls"></table></div></div>
+      <div class="body" id="clswrap" tabindex="0" role="region" aria-label="Timing tower"><table id="cls"></table></div></div>
     <div class="panel" id="pTel"><h2>
       <span class="seg" onclick="event.stopPropagation()">
         <button id="tabCar" class="on" onclick="setTab('car')">CAR</button><button id="tabSec" onclick="setTab('sec')">SECTORS</button><button id="tabBat" onclick="setTab('bat')">BATTLE</button>
@@ -440,12 +463,13 @@
       <div class="body"><canvas id="stc" style="width:100%;height:100%"></canvas></div></div>
     <div class="panel" id="pLap"><h2>POSITION BY LAP <span class="r">all cars</span></h2>
       <div class="body"><canvas id="lcc" style="width:100%;height:100%"></canvas></div></div>
-    <div class="panel" id="pMsg"><h2>RACE CONTROL &amp; RADIO</h2><div class="body" id="rc"></div></div>
+    <div class="panel" id="pMsg"><h2>RACE CONTROL &amp; RADIO</h2><div class="body" id="rc" tabindex="0" role="region" aria-label="Race control messages and team radio"></div></div>
   </div>
 </main>
 
 <footer>
-  <canvas id="tlc"></canvas>
+  <canvas id="tlc" role="slider" tabindex="0" aria-label="Race timeline" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0"
+          aria-valuetext="Lap 1, 0:00" aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown Home End"></canvas>
   <div class="ctl">
     <button class="pl" id="play">▶ Play</button>
     <button id="plap" aria-label="Previous lap">⏮ Lap</button>
@@ -454,7 +478,7 @@
     <select id="focus" aria-label="Map focus"><option value="">whole track</option></select>
     <label class="cb"><input type="checkbox" id="autoradio" checked> radio</label>
     <audio id="au" controls preload="none"></audio>
-    <span class="hint">Tap the timeline to scrub · orange ticks are team radio · tap a panel title to collapse</span>
+    <span class="hint">Tap the timeline to scrub (or focus it and use the arrow keys) · orange ticks are team radio · tap a panel title to collapse</span>
   </div>
 </footer>
 
@@ -535,11 +559,27 @@ function init(){
       const i=Math.floor(((e.clientY-r.top)*dpr-16*dpr)/rowH);
       if(rows[i]){sel=rows[i].code;paint()} return}
     const b=pick(e.clientX-r.left,e.clientY-r.top);if(b){sel=b;paint()}};
+  // Page-wide shortcuts. Ignored whenever a control has focus: Space on a focused button
+  // must press THAT button (it used to toggle playback instead), and arrows belong to
+  // selects, the timeline slider and page scrolling.
   addEventListener('keydown',e=>{
+    if(e.defaultPrevented||e.altKey||e.ctrlKey||e.metaKey)return;
+    if(e.target.closest&&e.target.closest('button,a,select,input,textarea,audio,[role=slider],[contenteditable],[tabindex]'))return;
     if(e.key==='ArrowRight'){F=clamp(F+D.meta.hz,0,D.meta.frames-1);paint()}
     if(e.key==='ArrowLeft'){F=clamp(F-D.meta.hz,0,D.meta.frames-1);paint()}
     if(e.key==='.')jumpLap(1); if(e.key===',')jumpLap(-1);
     if(e.key===' '){e.preventDefault();$('#play').click()}});
+  // the timeline is a keyboard slider: arrows step 5 s, Up/Down and PageUp/PageDown a lap
+  $('#tlc').addEventListener('keydown',e=>{
+    const k=e.key,step=5*D.meta.hz;
+    if(k==='ArrowRight')F=clamp(F+step,0,D.meta.frames-1);
+    else if(k==='ArrowLeft')F=clamp(F-step,0,D.meta.frames-1);
+    else if(k==='ArrowUp'||k==='PageUp'){jumpLap(1);e.preventDefault();return}
+    else if(k==='ArrowDown'||k==='PageDown'){jumpLap(-1);e.preventDefault();return}
+    else if(k==='Home')F=0;
+    else if(k==='End')F=D.meta.frames-1;
+    else return;
+    e.preventDefault();paint(true)});
   if(mapView==='tracker')setView('tracker');
   size();paint();
 }
@@ -624,6 +664,10 @@ function paint(force){
   for(const i of [1,2,3]){const b=best.s[i-1];
     $('#sS'+i).innerHTML=b?`${b.v.toFixed(3)} <i>${b.code}</i>`:'-'}
   $('#selc').textContent=sel;
+  if(doDom){   // timeline slider state for assistive tech, in seconds from lights out
+    const tl=$('#tlc'),dur=Math.round(D.meta.t1-D.meta.t0),lapTxt=$('#sLap').textContent.split('/')[0];
+    tl.setAttribute('aria-valuemax',dur);tl.setAttribute('aria-valuenow',Math.round(clamp(el,0,dur)));
+    tl.setAttribute('aria-valuetext',`Lap ${lapTxt||'-'} of ${D._maxLap}, ${$('#sClock').textContent}`)}
 }
 
 /* Colour the circuit by where the selected car carries more speed than its rival, averaged
@@ -668,11 +712,11 @@ function drawDelta(t){
       g.strokeStyle=dv>=0?`rgba(34,224,122,${0.25+0.75*f})`:`rgba(232,0,45,${0.25+0.75*f})`}
     g.lineWidth=tw;g.stroke()}
   // scale + legend, top-left
-  g.font=`700 ${9*dpr}px ${getComputedStyle(document.body).fontFamily}`;
+  g.font=`700 ${11*dpr}px ${getComputedStyle(document.body).fontFamily}`;
   g.textAlign='left';g.textBaseline='top';
   g.fillStyle='#22e07a';g.fillText(`${sel} FASTER`,10*dpr,10*dpr);
-  g.fillStyle='#e8002d';g.fillText(`${riv} FASTER`,10*dpr,24*dpr);
-  g.fillStyle='#5a5a66';g.fillText(`full colour = ${mx.toFixed(0)} km/h`,10*dpr,38*dpr);
+  g.fillStyle='#ff5a6e';g.fillText(`${riv} FASTER`,10*dpr,26*dpr);
+  g.fillStyle='#8f8f99';g.fillText(`full colour = ${mx.toFixed(0)} km/h`,10*dpr,42*dpr);
 }
 
 function drawMap(t,st){
@@ -795,21 +839,25 @@ function drawTracker(t,st){
    trying offsets around the dot, drawing a leader line when the label is pushed away,
    and dropping any label that cannot find clear space. The selected car always wins. */
 function placeLabels(g,pts){
-  const CW=7.2*dpr,H=13*dpr,placed=[];
+  // Team colours failed as TEXT (several are blues) so codes are drawn in the foreground ink
+  // on a dark pill, with the team colour as a bar on the pill's left edge.
+  const CW=7.9*dpr,H=15*dpr,BAR=3*dpr,placed=[];
   const CAND=[[0,-15],[0,15],[22,-9],[-22,-9],[22,9],[-22,9],[0,-28],[0,28],[34,-20],[-34,-20],[34,20],[-34,20]];
   const hit=r=>placed.some(p=>Math.abs(p.x-r.x)<(p.w+r.w)/2+2&&Math.abs(p.y-r.y)<(p.h+r.h)/2+1);
-  g.font=`700 ${10*dpr}px ${getComputedStyle(document.body).fontFamily}`;
+  g.font=`700 ${11*dpr}px ${getComputedStyle(document.body).fontFamily}`;
   g.textAlign='center';g.textBaseline='middle';
   for(const p of pts.slice().sort((a,b)=>(b.on-a.on)||(a.rank-b.rank))){
-    const w=p.code.length*CW+6*dpr;let put=null;
+    const w=p.code.length*CW+10*dpr+BAR;let put=null;
     for(const [dx,dy] of CAND){const r={x:p.X+dx*dpr,y:p.Y+dy*dpr,w,h:H};if(!hit(r)){put=r;break}}
     if(!put){if(!p.on)continue;put={x:p.X,y:p.Y-15*dpr,w,h:H}}
     placed.push(put);
     const far=Math.hypot(put.x-p.X,put.y-p.Y)>18*dpr;
     if(far){g.strokeStyle=p.col+'80';g.lineWidth=1*dpr;g.beginPath();
       g.moveTo(p.X,p.Y);g.lineTo(put.x,put.y);g.stroke()}
-    g.fillStyle='rgba(0,0,0,.78)';g.fillRect(put.x-w/2,put.y-H/2,w,H);
-    g.fillStyle=p.on?'#fff':p.col;g.fillText(p.code,put.x,put.y);
+    g.fillStyle='rgba(8,8,11,.9)';g.fillRect(put.x-w/2,put.y-H/2,w,H);
+    g.fillStyle=p.col;g.fillRect(put.x-w/2,put.y-H/2,BAR,H);
+    if(p.on){g.strokeStyle='#fff';g.lineWidth=1.2*dpr;g.strokeRect(put.x-w/2,put.y-H/2,w,H)}
+    g.fillStyle=p.on?'#fff':'#ececf0';g.fillText(p.code,put.x+BAR/2,put.y);
   }
 }
 
@@ -1204,7 +1252,7 @@ function drawTrace(p,i){
 
   const v=p.v[i];                                           // head marker
   if(v!=null){g.beginPath();g.arc(X(i),Y(v),2.6*dpr,0,TAU);g.fillStyle='#fff';g.fill()}
-  g.fillStyle='#5a5a66';g.font=`${8*dpr}px ${getComputedStyle(document.body).fontFamily}`;
+  g.fillStyle='#8f8f99';g.font=`${11*dpr}px ${getComputedStyle(document.body).fontFamily}`;
   g.textBaseline='top';g.fillText(`${Math.round(vmax)} km/h`,4*dpr,3*dpr);
   g.textBaseline='bottom';g.fillText(`${TRACE_S}s`,4*dpr,H-3*dpr);
 }
@@ -1212,11 +1260,15 @@ function drawTrace(p,i){
 function drawStints(){
   const c=$('#stc'),g=c.getContext('2d');if(!c.width)return;g.clearRect(0,0,c.width,c.height);
   const S=D.stints||{},rows=order(now()).map(r=>r.code).filter(x=>S[x]);if(!rows.length)return;
-  const padL=32*dpr,padT=12*dpr,h=(c.height-padT-6*dpr)/rows.length,W=c.width-padL-8*dpr;
+  const padT=12*dpr,h=(c.height-padT-6*dpr)/rows.length,stagger=h<12*dpr,LBL=26*dpr;
+  const padL=(stagger?2*LBL+6*dpr:LBL+8*dpr),W=c.width-padL-8*dpr;
   const COL={SOFT:'#e8002d',MEDIUM:'#ffd400',HARD:'#e9e9ee',INTERMEDIATE:'#22e07a',WET:'#3671c6'};
-  g.font=`700 ${8.5*dpr}px ${getComputedStyle(document.body).fontFamily}`;g.textBaseline='middle';
+  g.font=`700 ${11*dpr}px ${getComputedStyle(document.body).fontFamily}`;g.textBaseline='middle';
   rows.forEach((code,i)=>{const y=padT+i*h;
-    g.fillStyle=code===sel?'#fff':'rgba(234,234,240,.55)';g.textAlign='right';g.fillText(code,padL-5*dpr,y+h/2);
+    // 11px codes need ~12px of height; when 20 rows share a short panel, alternate rows
+    // sit in two columns so each label has two rows of room
+    const lx=padL-5*dpr-(stagger&&i%2?LBL:0);
+    g.fillStyle=code===sel?'#fff':'rgba(234,234,240,.72)';g.textAlign='right';g.fillText(code,lx,y+h/2);
     for(const st of S[code]){const x0=padL+(st.from-1)/D._maxLap*W,x1=padL+st.to/D._maxLap*W;
       g.fillStyle=COL[st.compound]||'#44444e';g.fillRect(x0,y+1*dpr,Math.max(1.5*dpr,x1-x0-1*dpr),h-2.5*dpr)}});
   const lapNow=Math.max(...order(now()).map(r=>r.lp.lap));
@@ -1224,12 +1276,12 @@ function drawStints(){
 
 function drawLapChart(){
   const c=$('#lcc'),g=c.getContext('2d');if(!c.width)return;g.clearRect(0,0,c.width,c.height);
-  const padL=22*dpr,padT=10*dpr,padB=8*dpr,W=c.width-padL-8*dpr,H=c.height-padT-padB,N=codes.length;
-  g.lineWidth=1*dpr;g.font=`${8*dpr}px ${getComputedStyle(document.body).fontFamily}`;
+  const padL=24*dpr,padT=10*dpr,padB=8*dpr,W=c.width-padL-8*dpr,H=c.height-padT-padB,N=codes.length;
+  g.lineWidth=1*dpr;g.font=`${11*dpr}px ${getComputedStyle(document.body).fontFamily}`;
   g.textAlign='right';g.textBaseline='middle';
   for(let p=1;p<=N;p+=4){const y=padT+(p-1)/(N-1)*H;
     g.strokeStyle='#141419';g.beginPath();g.moveTo(padL,y);g.lineTo(c.width-8*dpr,y);g.stroke();
-    g.fillStyle='#3a3a44';g.fillText(p,padL-3*dpr,y)}
+    g.fillStyle='#8f8f99';g.fillText(p,padL-3*dpr,y)}
   for(const code of codes){const L=D._laps[code];if(!L)continue;
     g.strokeStyle=code===sel?D.drivers[code].color:D.drivers[code].color+'3a';
     g.lineWidth=(code===sel?2.2:1)*dpr;g.beginPath();let st=false;

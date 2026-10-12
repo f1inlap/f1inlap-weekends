@@ -1,8 +1,8 @@
-<!doctype html><html lang="en"><meta charset="utf-8">
+<!doctype html><html lang="en-GB"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Session summary · F1 Inlap</title>
 <meta name="theme-color" content="#08080a">
-<link rel="stylesheet" href="../assets/brand.css?v=9e5b0e5f">
+<link rel="stylesheet" href="../assets/brand.css?v=eb7bdc3d">
 <script>
 (function(){var t=null;try{t=localStorage.getItem("inlap-theme")}catch(e){}if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)})();
 </script>
@@ -39,8 +39,9 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark}}
 :root[data-theme="dark"]{color-scheme:dark}
 :root{
-  --surface-0:#08080a; --surface-1:#0f0f13; --surface-2:#16161c; --line:rgba(255,255,255,.08);
-  --ink-1:#ececf0; --ink-2:#c3c3cb; --ink-3:#9a9aa6; --ink-4:#80808c;
+  /* neutrals come from the shared brand.css (--ink-1..4, --grid-line, --pit/--carbon): one
+     palette for the whole site. Only the data colours below are local. */
+  --surface-0:var(--pit); --surface-1:#0f0f13; --surface-2:#16161c; --line:var(--grid-line);
   --series:#1b9ec0;          /* validated: single-series marks */
   --emphasis:#d95926;        /* validated: the highlighted driver */
   /* 7-step sequential ramp, OKLCH lightness stepped evenly 0.40 -> 0.80 at constant hue.
@@ -56,15 +57,14 @@
   --track:#16161c; --grid:#1b1b22; --inactive:#4a4a55; --ctl:#14141a; --tab:#101016;
   --tip-bg:#16161c; --tip-line:#33333d; --on-series:#08080a; --sel-a:#07181d; --sel-b:#1f110a;
   --ty-S:#e8002d; --ty-M:#ffd400; --ty-H:#e9e9ee; --ty-I:#22e07a; --ty-I-ink:#0b0b0d; --ty-W:#3671c6;
-  --mono:"Geist Mono",'SF Mono',ui-monospace,Menlo,Consolas,monospace;
+  --mono:var(--font-num);
 }
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
   /* LIGHT theme. Every value validated with the dataviz method's validator against the
      light panel (#fafafb): series #006f96 + emphasis #b0400f pass all checks (CVD dE 18.5,
      normal 25.8) and clear 5.4:1 as text; the 7-step ramp is OKLCH-stepped at hue 222,
      monotone, adjacent dL >= 0.06, light end 2.08:1. Rank 1 is the DARKEST step here. */
-  --surface-0:#f3f3f4; --surface-1:#fafafb; --surface-2:#eeeef1; --line:rgba(17,17,20,.10);
-  --ink-1:#111114; --ink-2:#34343b; --ink-3:#5a5a63; --ink-4:#66666f;
+  --surface-0:var(--carbon); --surface-1:#fafafb; --surface-2:#eeeef1;
   --series:#006f96; --emphasis:#b0400f;
   --seq-1:#5ac0e1; --seq-2:#45a9c9; --seq-3:#2e93b1; --seq-4:#127e9a;
   --seq-5:#006984; --seq-6:#00546e; --seq-7:#004159;
@@ -81,8 +81,7 @@
      light panel (#fafafb): series #006f96 + emphasis #b0400f pass all checks (CVD dE 18.5,
      normal 25.8) and clear 5.4:1 as text; the 7-step ramp is OKLCH-stepped at hue 222,
      monotone, adjacent dL >= 0.06, light end 2.08:1. Rank 1 is the DARKEST step here. */
-  --surface-0:#f3f3f4; --surface-1:#fafafb; --surface-2:#eeeef1; --line:rgba(17,17,20,.10);
-  --ink-1:#111114; --ink-2:#34343b; --ink-3:#5a5a63; --ink-4:#66666f;
+  --surface-0:var(--carbon); --surface-1:#fafafb; --surface-2:#eeeef1;
   --series:#006f96; --emphasis:#b0400f;
   --seq-1:#5ac0e1; --seq-2:#45a9c9; --seq-3:#2e93b1; --seq-4:#127e9a;
   --seq-5:#006984; --seq-6:#00546e; --seq-7:#004159;
@@ -107,14 +106,14 @@ h1{font-size:27px;margin:22px 0 2px;letter-spacing:-.02em;font-weight:680;text-w
 .sub{color:var(--ink-3);font-size:14px;margin-bottom:16px}
 .sector{height:3px;border-radius:2px;margin:0 0 18px;
   background:linear-gradient(90deg,#ff8000 0 25%,#e8002d 25% 50%,#00d2be 50% 75%,#3671c6 75%)}
-h2{font-size:12px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;
+h2{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
    color:var(--ink-3);margin:30px 0 10px;display:flex;align-items:baseline;gap:10px}
 h2 em{font-style:normal;color:var(--ink-4);font-weight:600;letter-spacing:0;
       text-transform:none;font-size:12.5px}
 /* ---- KPI row: headline numbers are stat tiles, never one-bar charts ---- */
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
 .kpi{background:var(--surface-1);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
-.kpi s{display:block;text-decoration:none;font-size:10.5px;letter-spacing:.11em;
+.kpi s{display:block;text-decoration:none;font-size:11px;letter-spacing:.06em;
        color:var(--ink-4);text-transform:uppercase;margin-bottom:3px}
 .kpi b{display:block;font-size:24px;font-weight:800;letter-spacing:-.4px;
        font-variant-numeric:tabular-nums;line-height:1.15}
@@ -173,7 +172,7 @@ td.chipcell{width:10px;padding-right:0}
 @media(max-width:900px){.two{grid-template-columns:1fr}}
 table{width:100%;border-collapse:collapse}
 td,th{padding:3px 5px;font-size:13px;text-align:left;white-space:nowrap}
-th{color:var(--ink-4);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:700}
+th{color:var(--ink-4);font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:700}
 .num{text-align:right;font-variant-numeric:tabular-nums}
 .bar{height:9px;border-radius:0 4px 4px 0;background:var(--series)}
 .bar.on{background:var(--emphasis)}
@@ -226,7 +225,7 @@ th{color:var(--ink-4);font-size:10.5px;letter-spacing:.09em;text-transform:upper
   #mobileOnly{display:none}
   .pane{background:var(--surface-1);border:1px solid var(--line);border-radius:10px;
         display:flex;flex-direction:column;min-height:0;min-width:0}
-  .pane>h3{margin:0;padding:8px 11px;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;
+  .pane>h2{margin:0;padding:0 11px;min-height:44px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;
            color:var(--ink-3);font-weight:800;border-bottom:1px solid var(--line);
            display:flex;align-items:center;gap:8px;flex:0 0 auto}
   .pane>.inner{flex:1 1 auto;min-height:0;overflow:auto;padding:9px 11px}
@@ -237,23 +236,25 @@ th{color:var(--ink-4);font-size:10.5px;letter-spacing:.09em;text-transform:upper
   .tyi.S{border-color:var(--ty-S)} .tyi.M{border-color:var(--ty-M)} .tyi.H{border-color:var(--ty-H)}
   .tyi.I{border-color:var(--ty-I)} .tyi.W{border-color:var(--ty-W)}
   .tyi.b{background:var(--surface-2);box-shadow:0 0 0 1.5px var(--ink-2)}
-  .tymore{font:700 10px var(--mono);font-style:normal;color:var(--ink-4);margin-left:1px}
+  .tymore{font:700 11px var(--mono);font-style:normal;color:var(--ink-4);margin-left:1px}
   .railhead .hty{width:70px}
   #side{flex-basis:330px!important}
   .rks{display:flex;gap:3px;flex:0 0 auto}
   .rk{width:26px;height:19px;border-radius:4px;display:grid;place-items:center;font:700 11.5px var(--mono);
       font-variant-numeric:tabular-nums}
-  .railhead{display:flex;align-items:center;gap:7px;padding:5px 15px 4px;font:700 10px var(--mono);
-      letter-spacing:.08em;text-transform:uppercase;color:var(--ink-4);border-bottom:1px solid var(--line)}
+  .railhead{display:flex;align-items:center;gap:7px;padding:5px 15px 4px;font:700 11px var(--mono);
+      letter-spacing:.06em;text-transform:uppercase;color:var(--ink-4);border-bottom:1px solid var(--line)}
   .railhead .hp{width:20px;text-align:right} .railhead .hc{width:44px;margin-left:10px}
   .railhead .ht{flex:1 1 auto;text-align:right} .railhead .hg{width:48px;text-align:right}
   .railhead .hr{display:flex;gap:3px} .railhead .hr span{width:26px;text-align:center}
   .cbox{margin-top:18px;padding-top:12px;border-top:1px solid var(--line)}
-  .cbox h4{margin:0 0 8px;font-size:11px;letter-spacing:.9px;text-transform:uppercase;color:var(--ink-3);font-weight:800}
+  .cbox h3{margin:0 0 8px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:800}
   #detail{flex:1 1 auto}
   #side{flex:0 0 372px}
-  .sortbtn{background:none;border:0;color:var(--ink-4);font:700 10px var(--mono);cursor:pointer;
-           letter-spacing:.08em;padding:1px 4px;border-radius:3px}
+  .sortbtn{background:none;border:0;color:var(--ink-4);font:700 11px var(--mono);cursor:pointer;
+           letter-spacing:.06em;padding:6px 8px;border-radius:4px;position:relative}
+  /* invisible 44px-tall hit areas on the small toggles (no visual pseudo-elements on these) */
+  .sortbtn::before,.gapTab::before,.sideTab::before{content:"";position:absolute;left:0;right:0;top:-10px;bottom:-10px}
   .sortbtn:hover{color:var(--ink-1)} .sortbtn.on{color:var(--on-series);background:var(--series)}
   .drow{display:flex;align-items:center;gap:7px;padding:4px 5px;border-radius:6px;cursor:pointer;
         border:1px solid transparent}
@@ -265,7 +266,7 @@ th{color:var(--ink-4);font-size:10.5px;letter-spacing:.09em;text-transform:upper
   .drow .t{flex:1 1 auto;font-size:12px;color:var(--ink-1);text-align:right;font-variant-numeric:tabular-nums}
   .drow .g{font-size:11px;color:var(--ink-4);width:48px;text-align:right;font-variant-numeric:tabular-nums}
   .drow .sp{flex:0 0 46px;height:14px}
-  .pill{font-size:9.5px;font-weight:800;padding:1px 5px;border-radius:9px;letter-spacing:.06em}
+  .pill{font-size:11px;font-weight:800;padding:1px 5px;border-radius:9px;letter-spacing:.06em}
   .pill.a{background:var(--series);color:var(--on-series)} .pill.b{background:var(--emphasis);color:var(--on-series)}
   .cmpbar{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--ink-3);
           padding:7px 11px;border-bottom:1px solid var(--line);flex:0 0 auto;flex-wrap:wrap}
@@ -273,7 +274,7 @@ th{color:var(--ink-4);font-size:10.5px;letter-spacing:.09em;text-transform:upper
   .hint{color:var(--ink-4);font-size:11px}
   .statline{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:9px}
   .st2{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:6px 9px}
-  .st2 s{display:block;text-decoration:none;font-size:9.5px;letter-spacing:.1em;color:var(--ink-4)}
+  .st2 s{display:block;text-decoration:none;font-size:11px;letter-spacing:.06em;color:var(--ink-4)}
   .st2 b{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
   .st2 i{font-style:normal;color:var(--ink-3);font-size:11px;margin-left:4px}
   #trace{width:100%;height:230px;display:block}
@@ -285,19 +286,20 @@ th{color:var(--ink-4);font-size:10.5px;letter-spacing:.09em;text-transform:upper
   .stint{display:flex;gap:2px;height:15px;margin-top:3px}
   .stint span{border-radius:2px;display:grid;place-items:center;font-size:9px;font-weight:800;color:#08080a}
   #side .panelbox{margin-bottom:12px}
-  #side h4{margin:0 0 5px;font-size:10px;letter-spacing:.9px;text-transform:uppercase;color:var(--ink-3);font-weight:800}
+  #side h3{margin:0 0 5px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:800}
   #side table td,#side table th{font-size:11.5px;padding:2px 4px}
-  #side .cell{height:15px;font-size:10px}
+  #side .cell{height:15px;font-size:11px}
   #side .db{height:12px}
-  .seg2{display:inline-flex;border:1px solid var(--line);border-radius:5px;overflow:hidden}
-  .sideTab{border:0;background:var(--tab);color:var(--ink-4);font:800 10px var(--mono);
-           letter-spacing:.1em;padding:3px 9px;cursor:pointer}
+  .seg2{display:inline-flex;border:1px solid var(--line);border-radius:5px}
+  .seg2>button:first-child{border-radius:4px 0 0 4px}.seg2>button:last-child{border-radius:0 4px 4px 0}
+  .sideTab{border:0;background:var(--tab);color:var(--ink-4);font:800 11px var(--mono);
+           letter-spacing:.06em;padding:6px 10px;cursor:pointer;position:relative}
   .sideTab.on{background:var(--series);color:var(--on-series)}
-  .gapTab{border:0;background:var(--tab);color:var(--ink-4);font:800 9.5px var(--mono);
-          letter-spacing:.09em;padding:3px 8px;cursor:pointer}
+  .gapTab{border:0;background:var(--tab);color:var(--ink-4);font:800 11px var(--mono);
+          letter-spacing:.06em;padding:6px 10px;cursor:pointer;position:relative}
   .gapTab.on{background:var(--series);color:var(--on-series)}
-  .railsort{display:flex;align-items:center;gap:3px;padding:5px 9px;border-bottom:1px solid var(--line);
-            font-size:9.5px;letter-spacing:.09em;color:var(--ink-4);flex:0 0 auto}
+  .railsort{display:flex;align-items:center;gap:3px;padding:10px 9px;border-bottom:1px solid var(--line);
+            font-size:11px;letter-spacing:.06em;color:var(--ink-4);flex:0 0 auto}
   .tm-row{border:1px solid var(--line);border-radius:8px;padding:7px 9px;margin-bottom:6px;
           background:var(--surface-2);cursor:pointer}
   .tm-row.on{border-color:var(--series)}
@@ -307,13 +309,13 @@ th{color:var(--ink-4);font-size:10.5px;letter-spacing:.09em;text-transform:upper
              text-overflow:ellipsis;white-space:nowrap}
   .tm-hd .bt{font-size:12px;font-variant-numeric:tabular-nums}
   .tm-hd .gp{font-size:11px;color:var(--ink-4);width:52px;text-align:right;font-variant-numeric:tabular-nums}
-  .tm-meta{display:flex;gap:9px;font-size:10.5px;color:var(--ink-4);margin-top:4px;flex-wrap:wrap}
+  .tm-meta{display:flex;gap:9px;font-size:11px;color:var(--ink-4);margin-top:4px;flex-wrap:wrap}
   .tm-meta b{color:var(--ink-2)}
   .tm-ins{margin-top:6px;font-size:11.5px;line-height:1.5;color:var(--ink-3);display:none}
   .tm-row.on .tm-ins{display:block}
   .tm-ins div{margin-bottom:3px}
   .tm-ins s{text-decoration:none;display:inline-block;min-width:44px;color:var(--ink-4);
-            font-weight:800;font-size:9.5px;letter-spacing:.09em}
+            font-weight:800;font-size:11px;letter-spacing:.06em}
   .tm-bar{height:5px;border-radius:3px;background:var(--track);margin-top:5px;overflow:hidden}
   .tm-bar i{display:block;height:100%;background:var(--series);border-radius:3px}
   .pointsD{font-size:12.5px;color:var(--ink-2);line-height:1.5;margin:0;padding-left:15px}
@@ -325,16 +327,22 @@ th{color:var(--ink-4);font-size:10.5px;letter-spacing:.09em;text-transform:upper
 /* previous / next session, top right; also the keyboard's left and right arrows */
 .snav{display:inline-flex;align-items:center;gap:4px;margin-right:4px}
 .snav[hidden]{display:none}
-.snav-a{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 11px;border-radius:999px;
+.snav-a{display:inline-flex;align-items:center;gap:6px;height:44px;padding:0 11px;border-radius:999px;
   color:var(--ink-2)!important;text-decoration:none!important;font:600 13px/1 var(--mono);white-space:nowrap;
   box-shadow:inset 0 0 0 1px var(--line);transition:background-color .15s,color .15s}
 .snav-a:hover{background:var(--surface-2);color:var(--ink-1)!important}
 .snav-a svg{width:16px;height:16px;flex:none}
 .snav-a[aria-disabled="true"]{opacity:.35;pointer-events:none}
-@media (max-width:640px){.snav-l{display:none}.snav-a{width:36px;justify-content:center;padding:0}}
-/* smallest phones: the arrows + theme toggle fill the bar; the mark already links home */
-@media (max-width:400px){.inlap-nav nav a[href="../#data"]{display:none}.inlap-nav .here{display:none}}
-.tyx{font:600 10.5px var(--mono);color:var(--ink-3);border:1px solid var(--line);border-radius:4px;padding:0 4px;margin-left:4px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.xs-show{display:none}
+/* phones: arrows become 44px icon buttons; their visible label moves to screen-reader text so
+   the accessible name still starts with it */
+@media (max-width:640px){.snav-l{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .snav-a{width:44px;height:44px;justify-content:center;padding:0}.snav{gap:2px;margin-right:0}
+  .inlap-nav .here{display:none}}
+/* smallest phones: the back link shortens rather than disappearing */
+@media (max-width:400px){.xs-hide{display:none}.xs-show{display:inline}}
+.tyx{font:600 11px var(--mono);color:var(--ink-3);border:1px solid var(--line);border-radius:4px;padding:0 4px;margin-left:4px}
 /* tyre chips inside table cells sit inline with the driver code */
 td .ty{display:inline-grid;vertical-align:middle;margin-left:3px}
 
@@ -352,7 +360,7 @@ td .ty{display:inline-grid;vertical-align:middle;margin-left:3px}
 .plan-c,.plan-axis>span{flex:0 0 38px;font:700 12px var(--mono)}
 .plan-track{position:relative;flex:1 1 auto;height:16px}
 .plan-axis .plan-track{height:14px}
-.plan-axis i{position:absolute;transform:translateX(-50%);font:500 10.5px var(--mono);font-style:normal;color:var(--ink-4)}
+.plan-axis i{position:absolute;transform:translateX(-50%);font:500 11px var(--mono);font-style:normal;color:var(--ink-4)}
 .plan-row:hover .plan-track{background:var(--surface-2);border-radius:4px}
 .plan .seg{position:absolute;top:2px;height:12px;border-radius:4px;display:grid;place-items:center;
   font:800 9px/1 var(--mono);color:#0b0b0d;background:var(--ty-M)}
@@ -363,7 +371,7 @@ td .ty{display:inline-grid;vertical-align:middle;margin-left:3px}
 .plan-best-key{position:relative;display:inline-block;top:auto;margin:0 4px 0 2px}
 
 /* season context */
-.formt thead th{font:600 10.5px var(--mono);color:var(--ink-4);text-transform:uppercase;letter-spacing:.06em;text-align:left;padding-bottom:6px;position:relative}
+.formt thead th{font:600 12px var(--mono);color:var(--ink-4);text-transform:uppercase;letter-spacing:.06em;text-align:left;padding-bottom:6px;position:relative}
 .formt thead th.num{text-align:right}
 .formt .axl{position:absolute;left:6px} .formt .axr{float:right;text-transform:none;letter-spacing:0}
 .formt tbody tr{cursor:pointer}
@@ -404,17 +412,17 @@ td .ty{display:inline-grid;vertical-align:middle;margin-left:3px}
     <span class="here">Session summary</span>
     <nav aria-label="Site">
       <span class="snav" id="snav" hidden>
-        <a id="prevS" class="snav-a" href="#"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"/></svg><span class="snav-l" id="prevL"></span></a>
-        <a id="nextS" class="snav-a" href="#"><span class="snav-l" id="nextL"></span><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></svg></a>
+        <a id="prevS" class="snav-a" href="#"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"/></svg><span class="snav-l" id="prevL"></span><span class="sr-only" id="prevX"></span></a>
+        <a id="nextS" class="snav-a" href="#"><span class="snav-l" id="nextL"></span><span class="sr-only" id="nextX"></span><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></svg></a>
       </span>
-      <a id="toReplay" href="#" hidden>Watch the replay</a>
-      <a href="../#data">All weekends</a>
-      <a class="hide-sm" href="https://www.youtube.com/@f1inlap">YouTube</a>
+      <a id="toReplay" class="hide-sm" href="#" hidden>Watch the replay</a>
+      <a class="nav-back" href="../#data"><span class="xs-hide">All weekends</span><span class="xs-show">Weekends</span></a>
+      <a class="nav-yt" href="https://www.youtube.com/@f1inlap"><svg class="yt-i" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M164.44,121.34l-48-32A8,8,0,0,0,104,96v64a8,8,0,0,0,12.44,6.66l48-32a8,8,0,0,0,0-13.32ZM120,145.05V111l25.58,17ZM234.33,69.52a24,24,0,0,0-14.49-16.4C185.56,39.88,131,40,128,40s-57.56-.12-91.84,13.12a24,24,0,0,0-14.49,16.4C19.08,79.5,16,97.74,16,128s3.08,48.5,5.67,58.48a24,24,0,0,0,14.49,16.41C69,215.56,120.4,216,127.34,216h1.32c6.94,0,58.37-.44,91.18-13.11a24,24,0,0,0,14.49-16.41c2.59-10,5.67-28.22,5.67-58.48S236.92,79.5,234.33,69.52Zm-15.49,113a8,8,0,0,1-4.77,5.49c-31.65,12.22-85.48,12-86,12H128c-.54,0-54.33.2-86-12a8,8,0,0,1-4.77-5.49C34.8,173.39,32,156.57,32,128s2.8-45.39,5.16-54.47A8,8,0,0,1,41.93,68c30.52-11.79,81.66-12,85.85-12h.27c.54,0,54.38-.18,86,12a8,8,0,0,1,4.77,5.49C221.2,82.61,224,99.43,224,128S221.2,173.39,218.84,182.47Z"/></svg><span class="yt-t">YouTube</span></a>
       <button class="theme-btn" type="button" aria-label="Switch theme"><svg class="i-moon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z"/></svg><svg class="i-sun" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z"/></svg></button>
     </nav>
   </div>
 </header>
-<div class="wrap">
+<main class="wrap" id="main">
   <h1 id="ttl">Loading…</h1>
   <div class="sub" id="sub"></div>
   <div class="sector"></div>
@@ -425,49 +433,49 @@ td .ty{display:inline-grid;vertical-align:middle;margin-left:3px}
     <!-- DESKTOP: three panes. The stacked sections below are the narrow-screen layout. -->
     <div id="deskOnly">
       <div class="pane" id="rail">
-        <h3>Drivers
+        <h2>Drivers
           <span class="seg2" style="margin-left:auto">
-            <button class="gapTab on" data-gap="leader">LEADER</button><button class="gapTab" data-gap="next">NEXT</button>
-          </span></h3>
+            <button class="gapTab on" data-gap="leader" aria-pressed="true">LEADER</button><button class="gapTab" data-gap="next" aria-pressed="false">NEXT</button>
+          </span></h2>
         <div class="railsort">
           <span>sort</span>
-          <button class="sortbtn on" data-sort="pos">POS</button>
-          <button class="sortbtn" data-sort="trap">TRAP</button>
-          <button class="sortbtn" data-sort="laps">LAPS</button>
+          <button class="sortbtn on" data-sort="pos" aria-pressed="true">POS</button>
+          <button class="sortbtn" data-sort="trap" aria-pressed="false">TRAP</button>
+          <button class="sortbtn" data-sort="laps" aria-pressed="false">LAPS</button>
         </div>
         <div class="railhead" aria-hidden="true"><span class="hp">P</span><span class="hc">Driver</span><span class="hty">Tyres</span>
           <span class="ht" id="railHeadT">Best</span><span class="hg">Gap</span>
           <span class="hr"><span>S1</span><span>S2</span><span>S3</span></span></div>
-        <div class="inner" id="railList"></div>
+        <div class="inner" id="railList" tabindex="0" role="region" aria-label="Drivers, use the up and down arrows to select"></div>
       </div>
       <div class="pane" id="detail">
-        <h3 id="detailTitle">Driver</h3>
+        <h2 id="detailTitle">Driver</h2>
         <div class="cmpbar" id="cmpbar"></div>
         <div class="inner">
           <div class="statline" id="dStats"></div>
           <svg id="trace"></svg>
           <div id="dSectors" style="margin-top:6px"></div>
           <div id="dStints" style="margin-top:10px"></div>
-          <div class="cbox raceOnly" hidden><h4>Race story <em class="h4note">position every lap</em></h4><div id="storyC"></div></div>
-          <div class="cbox raceOnly" hidden><h4>Positions gained</h4><div id="gainC"></div></div>
-          <div class="cbox raceOnly" hidden><h4>Race pace</h4><div id="paceC"></div></div>
-          <div class="cbox"><h4>Team-mates</h4><div id="matesC"></div></div>
-          <div class="cbox"><h4>Speed trap</h4><div id="trapC"></div></div>
-          <div class="cbox"><h4>Team order</h4><div id="teamOrderC"></div></div>
-          <div class="cbox" id="seasonBox" hidden><h4>Against their season</h4><div id="seasonC"></div></div>
-          <div class="cbox" id="devBox" hidden><h4>Development curve</h4><div id="devC"></div></div>
-          <div class="cbox notRace"><h4>Soft vs medium</h4><div id="tyreOffC"></div></div>
-          <div class="cbox"><h4>Where the gap came from</h4><div id="idealC"></div></div>
-          <div class="cbox"><h4>Run plan</h4><div id="planC"></div></div>
+          <div class="cbox raceOnly" hidden><h3>Race story <em class="h4note">position every lap</em></h3><div id="storyC"></div></div>
+          <div class="cbox raceOnly" hidden><h3>Positions gained</h3><div id="gainC"></div></div>
+          <div class="cbox raceOnly" hidden><h3>Race pace</h3><div id="paceC"></div></div>
+          <div class="cbox"><h3>Team-mates</h3><div id="matesC"></div></div>
+          <div class="cbox"><h3>Speed trap</h3><div id="trapC"></div></div>
+          <div class="cbox"><h3>Team order</h3><div id="teamOrderC"></div></div>
+          <div class="cbox" id="seasonBox" hidden><h3>Against their season</h3><div id="seasonC"></div></div>
+          <div class="cbox" id="devBox" hidden><h3>Development curve</h3><div id="devC"></div></div>
+          <div class="cbox notRace"><h3>Soft vs medium</h3><div id="tyreOffC"></div></div>
+          <div class="cbox"><h3>Where the gap came from</h3><div id="idealC"></div></div>
+          <div class="cbox"><h3>Run plan</h3><div id="planC"></div></div>
         </div>
       </div>
       <div class="pane" id="side">
-        <h3><span class="seg2"><button class="sideTab on" data-tab="session">SESSION</button><button class="sideTab" data-tab="teams">TEAMS</button></span></h3>
-        <div class="inner" id="sideSession">
-          <div class="panelbox"><h4>What the session said</h4><ul class="pointsD" id="pointsD"></ul></div>
-          <div class="panelbox"><h4>Long runs by tyre</h4><div id="runsD"></div></div>
+        <h2><span class="seg2"><button class="sideTab on" data-tab="session" aria-pressed="true">SESSION</button><button class="sideTab" data-tab="teams" aria-pressed="false">TEAMS</button></span></h2>
+        <div class="inner" id="sideSession" tabindex="0" role="region" aria-label="Session notes">
+          <div class="panelbox"><h3>What the session said</h3><ul class="pointsD" id="pointsD"></ul></div>
+          <div class="panelbox"><h3>Long runs by tyre</h3><div id="runsD"></div></div>
         </div>
-        <div class="inner" id="sideTeams" hidden></div>
+        <div class="inner" id="sideTeams" tabindex="0" role="region" aria-label="Teams" hidden></div>
       </div>
     </div>
 
@@ -476,7 +484,7 @@ td .ty{display:inline-grid;vertical-align:middle;margin-left:3px}
     <div class="points"><ul id="points" style="margin:0;padding-left:18px"></ul></div>
     <h2>Every driver <em>click a card to highlight it in the charts below</em>
       <span class="seg2" style="margin-left:auto">
-        <button class="gapTab on" data-gap="leader">GAP TO LEADER</button><button class="gapTab" data-gap="next">GAP TO NEXT</button>
+        <button class="gapTab on" data-gap="leader" aria-pressed="true">GAP TO LEADER</button><button class="gapTab" data-gap="next" aria-pressed="false">GAP TO NEXT</button>
       </span></h2>
     <div class="grid" id="grid"></div>
     <div class="two" style="margin-top:22px">
@@ -497,7 +505,7 @@ td .ty{display:inline-grid;vertical-align:middle;margin-left:3px}
     </div>
     <div class="foot" id="foot"></div>
   </div>
-</div>
+</main>
 <div id="tip"></div>
 <script>
 const $=s=>document.querySelector(s), TEAMCOL={};
@@ -661,7 +669,7 @@ function drawHeat(target){
     const q=n>1?Math.pow((r-1)/(n-1),RANK_EXP):0;
     return RAMP[Math.min(RAMP.length-1,Math.floor(q*RAMP.length))];
   };
-  $(TGT).innerHTML=`<table class="heat"><thead><tr><th></th><th>Driver</th>
+  $(TGT).innerHTML=`<table class="heat"><thead><tr><th><span class="sr-only">Position</span></th><th>Driver</th>
       <th style="text-align:center">S1</th><th style="text-align:center">S2</th><th style="text-align:center">S3</th>
       <th class="num">Best lap</th><th class="num" id="heatGapHd">Gap</th><th class="num">Trap</th></tr></thead><tbody>
     ${D.drivers.map(d=>{
@@ -768,7 +776,7 @@ function gapText(d){
 }
 function setGapMode(m){
   gapMode=m;
-  document.querySelectorAll('.gapTab').forEach(b=>b.classList.toggle('on',b.dataset.gap===m));
+  document.querySelectorAll('.gapTab').forEach(b=>{b.classList.toggle('on',b.dataset.gap===m);b.setAttribute('aria-pressed',String(b.dataset.gap===m))});
   render();
 }
 const isDesk=()=>matchMedia('(min-width:1180px)').matches;
@@ -995,7 +1003,7 @@ function drawTeams(){
 }
 function setSideTab(t){
   sideTab=t;
-  document.querySelectorAll('.sideTab').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
+  document.querySelectorAll('.sideTab').forEach(b=>{b.classList.toggle('on',b.dataset.tab===t);b.setAttribute('aria-pressed',String(b.dataset.tab===t))});
   $('#sideSession').hidden=(t!=='session'); $('#sideTeams').hidden=(t!=='teams');
   if(t==='teams')drawTeams();
 }
@@ -1023,12 +1031,17 @@ document.querySelectorAll('.sideTab').forEach(b=>b.onclick=()=>setSideTab(b.data
 document.querySelectorAll('.gapTab').forEach(b=>b.onclick=()=>setGapMode(b.dataset.gap));
 document.querySelectorAll('.sortbtn[data-sort]').forEach(b=>b.onclick=()=>{
   railSort=b.dataset.sort;
-  document.querySelectorAll('.sortbtn[data-sort]').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.sortbtn[data-sort]').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-pressed',String(x===b))});
   drawRail();
 });
 /* keyboard: the rail is a list, so it should behave like one */
 addEventListener('keydown',e=>{
-  if(!D||!isDesk())return;
+  if(!D||!isDesk()||e.defaultPrevented||e.altKey||e.ctrlKey||e.metaKey)return;
+  // Arrows drive the rail only when the rail itself has focus: page-wide they blocked
+  // scrolling, and on a focused control they belong to that control.
+  const inRail=e.target.closest&&e.target.closest('#railList');
+  if(!inRail&&e.key!=='Escape')return;
+  if(e.key==='Escape'&&e.target.closest&&e.target.closest('button,a,select,input,textarea,[contenteditable]'))return;
   const rows=railRows(), i=rows.findIndex(d=>d.code===selA);
   if(e.key==='ArrowDown'||e.key==='ArrowUp'){
     e.preventDefault();
@@ -1080,18 +1093,22 @@ $('#tblBtn').onclick=()=>{
   fetch('sessions.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(list=>{
     if(!list||!list.length)return;
     const i=list.findIndex(x=>x.file===here); if(i<0)return;
-    const set=(a,l,x,dir)=>{
-      if(!x){a.setAttribute('aria-disabled','true');a.removeAttribute('href');
-             a.setAttribute('aria-label','No '+dir.toLowerCase()+' session');return}
+    // the accessible name starts with the visible label ("R16 Race, previous session:
+    // Bahrain Grand Prix"); the rest is screen-reader text rather than an overriding aria-label
+    const set=(a,l,sx,x,dir)=>{
+      if(!x){a.setAttribute('aria-disabled','true');a.removeAttribute('href');a.setAttribute('role','link');
+             sx.textContent='No '+dir.toLowerCase()+' session';return}
       a.href='session.html?f='+encodeURIComponent(x.file);
       l.textContent='R'+x.round+' '+(NAME[x.session]||x.session);
-      a.setAttribute('aria-label',dir+' session: '+x.event+' '+(NAME[x.session]||x.session));
-      a.title=a.getAttribute('aria-label')};
-    set(document.getElementById('prevS'),document.getElementById('prevL'),list[i-1],'Previous');
-    set(document.getElementById('nextS'),document.getElementById('nextL'),list[i+1],'Next');
+      sx.textContent=', '+dir.toLowerCase()+' session: '+x.event;
+      a.title=l.textContent+sx.textContent};
+    set(document.getElementById('prevS'),document.getElementById('prevL'),document.getElementById('prevX'),list[i-1],'Previous');
+    set(document.getElementById('nextS'),document.getElementById('nextL'),document.getElementById('nextX'),list[i+1],'Next');
     document.getElementById('snav').hidden=false;
     document.addEventListener('keydown',e=>{
-      if(e.metaKey||e.ctrlKey||e.altKey||/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName||''))return;
+      if(e.metaKey||e.ctrlKey||e.altKey||e.defaultPrevented)return;
+      // never steal arrows from a focused control, the rail list or a scrollable region
+      if(e.target.closest&&e.target.closest('button,a,select,input,textarea,[role=slider],[contenteditable],[tabindex]'))return;
       const t=e.key==='ArrowLeft'?list[i-1]:e.key==='ArrowRight'?list[i+1]:null;
       if(t)location.href='session.html?f='+encodeURIComponent(t.file)});
   }).catch(()=>{});
@@ -1230,7 +1247,7 @@ function drawSeason(target){
   const mx=Math.max(.5,...R.flatMap(r=>[r.now.pct,r.avg,r.last?r.last.pct:0]))*1.06, X=v=>v/mx*100;
   const hi=formTeam||teamOf(selA);
   const lastEv=last&&(TF.rounds.find(r=>String(r.r)===last)||{}).event;
-  $(target).innerHTML=`<table class="formt"><thead><tr><th></th><th>Team</th>
+  $(target).innerHTML=`<table class="formt"><thead><tr><th><span class="sr-only">Team colour</span></th><th>Team</th>
       <th style="width:100%"><span class="axl">0%</span><span class="axr">${mx.toFixed(1)}% off the pace</span></th>
       <th class="num">now</th><th class="num">vs avg</th></tr></thead><tbody>${R.map(r=>{const on=r.team===hi,
       a=X(r.avg), b=X(r.now.pct), lo=Math.min(a,b), w=Math.abs(a-b);

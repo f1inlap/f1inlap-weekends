@@ -25,7 +25,7 @@
   --grid-line-strong:rgb(255 255 255 / .14);
 
   /* ink: primary, secondary, tertiary, muted */
-  --ink-1:#f1f1f3; --ink-2:#c3c3cb; --ink-3:#8f8f99; --ink-4:#5e5e68;
+  --ink-1:#f1f1f3; --ink-2:#c3c3cb; --ink-3:#8f8f99; --ink-4:#80808c;  /* --ink-4 5.04:1 on carbon, 4.58:1 on tarmac-up */
 
   /* one signal colour; everything else is structure. Contrast-checked (WCAG AA):
      --signal behind the --on-signal label 4.81:1, hover goes DARKER (5.69:1);
@@ -59,15 +59,31 @@
 /* :not(.btn) so a button placed in the nav keeps its own colours (a plain `nav a` rule once
    painted the red "Watch on YouTube" pill's label red-on-red) */
 .inlap-nav nav a:not(.btn){font:500 14px/1 var(--font-ui);color:var(--ink-3);text-decoration:none;white-space:nowrap}
+/* 44px tap target; :where() keeps specificity at zero so .hide-sm / .hide-md still hide links */
+:where(.inlap-nav nav a:not(.btn)){display:inline-flex;align-items:center;min-height:44px}
 .inlap-nav nav a:not(.btn):hover{color:var(--ink-1)}
 .inlap-nav nav a[aria-current="page"]{color:var(--ink-1)}
 @media (max-width:640px){.inlap-nav .hide-sm{display:none}.inlap-nav>div{gap:14px;padding:0 16px}}
+/* replay/session/radio headers: "All weekends" back link and a YouTube link that collapses to a
+   44px icon button on phones (both stay; they used to be hidden on mobile) */
+.inlap-nav nav a.nav-yt{gap:8px}
+.inlap-nav nav a.nav-yt svg{width:18px;height:18px;flex:none}
+.inlap-nav nav a.nav-yt svg.yt-i{display:none}
+@media (max-width:640px){
+  .inlap-nav nav{gap:6px}
+  .inlap-nav nav a.nav-yt{justify-content:center;min-width:44px;border-radius:var(--r-pill)}
+  .inlap-nav nav a.nav-yt svg.yt-i{display:block}
+  .inlap-nav nav a.nav-yt .yt-t{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+}
 
 /* footer shared by every page */
 .inlap-foot{border-top:1px solid var(--grid-line);color:var(--ink-4);font:400 12.5px/1.65 var(--font-ui)}
 .inlap-foot>div{max-width:1240px;margin:0 auto;padding:28px 20px 44px}
 .inlap-foot p{margin:0 0 6px;max-width:80ch;text-wrap:pretty}
 .inlap-foot a{color:var(--ink-3)}
+
+/* visually hidden, still read by screen readers */
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 
 /* focus: visible on keyboard, never on click */
 :focus-visible{outline:2px solid var(--signal);outline-offset:2px}
@@ -94,8 +110,8 @@
     --signal:#cf0f08;--signal-hover:#b00c06;--signal-ink:#cf0f08;color-scheme:light}
 :root[data-theme="dark"]{color-scheme:dark}
 
-/* theme toggle: 40px icon button showing the theme you would switch TO */
-.theme-btn{display:inline-grid;place-items:center;width:40px;height:40px;flex:none;border-radius:var(--r-pill);
+/* theme toggle: 44px icon button showing the theme you would switch TO */
+.theme-btn{display:inline-grid;place-items:center;width:44px;height:44px;flex:none;border-radius:var(--r-pill);
   border:0;background:none;color:var(--ink-3);cursor:pointer;padding:0;
   transition:background-color .15s var(--ease-out),color .15s var(--ease-out)}
 .theme-btn:hover{background:var(--tarmac);color:var(--ink-1)}
