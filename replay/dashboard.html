@@ -354,6 +354,32 @@
   }
   /* scrollbars: shared, theme-aware rules in ../assets/brand.css */
 
+
+  /* ============ TYPE PASS (20 Nov 2026) ================================================
+     Same split as the session summary: text, driver codes and labels in Geist; mono only for
+     times, gaps and readouts, where tabular figures matter. */
+  body{font:14px/1.45 var(--ui)}
+  .cd{font:650 13px/1 var(--ui);letter-spacing:.02em}
+  td.pos{font:600 12.5px var(--mono)}
+  td.gap,td.sec,.st b,.spd b,.gearbox b,.row>b,.bstat b,.brow>b,.se u,.ideal b,.kv b{font-family:var(--mono)}
+  #sLap{font-family:var(--ui)}
+  .msg b{font:600 11.5px/1.6 var(--mono);color:var(--dim);flex:0 0 30px}
+  .msg{font:12.5px/1.45 var(--ui);color:var(--fg2);letter-spacing:.01em}
+  .msg:not(.radio){font-size:12px;color:var(--muted)}
+  .msg.radio b{color:var(--fg2)}
+  td.ty{white-space:nowrap}
+  td.ty u{text-decoration:none;font:500 11px var(--mono);color:var(--dim);min-width:12px}
+  .tyi{width:17px;height:17px;border-radius:50%;box-sizing:border-box;border:2.5px solid var(--mid);
+       display:inline-grid;place-items:center;vertical-align:middle;margin-right:4px;font:700 8.5px/1 var(--ui);font-style:normal;color:var(--fg)}
+  .tyi.SOFT{border-color:var(--red)} .tyi.MEDIUM{border-color:var(--yellow)} .tyi.HARD{border-color:var(--hard)}
+  .tyi.INTERMEDIATE{border-color:var(--green)} .tyi.WET{border-color:#3671c6}
+  .pitf{font:700 10px var(--ui);letter-spacing:.06em}
+  #evt{font:500 13px/1.2 var(--ui);color:var(--fg2)}
+  @media (min-width:901px){
+    /* the map had room to spare; the strategy strip needs ~11px a row for 22 cars */
+    main{grid-template-rows:minmax(0,1fr) minmax(0,262px)}
+  }
+
   @media (max-width:900px){
     body{overflow:auto}
     .stats{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -515,7 +541,7 @@ fetch(new URLSearchParams(location.search).get('f') || 'replay-2026-12-R.json')
 
 function init(){
   codes=Object.keys(D.pos);
-  $('#evt').textContent=`${D.meta.event} · ${D.meta.frames.toLocaleString()} frames @ ${D.meta.hz}Hz`;
+  $('#evt').textContent=`${D.meta.event} · Round ${D.meta.round}${D.meta.totalLaps?` · ${D.meta.totalLaps} laps`:''}`;
   $('#mapr').textContent=D.track.corners.length+' corners';
   const o=D.track.outline;
   D._bb=o.reduce((a,[x,y])=>({x0:Math.min(a.x0,x),x1:Math.max(a.x1,x),y0:Math.min(a.y0,y),y1:Math.max(a.y1,y)}),{x0:1e9,x1:-1e9,y0:1e9,y1:-1e9});
@@ -1022,7 +1048,7 @@ function drawTiming(t,best){
     return `<tr class="row${r.code===sel?' on':''}" onclick="sel='${r.code}';paint()">
       <td class="pos">${i+1}</td>
       <td><span class="bar" style="background:${d.color}"></span><span class="cd">${r.code}</span></td>
-      <td class="ty ${lp.compound||''}">${(lp.compound||'').slice(0,1)}<span style="color:var(--dim)">${lp.age??''}</span>${lp.pit?' <span class="pitf">PIT</span>':''}</td>
+      <td class="ty">${lp.compound?`<i class="tyi ${lp.compound}">${lp.compound.slice(0,1)}</i>`:''}<u>${lp.age??''}</u>${lp.pit?' <span class="pitf">PIT</span>':''}</td>
       ${secs}<td class="gap">${gs}</td></tr>`}).join('');
   if(html!==lastClsHTML){lastClsHTML=html;$('#cls').innerHTML=html}   // skip identical repaints
 }
@@ -1260,17 +1286,15 @@ function drawTrace(p,i){
 function drawStints(){
   const c=$('#stc'),g=c.getContext('2d');if(!c.width)return;g.clearRect(0,0,c.width,c.height);
   const S=D.stints||{},rows=order(now()).map(r=>r.code).filter(x=>S[x]);if(!rows.length)return;
-  const padT=12*dpr,h=(c.height-padT-6*dpr)/rows.length,stagger=h<12*dpr,LBL=26*dpr;
-  const padL=(stagger?2*LBL+6*dpr:LBL+8*dpr),W=c.width-padL-8*dpr;
+  const padT=12*dpr,h=(c.height-padT-6*dpr)/rows.length,LBL=30*dpr;
+  const padL=LBL+8*dpr,W=c.width-padL-8*dpr,fs=Math.max(8.5,Math.min(11,h/dpr*.92));
   const COL={SOFT:'#e8002d',MEDIUM:'#ffd400',HARD:'#e9e9ee',INTERMEDIATE:'#22e07a',WET:'#3671c6'};
-  g.font=`700 ${11*dpr}px ${getComputedStyle(document.body).fontFamily}`;g.textBaseline='middle';
+  g.font=`600 ${fs*dpr}px ${getComputedStyle(document.body).fontFamily}`;g.textBaseline='middle';
   rows.forEach((code,i)=>{const y=padT+i*h;
-    // 11px codes need ~12px of height; when 20 rows share a short panel, alternate rows
-    // sit in two columns so each label has two rows of room
-    const lx=padL-5*dpr-(stagger&&i%2?LBL:0);
+    const lx=padL-6*dpr;
     g.fillStyle=code===sel?'#fff':'rgba(234,234,240,.72)';g.textAlign='right';g.fillText(code,lx,y+h/2);
     for(const st of S[code]){const x0=padL+(st.from-1)/D._maxLap*W,x1=padL+st.to/D._maxLap*W;
-      g.fillStyle=COL[st.compound]||'#44444e';g.fillRect(x0,y+1*dpr,Math.max(1.5*dpr,x1-x0-1*dpr),h-2.5*dpr)}});
+      g.fillStyle=COL[st.compound]||'#44444e';g.fillRect(x0,y+h*.18,Math.max(1.5*dpr,x1-x0-1.5*dpr),h*.64)}});
   const lapNow=Math.max(...order(now()).map(r=>r.lp.lap));
   g.fillStyle='#ff6c00';g.fillRect(padL+lapNow/D._maxLap*W-1*dpr,padT-4*dpr,2*dpr,c.height-padT)}
 
