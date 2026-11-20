@@ -380,6 +380,54 @@
     main{grid-template-rows:minmax(0,1fr) minmax(0,262px)}
   }
 
+
+  /* ============ SITE STYLE (20 Nov 2026) ===============================================
+     Same chrome as the home page: shared nav, sentence-case titles, 12px panels on the
+     page's own surfaces, the red pill for the primary action. */
+  :root{--bg:var(--carbon)}
+  .rp-nav{position:static}
+  .rp-nav>div{max-width:none;height:56px;padding:0 16px}
+  .rp-nav .here{display:flex;align-items:baseline;gap:10px;min-width:0}
+  .rp-nav .here b{font:650 16px/1 var(--ui);letter-spacing:-.01em;color:var(--fg);white-space:nowrap}
+  .rp-nav .here span{font:500 13px/1 var(--ui);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rp-nav nav{gap:16px}
+  .rp-nav .flag{margin-left:0}
+  .btn{display:inline-flex;align-items:center;gap:8px;border-radius:var(--r-pill);text-decoration:none;white-space:nowrap;
+       font:600 14px/1 var(--ui);transition:transform .16s var(--ease-out),background-color .2s}
+  .btn-primary{background:var(--signal);color:var(--on-signal)!important}
+  .btn-primary:hover{background:var(--signal-hover)}
+  .btn-sm{height:38px;padding:0 15px}
+  .btn svg{flex:none}
+  @media (max-width:900px){.rp-nav .here span{display:none}}
+  @media (max-width:640px){.rp-nav .here{display:none}.rp-nav .hide-xs,.rp-nav .hide-md{display:none}.rp-nav nav{gap:6px}
+    .rp-nav>div{padding:0 12px;gap:10px}
+    /* YouTube collapses to a 44px red icon pill, as the old header's link did */
+    .rp-nav .btn-sm{width:44px;height:38px;padding:0;justify-content:center}
+    .rp-nav .btn-sm>span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}}
+  .rp-nav .btn-sm svg.yt-i{display:block}
+  .stats{border-top:0;border-bottom:1px solid var(--line)}
+  .st s{font:500 12.5px/1 var(--ui);letter-spacing:0;color:var(--muted)}
+  .panel{border:0;box-shadow:inset 0 0 0 1px var(--line);border-radius:var(--r-panel)}
+  .panel>h2{font:650 15px/1 var(--ui);letter-spacing:-.01em;color:var(--fg);text-transform:none}
+  .panel>h2 .r{font:500 13px/1 var(--ui);color:var(--muted)}
+  .seg button{font:600 12.5px/1 var(--ui);letter-spacing:0}
+  .sublabel,.spd s,.gearbox s,.row>s,.bstat s{letter-spacing:0;text-transform:none}
+  .row>s{flex:0 0 58px;font-size:12px}
+  .panel.map{position:relative}
+  .panel.map>h2{position:absolute;z-index:2;left:0;right:0;top:0;border:0;background:none;pointer-events:none;
+                padding:10px 12px;min-height:0}
+  .panel.map>h2::before{display:none}
+  .panel.map>h2 .seg{pointer-events:auto;background:rgba(10,10,13,.82);border-color:rgba(255,255,255,.12);margin-left:0}
+  .panel.map>h2 .seg button{color:#b9b9c2}
+  .panel.map>h2 .seg button:hover{background:rgba(255,255,255,.08);color:#fff}
+  .panel.map>h2 .seg button.on{background:#f1f1f3;color:#0b0b0d}
+  .panel.map>h2 .r{color:#8f8f99}
+  .panel.map>.body{border-radius:var(--r-panel)}
+  button,select{border-radius:var(--r-pill)}
+  button.pl{background:var(--signal);color:var(--on-signal);border-color:transparent}
+  button.pl:hover{background:var(--signal-hover);opacity:1}
+  .seg,.seg button{border-radius:var(--r-pill)}
+
   @media (max-width:900px){
     body{overflow:auto}
     .stats{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -405,67 +453,69 @@
 <div id="load"><div class="ld"><span class="ldmark" translate="no">F1 INLAP</span><span>Loading race data…</span></div></div>
 
 <header>
-  <div class="top">
-    <a class="brand" href="../" title="F1 Inlap home" translate="no">F1 INLAP <em>RACE REPLAY</em></a>
-    <div id="evt"></div>
-    <a class="home" id="toBreak" href="#" hidden>Race breakdown</a>
-    <a class="home" href="../#data">All weekends</a>
-    <a class="home nav-yt" href="https://www.youtube.com/@f1inlap"><svg class="yt-i" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M164.44,121.34l-48-32A8,8,0,0,0,104,96v64a8,8,0,0,0,12.44,6.66l48-32a8,8,0,0,0,0-13.32ZM120,145.05V111l25.58,17ZM234.33,69.52a24,24,0,0,0-14.49-16.4C185.56,39.88,131,40,128,40s-57.56-.12-91.84,13.12a24,24,0,0,0-14.49,16.4C19.08,79.5,16,97.74,16,128s3.08,48.5,5.67,58.48a24,24,0,0,0,14.49,16.41C69,215.56,120.4,216,127.34,216h1.32c6.94,0,58.37-.44,91.18-13.11a24,24,0,0,0,14.49-16.41c2.59-10,5.67-28.22,5.67-58.48S236.92,79.5,234.33,69.52Zm-15.49,113a8,8,0,0,1-4.77,5.49c-31.65,12.22-85.48,12-86,12H128c-.54,0-54.33.2-86-12a8,8,0,0,1-4.77-5.49C34.8,173.39,32,156.57,32,128s2.8-45.39,5.16-54.47A8,8,0,0,1,41.93,68c30.52-11.79,81.66-12,85.85-12h.27c.54,0,54.38-.18,86,12a8,8,0,0,1,4.77,5.49C221.2,82.61,224,99.43,224,128S221.2,173.39,218.84,182.47Z"/></svg><span class="yt-t">YouTube</span></a>
-    <button class="theme-btn" type="button" aria-label="Switch theme"><svg class="i-moon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z"/></svg><svg class="i-sun" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z"/></svg></button>
-    <div class="flag" id="flag">GREEN</div>
-  </div>
+  <div class="inlap-nav rp-nav"><div>
+    <a class="inlap-mark" href="../" aria-label="F1 Inlap home" translate="no">F1 INLAP</a>
+    <span class="here" id="evt"></span>
+    <nav aria-label="Main">
+      <a class="hide-md" id="toBreak" href="#" hidden>Race breakdown</a>
+      <a href="../#data">All weekends</a>
+      <span class="flag" id="flag">GREEN</span>
+      <button class="theme-btn" type="button" aria-label="Switch theme"><svg class="i-moon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z"/></svg><svg class="i-sun" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z"/></svg></button>
+      <a class="btn btn-primary btn-sm" href="https://www.youtube.com/@f1inlap"><svg class="yt-i" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M164.44,121.34l-48-32A8,8,0,0,0,104,96v64a8,8,0,0,0,12.44,6.66l48-32a8,8,0,0,0,0-13.32ZM120,145.05V111l25.58,17ZM234.33,69.52a24,24,0,0,0-14.49-16.4C185.56,39.88,131,40,128,40s-57.56-.12-91.84,13.12a24,24,0,0,0-14.49,16.4C19.08,79.5,16,97.74,16,128s3.08,48.5,5.67,58.48a24,24,0,0,0,14.49,16.41C69,215.56,120.4,216,127.34,216h1.32c6.94,0,58.37-.44,91.18-13.11a24,24,0,0,0,14.49-16.41c2.59-10,5.67-28.22,5.67-58.48S236.92,79.5,234.33,69.52Zm-15.49,113a8,8,0,0,1-4.77,5.49c-31.65,12.22-85.48,12-86,12H128c-.54,0-54.33.2-86-12a8,8,0,0,1-4.77-5.49C34.8,173.39,32,156.57,32,128s2.8-45.39,5.16-54.47A8,8,0,0,1,41.93,68c30.52-11.79,81.66-12,85.85-12h.27c.54,0,54.38-.18,86,12a8,8,0,0,1,4.77,5.49C221.2,82.61,224,99.43,224,128S221.2,173.39,218.84,182.47Z"/></svg><span><span class="hide-xs">Watch on </span>YouTube</span></a>
+    </nav>
+  </div></div>
   <div class="stats">
-    <div class="st"><s>LAP</s><b id="sLap">-</b></div>
-    <div class="st"><s>TIME</s><b id="sClock">0:00</b></div>
-    <div class="st"><s>LEADER</s><b id="sLead">-</b></div>
-    <div class="st"><s>FASTEST LAP</s><b id="sFast" class="p">-</b></div>
-    <div class="st"><s>BEST S1</s><b id="sS1" class="p">-</b></div>
-    <div class="st"><s>BEST S2</s><b id="sS2" class="p">-</b></div>
-    <div class="st"><s>BEST S3</s><b id="sS3" class="p">-</b></div>
+    <div class="st"><s>Lap</s><b id="sLap">-</b></div>
+    <div class="st"><s>Time</s><b id="sClock">0:00</b></div>
+    <div class="st"><s>Leader</s><b id="sLead">-</b></div>
+    <div class="st"><s>Fastest lap</s><b id="sFast" class="p">-</b></div>
+    <div class="st"><s>Best S1</s><b id="sS1" class="p">-</b></div>
+    <div class="st"><s>Best S2</s><b id="sS2" class="p">-</b></div>
+    <div class="st"><s>Best S3</s><b id="sS3" class="p">-</b></div>
   </div>
 </header>
 
 <main id="main">
   <h1 class="sr-only" id="pageH">Race replay</h1>
   <div class="panel map" id="pMap">
-    <h2><span id="mapTitle">CIRCUIT</span>
+    <h2><span id="mapTitle" class="sr-only">Circuit</span>
       <span class="seg" onclick="event.stopPropagation()">
-        <button id="vCircuit" class="on" onclick="setView('circuit')">CIRCUIT</button><button id="vTracker" onclick="setView('tracker')">TRACKER</button><button id="vDelta" onclick="setView('delta')">DELTA</button>
+        <button id="vCircuit" class="on" onclick="setView('circuit')">Circuit</button><button id="vTracker" onclick="setView('tracker')">Tracker</button><button id="vDelta" onclick="setView('delta')">Delta</button>
       </span>
       <span class="r" id="mapr"></span></h2>
     <div class="body"><canvas id="mapc"></canvas></div></div>
 
   <div id="right">
-    <div class="panel" id="pCls"><h2>TIMING
+    <div class="panel" id="pCls"><h2>Timing
       <span class="seg" onclick="event.stopPropagation()">
-        <button id="gmLead" class="on" onclick="setGapMode('lead')">LEADER</button><button id="gmInt" onclick="setGapMode('int')">INTERVAL</button>
+        <button id="gmLead" class="on" onclick="setGapMode('lead')">Leader</button><button id="gmInt" onclick="setGapMode('int')">Interval</button>
       </span>
       <span class="r" id="clsr"></span></h2>
       <div class="body" id="clswrap" tabindex="0" role="region" aria-label="Timing tower"><table id="cls"></table></div></div>
     <div class="panel" id="pTel"><h2>
       <span class="seg" onclick="event.stopPropagation()">
-        <button id="tabCar" class="on" onclick="setTab('car')">CAR</button><button id="tabSec" onclick="setTab('sec')">SECTORS</button><button id="tabBat" onclick="setTab('bat')">BATTLE</button>
+        <button id="tabCar" class="on" onclick="setTab('car')">Car</button><button id="tabSec" onclick="setTab('sec')">Sectors</button><button id="tabBat" onclick="setTab('bat')">Battle</button>
       </span>
       <span class="r" id="selc"></span></h2>
       <div class="body" id="anaBody">
       <div id="tel">
         <div class="tbig">
           <div class="spd"><b id="vv">0</b><s>KM/H</s></div>
-          <div class="gearbox" id="gearwrap"><b id="gr">N</b><s>GEAR</s></div>
+          <div class="gearbox" id="gearwrap"><b id="gr">N</b><s>Gear</s></div>
         </div>
         <div class="row" id="rpmrow"><s>RPM</s>
           <div class="track" id="rpmt"><span id="rb"></span></div><b id="rv">0</b></div>
         <canvas id="telc"></canvas>
-        <div class="row"><s>THR</s><div class="track thr"><span id="tb"></span></div><b id="tt">0%</b></div>
-        <div class="row"><s>BRK</s><div class="track brk"><span id="bb"></span></div><b id="bt">off</b></div>
-        <div class="row"><s>LONG G</s>
+        <div class="row"><s>Throttle</s><div class="track thr"><span id="tb"></span></div><b id="tt">0%</b></div>
+        <div class="row"><s>Brake</s><div class="track brk"><span id="bb"></span></div><b id="bt">off</b></div>
+        <div class="row"><s>Long g</s>
           <div class="gtrack"><i></i><u id="gb"></u></div><b id="gv">0.0</b></div>
         <div id="wx"></div></div>
 
       <div id="secv" class="pad" style="display:none">
-        <div class="sublabel">FASTEST IN EACH SECTOR
+        <div class="sublabel">Fastest in each sector
           <span class="seg" onclick="event.stopPropagation()" style="margin-left:6px">
-            <button id="smForm" class="on" onclick="setSecMode('form')">RECENT</button><button id="smBest" onclick="setSecMode('best')">BEST</button>
+            <button id="smForm" class="on" onclick="setSecMode('form')">Recent</button><button id="smBest" onclick="setSecMode('best')">Best</button>
           </span></div>
         <div id="secrows"></div>
         <div class="ideal" id="secideal"></div>
@@ -474,9 +524,9 @@
       <div id="batv" class="pad" style="display:none">
         <div class="bhead"><b id="batA">-</b><span>vs</span><select id="rival"></select></div>
         <div class="bstat">
-          <div><s>GAP NOW</s><b id="bgNow">-</b></div>
-          <div><s>TREND</s><b id="bgTrend">-</b></div>
-          <div><s>CLOSING IN</s><b id="bgCatch">-</b></div>
+          <div><s>Gap now</s><b id="bgNow">-</b></div>
+          <div><s>Trend</s><b id="bgTrend">-</b></div>
+          <div><s>Closing in</s><b id="bgCatch">-</b></div>
         </div>
         <div id="batbars"></div>
         <div class="bnote" id="batnote"></div>
@@ -485,11 +535,11 @@
   </div>
 
   <div id="bottom">
-    <div class="panel" id="pStint"><h2>TYRE STRATEGY <span class="r">full race</span></h2>
+    <div class="panel" id="pStint"><h2>Tyre strategy <span class="r">full race</span></h2>
       <div class="body"><canvas id="stc" style="width:100%;height:100%"></canvas></div></div>
-    <div class="panel" id="pLap"><h2>POSITION BY LAP <span class="r">all cars</span></h2>
+    <div class="panel" id="pLap"><h2>Position by lap <span class="r">all cars</span></h2>
       <div class="body"><canvas id="lcc" style="width:100%;height:100%"></canvas></div></div>
-    <div class="panel" id="pMsg"><h2>RACE CONTROL &amp; RADIO</h2><div class="body" id="rc" tabindex="0" role="region" aria-label="Race control messages and team radio"></div></div>
+    <div class="panel" id="pMsg"><h2>Race control &amp; radio</h2><div class="body" id="rc" tabindex="0" role="region" aria-label="Race control messages and team radio"></div></div>
   </div>
 </main>
 
@@ -541,8 +591,9 @@ fetch(new URLSearchParams(location.search).get('f') || 'replay-2026-12-R.json')
 
 function init(){
   codes=Object.keys(D.pos);
-  $('#evt').textContent=`${D.meta.event} · Round ${D.meta.round}${D.meta.totalLaps?` · ${D.meta.totalLaps} laps`:''}`;
+  $('#evt').innerHTML=`<b>${String(D.meta.event).replace(/[<&>]/g,'')}</b><span>Race replay · Round ${D.meta.round}${D.meta.totalLaps?` · ${D.meta.totalLaps} laps`:''}</span>`;
   $('#mapr').textContent=D.track.corners.length+' corners';
+  fitRotate();
   const o=D.track.outline;
   D._bb=o.reduce((a,[x,y])=>({x0:Math.min(a.x0,x),x1:Math.max(a.x1,x),y0:Math.min(a.y0,y),y1:Math.max(a.y1,y)}),{x0:1e9,x1:-1e9,y0:1e9,y1:-1e9});
   D._laps={};for(const c in D.laps)D._laps[c]=D.laps[c].slice().sort((a,b)=>a.t-b.t);
@@ -616,7 +667,7 @@ function setView(v){mapView=v;
   document.getElementById('vTracker').classList.toggle('on',v==='tracker');
   document.getElementById('vDelta').classList.toggle('on',v==='delta');
   document.getElementById('mapTitle').textContent=
-    v==='circuit'?'CIRCUIT':(v==='tracker'?'TRACKER':'SPEED DELTA');
+    v==='circuit'?'Circuit':(v==='tracker'?'Tracker':'Speed delta');
   paint()}
 const fmt=s=>s==null?'-':(s>=60?`${Math.floor(s/60)}:${(s%60).toFixed(3).padStart(6,'0')}`:s.toFixed(3));
 function now(){return D.meta.t0+F/D.meta.hz}
@@ -644,7 +695,22 @@ function progAt(c,f){const a=D.prog&&D.prog[c];return a?a[Math.round(f)]:null}
 const STCODE={'1':'GREEN','2':'YELLOW','4':'SC','5':'RED','6':'VSC','7':'GREEN'};
 function trackStatus(t){let st='GREEN';for(const r of (D.trackStatus||[])){if(r.t>t)break;st=STCODE[r.code]||'GREEN'}return st}
 
-function view(){const c=$('#mapc'),b=D._bb,pad=40*dpr,foc=$('#focus').value;
+// Turn the circuit so its long side runs along the panel's long side: on a wide desktop panel
+// an upright circuit used under half the width. Kept as drawn unless turning gains 8%+.
+function fitRotate(){const c=$('#mapc'),r=c.getBoundingClientRect(),o=D.track.outline;
+  if(!o.length||!r.width||!r.height)return;const A=r.width/r.height;
+  const fit=a=>{const co=Math.cos(a),si=Math.sin(a);let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+    for(const[x,y]of o){const X=x*co-y*si,Y=x*si+y*co;x0=Math.min(x0,X);x1=Math.max(x1,X);y0=Math.min(y0,Y);y1=Math.max(y1,Y)}
+    return Math.min(A/(x1-x0),1/(y1-y0))};
+  let best=0,bs=fit(0);const s0=bs;
+  for(let d=2;d<180;d+=2){const v=fit(d*Math.PI/180);if(v>bs){bs=v;best=d}}
+  if(bs<s0*1.08)return;
+  const a=best*Math.PI/180,co=Math.cos(a),si=Math.sin(a),R=(x,y)=>[x*co-y*si,x*si+y*co];
+  D.track.outline=o.map(([x,y])=>R(x,y).map(v=>Math.round(v*10)/10));
+  D.track.corners.forEach(k=>{[k.x,k.y]=R(k.x,k.y)});
+  for(const t of Object.values(D.pos)){for(let i=0;i<t.x.length;i++){
+    if(t.x[i]==null||t.y[i]==null)continue;const[X,Y]=R(t.x[i],t.y[i]);t.x[i]=X;t.y[i]=Y}}}
+function view(){const c=$('#mapc'),b=D._bb,pad=(narrow()?14:22)*dpr,foc=$('#focus').value;
   let s=Math.min((c.width-2*pad)/(b.x1-b.x0),(c.height-2*pad)/(b.y1-b.y0));
   let cx=(b.x0+b.x1)/2,cy=(b.y0+b.y1)/2;
   if(foc&&D.pos[foc]){const q=at(foc,F);if(q){s*=3.1;cx=q[0];cy=q[1]}}
@@ -681,7 +747,7 @@ function paint(force){
   else if(doDom&&anaTab==='bat')drawBattle(t);
   drawStints();drawLapChart();drawTimeline();
   const w=(D.weather||[]).filter(x=>x.t<=t).pop();
-  $('#wx').innerHTML=w?`TRACK <b style="color:var(--fg)">${w.track.toFixed(1)}°</b> · AIR ${w.air.toFixed(1)}° · WIND ${w.wind.toFixed(1)}m/s · HUM ${w.hum.toFixed(0)}%${w.rain?' · <b style="color:#3671c6">RAIN</b>':''}`:'';
+  $('#wx').innerHTML=w?`Track <b style="color:var(--fg)">${w.track.toFixed(1)}°</b> · Air ${w.air.toFixed(1)}° · Wind ${w.wind.toFixed(1)}m/s · Humidity ${w.hum.toFixed(0)}%${w.rain?' · <b style="color:#3671c6">RAIN</b>':''}`:'';
   const el=t-D.meta.t0;
   $('#sClock').textContent=`${Math.floor(el/60)}:${String(Math.floor(el%60)).padStart(2,'0')}`;
   $('#flag').textContent={SC:'SAFETY CAR',VSC:'VIRTUAL SC',YELLOW:'YELLOW',RED:'RED FLAG',GREEN:'GREEN'}[st];
@@ -1195,7 +1261,7 @@ function drawBattle(t){
     return `<div class="brow"><s>S${k}</s><div class="btr"><i></i><u id="bb${k}"></u></div>`+
       `<b style="color:${v==null?'var(--dim)':(v<0?'var(--green)':'var(--neg)')}">`+
       `${v==null?'-':(v>0?'+':'')+v.toFixed(3)}</b></div>`}).join('')+
-    `<div class="brow tot"><s>LAP</s><div class="btr"><i></i><u id="bbT"></u></div>`+
+    `<div class="brow tot"><s>Lap</s><div class="btr"><i></i><u id="bbT"></u></div>`+
     `<b style="color:${tot==null?'var(--dim)':(tot<0?'var(--green)':'var(--neg)')}">`+
     `${tot==null?'-':(tot>0?'+':'')+tot.toFixed(3)}</b></div>`;
   for(const k of [1,2,3])if(d[k-1]!=null)bar($('#bb'+k),d[k-1],scale);
