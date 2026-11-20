@@ -428,6 +428,44 @@
   button.pl:hover{background:var(--signal-hover);opacity:1}
   .seg,.seg button{border-radius:var(--r-pill)}
 
+
+  /* ============ SPACING PASS (20 Nov 2026) =============================================
+     One 16px gutter shared by the nav, the stats strip, the panels and the footer, so every
+     left edge lines up; inside panels everything sits on a 4px scale. */
+  header{border-bottom:0}
+  .stats{grid-template-columns:1.2fr repeat(6,minmax(0,1fr))}
+  .st{padding:10px 16px 12px}
+  .st s{margin-bottom:6px}
+  .st b{line-height:1.1}
+  main{padding:16px;gap:16px}
+  #right,#bottom{gap:16px}
+  .panel>h2{padding:0 16px;min-height:48px;gap:12px}
+  .panel>h2::before{margin-right:-4px}
+  .panel.map>h2{padding:12px}
+  /* the tower is a TABLE: the telemetry ".row" flex rule also matched tr.row, which turned
+     every tower row into a flexbox (columns drifting row to row, broken row lines) */
+  tr.row{display:table-row;font-size:inherit;letter-spacing:0;color:inherit;gap:0}
+  #cls td{height:30px;padding:0 6px;vertical-align:middle}
+  #cls td:first-child{padding-left:16px;width:34px;text-align:left}
+  #cls td:last-child{padding-right:16px}
+  .bar{margin-right:8px}
+  #cls td.sec{padding:0 4px;width:auto}
+  #cls td.gap{min-width:58px}
+  @media (min-width:901px){main{grid-template-columns:minmax(0,1fr) 384px}}
+  .msg{padding:9px 16px;gap:12px;align-items:baseline}
+  .msg b{flex:0 0 32px}
+  #tel{padding:12px 16px 14px;gap:8px}
+  .pad{padding:12px 16px}
+  .tbig{margin-bottom:2px}
+  #wx{margin-top:2px}
+  footer{padding:12px 16px 14px}
+  .ctl{gap:8px;margin-top:12px;flex-wrap:nowrap}
+  .hint{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1 1 auto;text-align:right}
+  @media (max-width:900px){
+    main{padding:12px;gap:12px} .st{padding:8px 12px 10px}
+    footer{padding:10px 12px 12px} .ctl{flex-wrap:wrap}
+  }
+
   @media (max-width:900px){
     body{overflow:auto}
     .stats{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -554,7 +592,7 @@
     <select id="focus" aria-label="Map focus"><option value="">whole track</option></select>
     <label class="cb"><input type="checkbox" id="autoradio" checked> radio</label>
     <audio id="au" controls preload="none"></audio>
-    <span class="hint">Tap the timeline to scrub (or focus it and use the arrow keys) · orange ticks are team radio · tap a panel title to collapse</span>
+    <span class="hint">Orange ticks are team radio · click a panel title to collapse it</span>
   </div>
 </footer>
 
@@ -1352,8 +1390,8 @@ function drawTrace(p,i){
 function drawStints(){
   const c=$('#stc'),g=c.getContext('2d');if(!c.width)return;g.clearRect(0,0,c.width,c.height);
   const S=D.stints||{},rows=order(now()).map(r=>r.code).filter(x=>S[x]);if(!rows.length)return;
-  const padT=12*dpr,h=(c.height-padT-6*dpr)/rows.length,LBL=30*dpr;
-  const padL=LBL+8*dpr,W=c.width-padL-8*dpr,fs=Math.max(8.5,Math.min(11,h/dpr*.92));
+  const padT=10*dpr,h=(c.height-padT-10*dpr)/rows.length,LBL=38*dpr;
+  const padL=LBL+8*dpr,W=c.width-padL-14*dpr,fs=Math.max(8.5,Math.min(11,h/dpr*.92));
   const COL={SOFT:'#e8002d',MEDIUM:'#ffd400',HARD:'#e9e9ee',INTERMEDIATE:'#22e07a',WET:'#3671c6'};
   g.font=`600 ${fs*dpr}px ${getComputedStyle(document.body).fontFamily}`;g.textBaseline='middle';
   rows.forEach((code,i)=>{const y=padT+i*h;
@@ -1366,12 +1404,12 @@ function drawStints(){
 
 function drawLapChart(){
   const c=$('#lcc'),g=c.getContext('2d');if(!c.width)return;g.clearRect(0,0,c.width,c.height);
-  const padL=24*dpr,padT=10*dpr,padB=8*dpr,W=c.width-padL-8*dpr,H=c.height-padT-padB,N=codes.length;
+  const padL=36*dpr,padT=12*dpr,padB=12*dpr,W=c.width-padL-14*dpr,H=c.height-padT-padB,N=codes.length;
   g.lineWidth=1*dpr;g.font=`${11*dpr}px ${getComputedStyle(document.body).fontFamily}`;
   g.textAlign='right';g.textBaseline='middle';
   for(let p=1;p<=N;p+=4){const y=padT+(p-1)/(N-1)*H;
-    g.strokeStyle='#141419';g.beginPath();g.moveTo(padL,y);g.lineTo(c.width-8*dpr,y);g.stroke();
-    g.fillStyle='#8f8f99';g.fillText(p,padL-3*dpr,y)}
+    g.strokeStyle='#141419';g.beginPath();g.moveTo(padL,y);g.lineTo(c.width-14*dpr,y);g.stroke();
+    g.fillStyle='#8f8f99';g.fillText(p,padL-10*dpr,y)}
   for(const code of codes){const L=D._laps[code];if(!L)continue;
     g.strokeStyle=code===sel?D.drivers[code].color:D.drivers[code].color+'3a';
     g.lineWidth=(code===sel?2.2:1)*dpr;g.beginPath();let st=false;
